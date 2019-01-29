@@ -45,6 +45,8 @@ func (r *RadiusVendorSpecificAttr) addSpecRadiusAttr(vendorAttr VendorAttr) {
 	r.VendorAttrs = append(r.VendorAttrs, vendorAttr)
 }
 
+
+
 // 获得26号私有属性的长度
 func (r *RadiusVendorSpecificAttr) getLength() int {
 	vendorAttrLen := 0
