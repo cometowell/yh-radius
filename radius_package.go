@@ -45,9 +45,26 @@ func (r *RadiusVendorSpecificAttr) addSpecRadiusAttr(vendorAttr VendorAttr) {
 	r.VendorAttrs = append(r.VendorAttrs, vendorAttr)
 }
 
+// 获得26号私有属性的长度
+func (r *RadiusVendorSpecificAttr) getLength() int {
+	vendorAttrLen := 0
+	vendorAttrs := r.VendorAttrs
+	if len(vendorAttrs) > 0 {
+		for _, va := range vendorAttrs {
+			vendorAttrLen += va.getLength()
+		}
+	}
+	return ATTR_TYPE_FIELD_LENGHT + ATTR_LENGTH_FIELD_LENGHT + VENDOR_ID_LENGTH + vendorAttrLen
+}
+
 // radius厂商定义的私有属性
 type VendorAttr struct {
 	VendorType byte
 	VendorLength byte
 	VendorValue []byte
+}
+
+// 获取厂商私有属性长度
+func (r *VendorAttr) getLength() int {
+	return len(r.VendorValue) + ATTR_TYPE_FIELD_LENGHT + ATTR_LENGTH_FIELD_LENGHT
 }

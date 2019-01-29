@@ -24,4 +24,11 @@ const (
 
 const (
 	VENDOR_SPECIFIC_TYPE byte = 26
+	VENDOR_ID_LENGTH = 4
+
+	// radius属性的type占字节长度
+	ATTR_TYPE_FIELD_LENGHT = 1
+
+	// radius属性的length占字节长度
+	ATTR_LENGTH_FIELD_LENGHT = 1
 )
