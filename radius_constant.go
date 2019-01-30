@@ -23,12 +23,18 @@ const (
 )
 
 const (
+
+	MAX_PACKAGE_LENGTH = 4096
+
+	// 26号私有属性Type
 	VENDOR_SPECIFIC_TYPE byte = 26
+
+	// 厂商ID长度
 	VENDOR_ID_LENGTH = 4
 
-	// radius属性的type占字节长度
-	ATTR_TYPE_FIELD_LENGHT = 1
+	// type(1) + length(1) = 2
+	ATTR_HEADER_LENGHT = 2
 
-	// radius属性的length占字节长度
-	ATTR_LENGTH_FIELD_LENGHT = 1
+	// code(1) + Identifier(1) + length(2) + Authenticator(16)
+	PACKAGE_HEADER_LENGTH = 20
 )
