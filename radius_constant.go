@@ -24,6 +24,8 @@ const (
 
 const (
 
+	AUTHENTICATOR_LENGTH = 16
+
 	MAX_PACKAGE_LENGTH = 4096
 
 	// 26号私有属性Type
@@ -34,6 +36,8 @@ const (
 
 	// type(1) + length(1) = 2
 	ATTR_HEADER_LENGHT = 2
+
+	VENDOR_HEADER_LENGTH = ATTR_HEADER_LENGHT + VENDOR_ID_LENGTH
 
 	// code(1) + Identifier(1) + length(2) + Authenticator(16)
 	PACKAGE_HEADER_LENGTH = 20

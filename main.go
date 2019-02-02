@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"time"
+	"log"
 )
 
 func main() {
@@ -15,51 +16,53 @@ func main() {
 	}
 
 	// 认证监听
-	authListener, err := net.ListenUDP("udp", authUDPAddr)
-	accountListener, err := net.ListenUDP("udp", accountUDPAddr)
+	authListener, authErr := net.ListenUDP("udp", authUDPAddr)
+	// 计费监听
+	accountListener, accountErr := net.ListenUDP("udp", accountUDPAddr)
 
-	if err != nil {
-		panic("监听UDP连接失败,{}" + err.Error())
+	if authErr != nil || accountErr != nil {
+		log.Fatalln("认证服务或者计费服务监听失败：", authErr, accountErr)
 	}
 
-	// 处理认证报文
-	go handlerAuthPackage(authListener)
+	defer authListener.Close()
+	defer accountListener.Close()
 
-	// 处理计费报文
-	go handlerAccountPackage(accountListener)
+	// 处理认证报文服务
+	go authServer(authListener)
+
+	// 处理计费报文服务
+	go accountServer(accountListener)
 
 	// TODO 优雅关闭服务
 
-	// 防止主线程退出
+	// 防止主线程退出,监听退出信号，优雅关闭服务
 	select {}
 }
 
-func handlerAuthPackage(authListener *net.UDPConn) {
+func authServer(authListener *net.UDPConn) {
 	fmt.Println("已经启动认证监听", time.Now())
-	defer authListener.Close()
-
 	for {
-
-		// TODO 异步处理报文
-
 		var pkg= make([]byte, MAX_PACKAGE_LENGTH)
 		n, sAddr, err := authListener.ReadFromUDP(pkg)
-		fmt.Println("有UDP包来了")
 		if err != nil {
-			fmt.Println("这里发生错误了" + err.Error())
+			log.Println("这里发生错误了", err.Error(), "消息来自 <<< ", sAddr.String())
 		}
 
-		fmt.Println(n, sAddr.String(), err)
+		// 这里需要控制协程的数量
+		go handleAuth(pkg[:n])
 	}
 
 }
 
-func handlerAccountPackage(accountListener *net.UDPConn) {
+// 认证报文处理,认证 + 授权
+func handleAuth(recvPkg []byte) {
+	rp := parsePkg(recvPkg)
+	fmt.Printf("%+v\n", rp)
+}
+
+func accountServer(accountListener *net.UDPConn) {
 	fmt.Println("已经启动计费监听", time.Now())
-	defer accountListener.Close()
-
 	for {
-
 		// TODO 异步处理报文
 		var pkg= make([]byte, MAX_PACKAGE_LENGTH)
 		n, sAddr, err := accountListener.ReadFromUDP(pkg)
@@ -67,7 +70,11 @@ func handlerAccountPackage(accountListener *net.UDPConn) {
 		if err != nil {
 			fmt.Println("这里发生错误了" + err.Error())
 		}
-
 		fmt.Println(n, sAddr.String(), err)
 	}
+}
+
+// 计费报文处理
+func handleAccounting() {
+
 }

@@ -14,7 +14,7 @@ type RadiusPackage struct {
 	// radius Authenticator 认证字
 	Authenticator [16]byte
 	// radius attributes slice
-	RadiusAttrs []RadiusAttr
+	RadiusAttrs [] RadiusAttr
 }
 
 // 注意RadiusAttr length == 0不加入到属性列表
@@ -40,7 +40,7 @@ func (r *RadiusPackage) ToByte() []byte {
 	buf.WriteByte(r.Code)
 	buf.WriteByte(r.Identifier)
 
-	var bs = make([]byte, 2)
+	var bs = make([]byte,0,  2)
 	binary.BigEndian.PutUint16(bs, r.Length)
 	buf.Write(bs)
 
@@ -84,7 +84,7 @@ func (r *RadiusAttr) addSpecRadiusAttr(vendorAttr VendorAttr) {
 }
 
 func (r *RadiusAttr) toBytes() []byte {
-	bs := make([]byte, r.AttrLength)
+	bs := make([]byte, 0, r.AttrLength)
 	_ = append(bs, r.AttrType, r.AttrLength)
 	if r.VendorId != 0 && r.AttrType == VENDOR_SPECIFIC_TYPE {
 		var bts []byte
@@ -115,7 +115,7 @@ func (r *VendorAttr) Length() byte {
 }
 
 func (r *VendorAttr) toBytes() []byte {
-	bs := make([]byte, r.VendorLength)
+	bs := make([]byte, 0, r.VendorLength)
 	_ = append(bs, r.VendorType, r.VendorLength)
 	_ = append(bs,  r.VendorValue...)
 	return bs
