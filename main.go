@@ -1,13 +1,22 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"time"
-	"log"
 )
 
 func main() {
+
+	//ra := RadiusAttr{AttrType: 1}
+	bytes, _ := json.Marshal(1)
+	fmt.Println(string(bytes))
+	//readAttributeFiles()
+}
+
+func server() {
 
 	authUDPAddr, err := net.ResolveUDPAddr("udp", ":1812")
 	accountUDPAddr, err := net.ResolveUDPAddr("udp", ":1813")
