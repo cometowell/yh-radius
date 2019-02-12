@@ -1,19 +1,17 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
-	"time"
 )
 
 func main() {
-
-	//ra := RadiusAttr{AttrType: 1}
-	bytes, _ := json.Marshal(1)
-	fmt.Println(string(bytes))
-	//readAttributeFiles()
+	// 读取radius属性字典文件
+	readAttributeFiles()
+	log.Println("字典文件加载完成...\n正在启动radius服务")
+	// 启动radius服务
+	server()
 }
 
 func server() {
@@ -44,12 +42,12 @@ func server() {
 
 	// TODO 优雅关闭服务
 
-	// 防止主线程退出,监听退出信号，优雅关闭服务
+	// 防止主线程退出,监听退出信号
 	select {}
 }
 
 func authServer(authListener *net.UDPConn) {
-	fmt.Println("已经启动认证监听", time.Now())
+	log.Println("已经启动认证监听")
 	for {
 		var pkg= make([]byte, MAX_PACKAGE_LENGTH)
 		n, sAddr, err := authListener.ReadFromUDP(pkg)
@@ -70,7 +68,7 @@ func handleAuth(recvPkg []byte) {
 }
 
 func accountServer(accountListener *net.UDPConn) {
-	fmt.Println("已经启动计费监听", time.Now())
+	log.Println("已经启动计费监听")
 	for {
 		// TODO 异步处理报文
 		var pkg= make([]byte, MAX_PACKAGE_LENGTH)

@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
-	"errors"
+	"encoding/binary"
+	"encoding/hex"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -20,7 +22,7 @@ type AttrKey struct {
 }
 
 var (
-	attributes = map[AttrKey]Attribute{}
+	attributes = map[AttrKey] *Attribute{}
 )
 
 // 属性值类型
@@ -31,7 +33,31 @@ const (
 	STRING
 	OCTETS
 	IP_ADDR
+	OTHER
 )
+
+func getAttrValue(attributeType AttributeValueType, value []byte) string {
+	var ret string
+	switch attributeType {
+	case INTEGE:
+		val,_ := binary.Varint(value)
+		ret = strconv.FormatInt(val, 10)
+	case STRING:
+		ret = string(value)
+	case OCTETS:
+		ret = strings.ToUpper(hex.EncodeToString(value))
+	case IP_ADDR:
+		return IPString(value)
+	}
+	return ret
+}
+
+func IPString(source []byte) string {
+	if len(source) != 4 {
+		return ""
+	}
+	return fmt.Sprintf("%d.%d.%d.%d", source[0] & 0xFF, source[1] & 0xFF, source[2] & 0xFF, source[3] & 0xFF)
+}
 
 // 属性结构体
 type Attribute struct {
@@ -41,15 +67,15 @@ type Attribute struct {
 	Name string
 	// 枚举
 	ValueType AttributeValueType
-	// 属性值
-	AttributeValue AttributeValue
+	// 属性值，可选的属性值
+	AttributeValues []AttributeValue
 }
 
 // 属性值结构体
 type AttributeValue struct {
 	Name string
 	ValueName string
-	Value []int
+	Value int
 }
 
 func readAttributeFiles() {
@@ -59,7 +85,6 @@ func readAttributeFiles() {
 	}
 	for _, fileInfo := range infos {
 		parseAttributes(fileInfo)
-		break
 	}
 }
 
@@ -78,6 +103,8 @@ func parseAttributes(file os.FileInfo) {
 	var vendorId uint32 = 0
 	vendorName := ""
 
+	_attrNameType := make(map[string]int)
+
 	for  {
 		line, err := buffer.ReadString('\n')
 		if err == io.EOF {
@@ -88,7 +115,7 @@ func parseAttributes(file os.FileInfo) {
 			log.Panicf("解析文件失败，请检查文件格式,file = %s, 错误 %s", filePath, err.Error())
 		}
 
-		line = strings.Replace(line, "\n", "", -1)
+		line = strings.TrimSuffix(line, "\r\n")
 		if pattern.MatchString(line) || line == "" {
 			continue
 		}
@@ -102,10 +129,10 @@ func parseAttributes(file os.FileInfo) {
 				log.Panic(err)
 			}
 			vendorId = uint32(val)
-		} else if len(items) == 4 && lineFirstItem == "ATTRIBUTE" {
+		} else if len(items) >= 4 && lineFirstItem == "ATTRIBUTE" {
 			typeVal, e := strconv.Atoi(items[2])
 			typeName := items[1]
-			valueType, e := getAttributeValueType(items[3])
+			valueType := getAttributeValueType(items[3])
 			if e != nil {
 				panic(e)
 			}
@@ -117,25 +144,50 @@ func parseAttributes(file os.FileInfo) {
 				Name: typeName,
 				ValueType: valueType,
 			}
-			attributes[AttrKey{vendorId:vendorId, attrType:typeVal}] = attr
+			attributes[AttrKey{vendorId:vendorId, attrType:typeVal}] = &attr
+
+			_attrNameType[typeName] = typeVal
 
 		} else if len(items) == 4 && lineFirstItem == "VALUE" {
+			belongAttrName := items[1]
+			typeVal, ok := _attrNameType[belongAttrName]
+			attribute, attrOk := attributes[AttrKey{vendorId: vendorId, attrType: typeVal}]
 
+			if !ok || !attrOk {
+				continue
+			}
+
+			val, err := strconv.Atoi(items[3])
+			if err != nil {
+				continue
+			}
+
+			attrVal := AttributeValue{
+				Name: belongAttrName,
+				ValueName: items[1],
+				Value: val,
+			}
+			values := attribute.AttributeValues
+			if values == nil {
+				values = make([]AttributeValue, 0, 20)
+			}
+			values = append(values, attrVal)
+			attribute.AttributeValues = values
 		}
-		break
 	}
 }
 
-func getAttributeValueType(valueTypeName string) (AttributeValueType, error) {
+func getAttributeValueType(valueTypeName string) AttributeValueType {
 	switch valueTypeName {
 	case "string":
-		return STRING, nil
+		return STRING
 	case "integer":
-		return INTEGE, nil
+		return INTEGE
 	case "octets":
-		return OCTETS, nil
+		return OCTETS
 	case "ipaddr":
-		return IP_ADDR, nil
+		return IP_ADDR
+	default:
+		return OTHER
 	}
-	return 0, errors.New("找不到匹配类型")
 }

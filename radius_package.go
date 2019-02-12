@@ -13,6 +13,7 @@ type RadiusPackage struct {
 	Length uint16
 	// radius Authenticator 认证字
 	Authenticator [16]byte
+	AuthenticatorString string
 	// radius attributes slice
 	RadiusAttrs [] RadiusAttr
 }
@@ -34,7 +35,7 @@ func (r *RadiusPackage) PackageLength() {
 	r.Length = uint16(length)
 }
 
-// 网络字节序，大端方式
+// 网络字节序，大端
 func (r *RadiusPackage) ToByte() []byte {
 	var buf bytes.Buffer
 	buf.WriteByte(r.Code)
@@ -54,11 +55,18 @@ type RadiusAttr struct {
 	AttrType byte
 	AttrLength byte
 	AttrValue []byte
-
+	attrStringValue string
 	// 26号私有属性专用
 	VendorId uint32
-	// RFC定义中为string类型
 	VendorAttrs []VendorAttr
+}
+
+func (r *RadiusAttr) setStandardAttrStringVal() {
+	attrKey := AttrKey{r.VendorId, int(r.AttrType)}
+	attribute, ok := attributes[attrKey]
+	if ok {
+		r.attrStringValue = getAttrValue(attribute.ValueType, r.AttrValue)
+	}
 }
 
 func (r *RadiusAttr) Length() byte {
@@ -103,9 +111,11 @@ func (r *RadiusAttr) toBytes() []byte {
 
 // radius厂商定义的私有属性
 type VendorAttr struct {
+	VendorId uint32
 	VendorType byte
 	VendorLength byte
 	VendorValue []byte
+	VendorValueString string
 }
 
 // 获取厂商私有属性长度
@@ -119,4 +129,11 @@ func (r *VendorAttr) toBytes() []byte {
 	_ = append(bs, r.VendorType, r.VendorLength)
 	_ = append(bs,  r.VendorValue...)
 	return bs
+}
+
+func (r *VendorAttr) setVendorAttrStringValue() {
+	attribute, ok := attributes[AttrKey{r.VendorId, int(r.VendorType)}]
+	if ok {
+		r.VendorValueString = getAttrValue(attribute.ValueType, r.VendorValue)
+	}
 }
