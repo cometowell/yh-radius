@@ -58,20 +58,23 @@ func authServer(authListener *net.UDPConn) {
 		}
 
 		// 这里需要控制协程的数量
-		go handleAuth(pkg[:n])
+		go handleAuth(pkg[:n], authListener, sAddr)
 	}
 
 }
 
 // 认证报文处理,认证 + 授权
-func handleAuth(recvPkg []byte) {
+func handleAuth(recvPkg []byte, authListener *net.UDPConn, dest *net.UDPAddr) {
 	rp := parsePkg(recvPkg)
 	log.Printf("%+v\n", rp)
 
-	// 认证用户信息
+	// 认证用户信息, 中间件的形式处理
+	for _, attr := range rp.RadiusAttrs {
+		fmt.Println(attr)
+	}
 
 	//返回认证授权结果
-
+	authReply(rp, authListener, dest)
 }
 
 func accountServer(accountListener *net.UDPConn) {
@@ -85,12 +88,12 @@ func accountServer(accountListener *net.UDPConn) {
 		}
 
 		// 这里需要控制协程的数量
-		go handleAccounting(pkg[:n])
+		go handleAccounting(pkg[:n], accountListener)
 	}
 }
 
 // 计费报文处理
-func handleAccounting(recvPkg []byte) {
+func handleAccounting(recvPkg []byte, accountListener *net.UDPConn) {
 	rp := parsePkg(recvPkg)
 	log.Printf("%+v\n", rp)
 }

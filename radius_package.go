@@ -17,9 +17,12 @@ type RadiusPackage struct {
 	AuthenticatorString string
 	// radius attributes
 	RadiusAttrs [] RadiusAttr
+	RadiusAttrMap map[AttrKey]RadiusAttr `json:"-"`
+
 	//是否是chap请求
 	isChap bool
 	challenge [16]byte
+
 }
 
 func (r *RadiusPackage) AddRadiusAttr(attr RadiusAttr)  {
@@ -44,12 +47,19 @@ func (r *RadiusPackage) ToByte() []byte {
 	buf.WriteByte(r.Code)
 	buf.WriteByte(r.Identifier)
 
-	var bs = make([]byte,0,  2)
+	var attrBuf bytes.Buffer
+	for _, attr := range r.RadiusAttrs {
+		attrBuf.Write(attr.toBytes())
+	}
+
+	var bs = make([]byte,2)
+	r.PackageLength()
 	binary.BigEndian.PutUint16(bs, r.Length)
 	buf.Write(bs)
 
 	buf.Write(r.Authenticator[:])
-	// radius attr insert into bytes
+	buf.Write(attrBuf.Bytes())
+
 	return buf.Bytes()
 }
 
@@ -63,6 +73,7 @@ type RadiusAttr struct {
 	// 26号私有属性专用
 	VendorId uint32
 	VendorAttrs []VendorAttr
+	VendorAttrMap map[AttrKey]VendorAttr
 }
 
 func (r RadiusAttr) String1() string {
@@ -101,19 +112,19 @@ func (r *RadiusAttr) addSpecRadiusAttr(vendorAttr VendorAttr) {
 
 func (r *RadiusAttr) toBytes() []byte {
 	bs := make([]byte, 0, r.AttrLength)
-	_ = append(bs, r.AttrType, r.AttrLength)
+	bs = append(bs, r.AttrType, r.AttrLength)
 	if r.VendorId != 0 && r.AttrType == VENDOR_SPECIFIC_TYPE {
 		var bts []byte
 		binary.BigEndian.PutUint32(bts, r.VendorId)
-		_ = append(bs, bts...)
+		bs = append(bs, bts...)
 
 		for _, va := range r.VendorAttrs {
-			_ = append(bs, va.toBytes()...)
+			bs = append(bs, va.toBytes()...)
 		}
 
 		return bs
 	}
-	_ = append(bs, r.AttrValue...)
+	bs = append(bs, r.AttrValue...)
 	return bs
 }
 

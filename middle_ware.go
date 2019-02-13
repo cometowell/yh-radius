@@ -1,27 +1,28 @@
 package main
 
-func authMiddleWare(rp RadiusPackage) {
-	attrs := rp.RadiusAttrs
+import "net"
 
-	for _, attr := range attrs {
-		if attr.AttrName == "User-Password" {
+func passwordMiddle(rp RadiusPackage)  {
+	if rp.isChap {
 
-		}
-
-		if attr.AttrName == "CHAP-Password" {
-
-		}
 	}
 }
 
-func authReply()  {
+func authReply(rp RadiusPackage, listener *net.UDPConn, dest *net.UDPAddr) {
+	reply := RadiusPackage {
+		Code:ACCESS_ACCEPT_CODE,
+		Identifier: rp.Identifier,
+		Authenticator: rp.Authenticator,
+	}
 
-}
+	replyMessage := RadiusAttr{
+		AttrType: 18,
+		AttrValue: []byte("认证成功"),
+	}
 
-func accountingMiddleWare(rp RadiusPackage) {
+	replyMessage.Length()
+	reply.AddRadiusAttr(replyMessage)
+	reply.PackageLength()
 
-}
-
-func accountingReply() {
-
+	listener.WriteToUDP(reply.ToByte(), dest)
 }
