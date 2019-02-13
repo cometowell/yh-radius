@@ -12,6 +12,7 @@ func main() {
 	log.Println("字典文件加载完成...\n正在启动radius服务")
 	// 启动radius服务
 	server()
+
 }
 
 func server() {
@@ -47,12 +48,13 @@ func server() {
 }
 
 func authServer(authListener *net.UDPConn) {
-	log.Println("已经启动认证监听")
+	log.Println("已经启动认证监听...")
 	for {
 		var pkg= make([]byte, MAX_PACKAGE_LENGTH)
 		n, sAddr, err := authListener.ReadFromUDP(pkg)
 		if err != nil {
-			log.Println("这里发生错误了", err.Error(), "消息来自 <<< ", sAddr.String())
+			log.Println("接收认证请求报文发生错误", err.Error(), "消息来自 <<< ", sAddr.String())
+			continue
 		}
 
 		// 这里需要控制协程的数量
@@ -64,24 +66,31 @@ func authServer(authListener *net.UDPConn) {
 // 认证报文处理,认证 + 授权
 func handleAuth(recvPkg []byte) {
 	rp := parsePkg(recvPkg)
-	fmt.Printf("%+v\n", rp)
+	log.Printf("%+v\n", rp)
+
+	// 认证用户信息
+
+	//返回认证授权结果
+
 }
 
 func accountServer(accountListener *net.UDPConn) {
-	log.Println("已经启动计费监听")
+	log.Println("已经启动计费监听...")
 	for {
-		// TODO 异步处理报文
 		var pkg= make([]byte, MAX_PACKAGE_LENGTH)
 		n, sAddr, err := accountListener.ReadFromUDP(pkg)
-		fmt.Println("有UDP包来了")
 		if err != nil {
-			fmt.Println("这里发生错误了" + err.Error())
+			fmt.Println("接收计费请求报文发送错误：", err.Error(), "消息来自 <<< ", sAddr.String() )
+			continue
 		}
-		fmt.Println(n, sAddr.String(), err)
+
+		// 这里需要控制协程的数量
+		go handleAccounting(pkg[:n])
 	}
 }
 
 // 计费报文处理
-func handleAccounting() {
-
+func handleAccounting(recvPkg []byte) {
+	rp := parsePkg(recvPkg)
+	log.Printf("%+v\n", rp)
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 )
 
 // radius报文结构
@@ -14,11 +15,13 @@ type RadiusPackage struct {
 	// radius Authenticator 认证字
 	Authenticator [16]byte
 	AuthenticatorString string
-	// radius attributes slice
+	// radius attributes
 	RadiusAttrs [] RadiusAttr
+	//是否是chap请求
+	isChap bool
+	challenge [16]byte
 }
 
-// 注意RadiusAttr length == 0不加入到属性列表
 func (r *RadiusPackage) AddRadiusAttr(attr RadiusAttr)  {
 	if attr.Length() == 0 {
 		return
@@ -53,19 +56,24 @@ func (r *RadiusPackage) ToByte() []byte {
 // radius attribute
 type RadiusAttr struct {
 	AttrType byte
+	AttrName string
 	AttrLength byte
 	AttrValue []byte
-	attrStringValue string
+	AttrStringValue string
 	// 26号私有属性专用
 	VendorId uint32
 	VendorAttrs []VendorAttr
 }
 
+func (r RadiusAttr) String1() string {
+	return fmt.Sprintf("{%s = %s}", r.AttrName, r.AttrStringValue)
+}
+
 func (r *RadiusAttr) setStandardAttrStringVal() {
 	attrKey := AttrKey{r.VendorId, int(r.AttrType)}
-	attribute, ok := attributes[attrKey]
+	attribute, ok := ATTRITUBES[attrKey]
 	if ok {
-		r.attrStringValue = getAttrValue(attribute.ValueType, r.AttrValue)
+		r.AttrStringValue = getAttrValue(attribute.ValueType, r.AttrValue)
 	}
 }
 
@@ -113,9 +121,14 @@ func (r *RadiusAttr) toBytes() []byte {
 type VendorAttr struct {
 	VendorId uint32
 	VendorType byte
+	VendorTypeName string
 	VendorLength byte
 	VendorValue []byte
 	VendorValueString string
+}
+
+func (r VendorAttr) String1() string {
+	return fmt.Sprintf("{%s=%s}", r.VendorTypeName, r.VendorValueString)
 }
 
 // 获取厂商私有属性长度
@@ -132,7 +145,7 @@ func (r *VendorAttr) toBytes() []byte {
 }
 
 func (r *VendorAttr) setVendorAttrStringValue() {
-	attribute, ok := attributes[AttrKey{r.VendorId, int(r.VendorType)}]
+	attribute, ok := ATTRITUBES[AttrKey{r.VendorId, int(r.VendorType)}]
 	if ok {
 		r.VendorValueString = getAttrValue(attribute.ValueType, r.VendorValue)
 	}

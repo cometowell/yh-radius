@@ -22,7 +22,7 @@ type AttrKey struct {
 }
 
 var (
-	attributes = map[AttrKey] *Attribute{}
+	ATTRITUBES = map[AttrKey] *Attribute{}
 )
 
 // 属性值类型
@@ -144,14 +144,14 @@ func parseAttributes(file os.FileInfo) {
 				Name: typeName,
 				ValueType: valueType,
 			}
-			attributes[AttrKey{vendorId:vendorId, attrType:typeVal}] = &attr
+			ATTRITUBES[AttrKey{vendorId: vendorId, attrType:typeVal}] = &attr
 
 			_attrNameType[typeName] = typeVal
 
 		} else if len(items) == 4 && lineFirstItem == "VALUE" {
 			belongAttrName := items[1]
 			typeVal, ok := _attrNameType[belongAttrName]
-			attribute, attrOk := attributes[AttrKey{vendorId: vendorId, attrType: typeVal}]
+			attribute, attrOk := ATTRITUBES[AttrKey{vendorId: vendorId, attrType: typeVal}]
 
 			if !ok || !attrOk {
 				continue
