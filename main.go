@@ -12,7 +12,6 @@ func main() {
 	log.Println("字典文件加载完成...\n正在启动radius服务")
 	// 启动radius服务
 	server()
-
 }
 
 func server() {

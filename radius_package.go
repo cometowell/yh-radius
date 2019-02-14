@@ -151,8 +151,8 @@ func (r *VendorAttr) Length() byte {
 
 func (r *VendorAttr) toBytes() []byte {
 	bs := make([]byte, 0, r.VendorLength)
-	_ = append(bs, r.VendorType, r.VendorLength)
-	_ = append(bs,  r.VendorValue...)
+	bs = append(bs, r.VendorType, r.VendorLength)
+	bs = append(bs,  r.VendorValue...)
 	return bs
 }
 
