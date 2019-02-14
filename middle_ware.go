@@ -7,11 +7,32 @@ import (
 	"net"
 )
 
-func passwordMiddle(rp RadiusPackage)  {
+const (
+	ACCESS_ACCEPT_REPLY_MSG = "authenticate success"
+)
+
+// 验证用户名，密码
+func UserVerify(rp RadiusPackage)  {
+
+	// 验证用户名
+
+	// 验证密码
 	if rp.isChap {
 
 	}
 }
+
+
+// 验证MAC地址绑定
+func MacAddrVerify(rp RadiusPackage) {
+
+}
+
+// 设置通用认证响应属性
+func AuthSetCommonResponseAttr(reply RadiusPackage) {
+
+}
+
 
 func authReply(rp RadiusPackage, listener *net.UDPConn, dest *net.UDPAddr) {
 	reply := RadiusPackage {
@@ -22,7 +43,7 @@ func authReply(rp RadiusPackage, listener *net.UDPConn, dest *net.UDPAddr) {
 
 	replyMessage := RadiusAttr{
 		AttrType: 18,
-		AttrValue: []byte("authenticator success"),
+		AttrValue: []byte(ACCESS_ACCEPT_REPLY_MSG),
 	}
 
 	replyMessage.Length()
@@ -30,7 +51,8 @@ func authReply(rp RadiusPackage, listener *net.UDPConn, dest *net.UDPAddr) {
 	reply.PackageLength()
 
 	// TODO secret
-	reply.Authenticator = authReplyAuthenticator(rp.Authenticator, reply, "111111", []RadiusAttr{replyMessage})
+	secret := "111111"
+	reply.Authenticator = authReplyAuthenticator(rp.Authenticator, reply, secret, []RadiusAttr{replyMessage})
 
 	listener.WriteToUDP(reply.ToByte(), dest)
 }
