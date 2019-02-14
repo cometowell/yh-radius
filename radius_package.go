@@ -52,8 +52,9 @@ func (r *RadiusPackage) ToByte() []byte {
 		attrBuf.Write(attr.toBytes())
 	}
 
-	var bs = make([]byte,2)
 	r.PackageLength()
+
+	var bs = make([]byte,2)
 	binary.BigEndian.PutUint16(bs, r.Length)
 	buf.Write(bs)
 
