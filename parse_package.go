@@ -16,6 +16,7 @@ func parsePkg(pkg []byte) RadiusPackage {
 	// 解析radius属性
 	attrs := make([]RadiusAttr, 0, 50)
 	rp.RadiusAttrMap = make(map[AttrKey]RadiusAttr)
+	rp.RadiusAttrStringKeyMap = make(map[string]RadiusAttr)
 	attrs = parseRadiusAttr(pkg[20:], attrs, &rp)
 	rp.RadiusAttrs = attrs
 	return rp
@@ -39,13 +40,14 @@ func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  [
 	if attrType == VENDOR_SPECIFIC_TYPE {
 		attr.VendorId = binary.BigEndian.Uint32(attrBytes[ATTR_HEADER_LENGHT: ATTR_HEADER_LENGHT + 4])
 		attr.VendorAttrMap = make(map[AttrKey]VendorAttr)
-		parseSpecRadiusAttr(attrBytes[VENDOR_HEADER_LENGTH:attrLength], &attr)
+		parseSpecRadiusAttr(attrBytes[VENDOR_HEADER_LENGTH:attrLength], &attr, rp)
 	} else {
 		attr.AttrValue = attrBytes[ATTR_HEADER_LENGHT:attrLength]
 		// 设置属性值的字符串形式值
 		attribute, ok := ATTRITUBES[AttrKey{0, int(attrType)}]
 		if ok {
 			attr.AttrName = attribute.Name
+			rp.RadiusAttrStringKeyMap[attribute.Name] = attr
 		}
 		attr.setStandardAttrStringVal()
 
@@ -54,17 +56,18 @@ func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  [
 		}
 
 		if attrType == 60 {
-			rp.challenge = getSixteenBytes(attr.AttrValue)
+			rp.challenge = attr.AttrValue
 		}
 	}
 	attrs = append(attrs, attr)
 	rp.RadiusAttrMap[AttrKey{attr.VendorId, int(attr.AttrType)}] = attr
+
 	attrs = parseRadiusAttr(attrBytes[attrLength:], attrs, rp)
 	return attrs
 }
 
 // 解析厂商私有属性
-func parseSpecRadiusAttr(specAttrBytes []byte, attr *RadiusAttr) {
+func parseSpecRadiusAttr(specAttrBytes []byte, attr *RadiusAttr, rp *RadiusPackage) {
 
 	vendorType := specAttrBytes[0]
 	vendorLength := specAttrBytes[1]
@@ -80,12 +83,13 @@ func parseSpecRadiusAttr(specAttrBytes []byte, attr *RadiusAttr) {
 	attribute, ok := ATTRITUBES[AttrKey{attr.VendorId, int(vendorType)}]
 	if ok {
 		vendorAttr.VendorTypeName = attribute.Name
+		attr.VendorAttrStringKeyMap[attribute.Name] = vendorAttr
 	}
 
 	attr.VendorAttrs = append(attr.VendorAttrs, vendorAttr)
 	attr.VendorAttrMap[AttrKey{attr.VendorId, int(attr.AttrType)}] = vendorAttr
 
-	parseSpecRadiusAttr(specAttrBytes[vendorLength:], attr)
+	parseSpecRadiusAttr(specAttrBytes[vendorLength:], attr, rp)
 }
 
 // 获取16字节Authenticator

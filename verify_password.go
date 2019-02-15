@@ -6,10 +6,10 @@ import (
 )
 
 // PAP 密码验证
-func pap(shareSecret, password string, authenticator [16]byte, encryptPassword []byte) bool {
+func pap(shareSecret, password string, rp RadiusPackage) bool {
 	hash := md5.New()
 	hash.Write([]byte(shareSecret))
-	hash.Write(authenticator[:])
+	hash.Write(rp.Authenticator[:])
 	b := hash.Sum(nil)
 
 	value := []byte(password)
@@ -29,7 +29,8 @@ func pap(shareSecret, password string, authenticator [16]byte, encryptPassword [
 		result = append(result, ret[:]...)
 	}
 
-	return bytes.Equal(result, encryptPassword)
+	attr := rp.RadiusAttrMap[AttrKey{0, 2}]
+	return bytes.Equal(result, attr.AttrValue)
 }
 
 
@@ -48,8 +49,8 @@ func chap(password string, rp *RadiusPackage) bool {
 
 	var chapId = chapPassword[0]
 	challenge := rp.challenge
-	if len(challenge) == 0 {
-		challenge = rp.Authenticator
+	if len(challenge) != 16 {
+		challenge = rp.Authenticator[:]
 	}
 
 	hashPassword := chapPassword[1:]
@@ -57,7 +58,7 @@ func chap(password string, rp *RadiusPackage) bool {
 	buffer := bytes.NewBuffer(nil)
 	buffer.WriteByte(chapId)
 	buffer.Write([]byte(password))
-	buffer.Write(challenge[:])
+	buffer.Write(challenge)
 	sum := md5.Sum(buffer.Bytes())
 	return bytes.Equal(sum[:], hashPassword)
 }

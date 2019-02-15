@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/binary"
+	"fmt"
 	"net"
 )
 
@@ -13,12 +14,13 @@ const (
 
 // 验证用户名，密码
 func UserVerify(rp RadiusPackage)  {
-
 	// 验证用户名
 
 	// 验证密码
 	if rp.isChap {
-
+		fmt.Println("CHAP用户认证结果：", chap("111111", &rp))
+	} else {
+		fmt.Println("PAP用户认证结果：", pap("111111", "111111", rp))
 	}
 }
 
@@ -52,13 +54,12 @@ func authReply(rp RadiusPackage, listener *net.UDPConn, dest *net.UDPAddr) {
 
 	// TODO secret
 	secret := "111111"
-	reply.Authenticator = authReplyAuthenticator(rp.Authenticator, reply, secret, []RadiusAttr{replyMessage})
-
+	authReplyAuthenticator(rp.Authenticator, &reply, secret)
 	listener.WriteToUDP(reply.ToByte(), dest)
 }
 
 // ResponseAuth = MD5(Code+ID+Length+RequestAuth+Attributes+Secret)
-func authReplyAuthenticator(authAuthenticator [16]byte, reply RadiusPackage, secret string, replyAttrs []RadiusAttr) [16]byte {
+func authReplyAuthenticator(authAuthenticator [16]byte, reply *RadiusPackage, secret string) {
 	md5hash := md5.New()
 	var buf bytes.Buffer
 	buf.WriteByte(reply.Code)
@@ -70,7 +71,7 @@ func authReplyAuthenticator(authAuthenticator [16]byte, reply RadiusPackage, sec
 
 	buf.Write(authAuthenticator[:])
 
-	for _, attr := range replyAttrs {
+	for _, attr := range reply.RadiusAttrs {
 		if attr.AttrLength == 0 {
 			continue
 		}
@@ -82,5 +83,5 @@ func authReplyAuthenticator(authAuthenticator [16]byte, reply RadiusPackage, sec
 	md5hash.Write(buf.Bytes())
 	sum := md5hash.Sum(nil)
 
-	return getSixteenBytes(sum)
+	reply.Authenticator = getSixteenBytes(sum)
 }

@@ -68,9 +68,7 @@ func handleAuth(recvPkg []byte, authListener *net.UDPConn, dest *net.UDPAddr) {
 	log.Printf("%+v\n", rp)
 
 	// 认证用户信息, 中间件的形式处理
-	//for _, attr := range rp.RadiusAttrs {
-	//	fmt.Println(attr)
-	//}
+	UserVerify(rp)
 
 	//返回认证授权结果
 	authReply(rp, authListener, dest)

@@ -18,11 +18,22 @@ type RadiusPackage struct {
 	// radius attributes
 	RadiusAttrs [] RadiusAttr
 	RadiusAttrMap map[AttrKey]RadiusAttr `json:"-"`
-
+	RadiusAttrStringKeyMap map[string]RadiusAttr `json:"-"`
 	//是否是chap请求
 	isChap bool
-	challenge [16]byte
+	challenge []byte
 
+}
+
+func (r RadiusPackage) String() string {
+	return fmt.Sprintf(`RadiusPackage:{
+        Code=%d
+		Identifier=%d
+		Length=%d
+		Authenticator=%s
+		isChap=%v
+		RadiusAttrs: %s
+	}`, r.Code, r.Identifier, r.Length, r.AuthenticatorString, r.isChap, r.RadiusAttrs)
 }
 
 func (r *RadiusPackage) AddRadiusAttr(attr RadiusAttr)  {
@@ -75,10 +86,11 @@ type RadiusAttr struct {
 	VendorId uint32
 	VendorAttrs []VendorAttr
 	VendorAttrMap map[AttrKey]VendorAttr
+	VendorAttrStringKeyMap map[string]VendorAttr
 }
 
-func (r RadiusAttr) String1() string {
-	return fmt.Sprintf("{%s = %s}", r.AttrName, r.AttrStringValue)
+func (r RadiusAttr) String() string {
+	return fmt.Sprintf("\n \t\t\t %s=%s", r.AttrName, r.AttrStringValue)
 }
 
 func (r *RadiusAttr) setStandardAttrStringVal() {
@@ -139,7 +151,7 @@ type VendorAttr struct {
 	VendorValueString string
 }
 
-func (r VendorAttr) String1() string {
+func (r VendorAttr) String() string {
 	return fmt.Sprintf("{%s=%s}", r.VendorTypeName, r.VendorValueString)
 }
 
