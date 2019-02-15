@@ -1,15 +1,26 @@
 package main
 
 import (
-	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/xorm"
 	"log"
 	"net"
 )
+
+var engine *xorm.Engine
 
 func main() {
 	// 读取radius属性字典文件
 	readAttributeFiles()
 	log.Println("字典文件加载完成...\n正在启动radius服务")
+
+	// 初始化数据库连接
+	var err error
+	engine, err = xorm.NewEngine("mysql", "root:root@/127.0.0.1:3306/user?charset=utf8")
+	if err != nil {
+		log.Fatalf("连接数据库发生错误：%v", err)
+	}
+
 	// 启动radius服务
 	server()
 }
@@ -49,7 +60,7 @@ func server() {
 func authServer(authListener *net.UDPConn) {
 	log.Println("已经启动认证监听...")
 	for {
-		var pkg= make([]byte, MAX_PACKAGE_LENGTH)
+		var pkg = make([]byte, MAX_PACKAGE_LENGTH)
 		n, sAddr, err := authListener.ReadFromUDP(pkg)
 		if err != nil {
 			log.Println("接收认证请求报文发生错误", err.Error(), "消息来自 <<< ", sAddr.String())
@@ -77,10 +88,10 @@ func handleAuth(recvPkg []byte, authListener *net.UDPConn, dest *net.UDPAddr) {
 func accountServer(accountListener *net.UDPConn) {
 	log.Println("已经启动计费监听...")
 	for {
-		var pkg= make([]byte, MAX_PACKAGE_LENGTH)
+		var pkg = make([]byte, MAX_PACKAGE_LENGTH)
 		n, sAddr, err := accountListener.ReadFromUDP(pkg)
 		if err != nil {
-			fmt.Println("接收计费请求报文发送错误：", err.Error(), "消息来自 <<< ", sAddr.String() )
+			log.Println("接收计费请求报文发送错误：", err.Error(), "消息来自 <<< ", sAddr.String())
 			continue
 		}
 

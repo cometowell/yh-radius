@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"net"
 )
@@ -13,8 +14,15 @@ const (
 )
 
 // 验证用户名，密码
-func UserVerify(rp RadiusPackage)  {
+func UserVerify(rp RadiusPackage)  error {
 	// 验证用户名
+	attr, ok := rp.RadiusAttrStringKeyMap["User-Name"]
+	if !ok {
+		return errors.New("user's account number or password is incorrect")
+	}
+
+	accountNumber := attr.AttrStringValue
+	fmt.Println(accountNumber)
 
 	// 验证密码
 	if rp.isChap {
@@ -22,6 +30,8 @@ func UserVerify(rp RadiusPackage)  {
 	} else {
 		fmt.Println("PAP用户认证结果：", pap("111111", "111111", rp))
 	}
+
+	return nil
 }
 
 
