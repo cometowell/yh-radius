@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"net"
 )
 
 const (
@@ -14,9 +13,9 @@ const (
 )
 
 // 验证用户名，密码
-func UserVerify(rp RadiusPackage)  error {
+func UserVerify(ctx *Context)  error {
 	// 验证用户名
-	attr, ok := rp.RadiusAttrStringKeyMap["User-Name"]
+	attr, ok := ctx.request.RadiusAttrStringKeyMap["User-Name"]
 	if !ok {
 		return errors.New("user's account number or password is incorrect")
 	}
@@ -25,10 +24,10 @@ func UserVerify(rp RadiusPackage)  error {
 	fmt.Println(accountNumber)
 
 	// 验证密码
-	if rp.isChap {
-		fmt.Println("CHAP用户认证结果：", chap("111111", &rp))
+	if ctx.request.isChap {
+		fmt.Println("CHAP用户认证结果：", chap("111111", &ctx.request))
 	} else {
-		fmt.Println("PAP用户认证结果：", pap("111111", "111111", rp))
+		fmt.Println("PAP用户认证结果：", pap("111111", "111111", ctx.request))
 	}
 
 	return nil
@@ -36,20 +35,20 @@ func UserVerify(rp RadiusPackage)  error {
 
 
 // 验证MAC地址绑定
-func MacAddrVerify(rp RadiusPackage) {
+func MacAddrVerify(ctx *Context) {
 
 }
 
 // 设置通用认证响应属性
-func AuthSetCommonResponseAttr(reply RadiusPackage) {
+func AuthSetCommonResponseAttr(ctx *Context) {
 
 }
 
 
-func authReply(rp RadiusPackage, listener *net.UDPConn, dest *net.UDPAddr) {
+func authReply(cxt *Context) {
 	reply := RadiusPackage {
 		Code:ACCESS_ACCEPT_CODE,
-		Identifier: rp.Identifier,
+		Identifier: cxt.request.Identifier,
 		Authenticator:[16]byte{},
 	}
 
@@ -64,8 +63,8 @@ func authReply(rp RadiusPackage, listener *net.UDPConn, dest *net.UDPAddr) {
 
 	// TODO secret
 	secret := "111111"
-	authReplyAuthenticator(rp.Authenticator, &reply, secret)
-	listener.WriteToUDP(reply.ToByte(), dest)
+	authReplyAuthenticator(cxt.request.Authenticator, &reply, secret)
+	cxt.listener.WriteToUDP(reply.ToByte(), cxt.dst)
 }
 
 // ResponseAuth = MD5(Code+ID+Length+RequestAuth+Attributes+Secret)
