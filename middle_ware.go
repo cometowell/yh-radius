@@ -20,8 +20,8 @@ func UserVerify(ctx *Context)  error {
 		return errors.New("user's account number or password is incorrect")
 	}
 
-	accountNumber := attr.AttrStringValue
-	fmt.Println(accountNumber)
+	userName := attr.AttrStringValue
+	fmt.Println(userName)
 
 	// 验证密码
 	if ctx.request.isChap {
