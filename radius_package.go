@@ -32,7 +32,7 @@ func (r RadiusPackage) String() string {
 		Length=%d
 		Authenticator=%s
 		isChap=%v
-		RadiusAttrs: %s
+		RadiusAttrs: %v
 	}`, r.Code, r.Identifier, r.Length, r.AuthenticatorString, r.isChap, r.RadiusAttrs)
 }
 
@@ -45,7 +45,7 @@ func (r *RadiusPackage) AddRadiusAttr(attr RadiusAttr)  {
 
 // 计算radius package长度
 func (r *RadiusPackage) PackageLength() {
-	length := PACKAGE_HEADER_LENGTH
+	length := PackageHeaderLength
 	for _, ra :=range r.RadiusAttrs {
 		length += int(ra.AttrLength)
 	}
@@ -102,9 +102,9 @@ func (r *RadiusAttr) setStandardAttrStringVal() {
 }
 
 func (r *RadiusAttr) Length() byte {
-	r.AttrLength = byte(ATTR_HEADER_LENGHT + len(r.AttrValue))
+	r.AttrLength = byte(AttrHeaderLength + len(r.AttrValue))
 
-	if r.VendorId != 0 && r.AttrType == VENDOR_SPECIFIC_TYPE {
+	if r.VendorId != 0 && r.AttrType == VendorSpecificType {
 		var vendorAttrLen byte = 0
 		vendorAttrs := r.VendorAttrs
 		if len(vendorAttrs) > 0 {
@@ -112,7 +112,7 @@ func (r *RadiusAttr) Length() byte {
 				vendorAttrLen += va.Length()
 			}
 		}
-		r.AttrLength = ATTR_HEADER_LENGHT + VENDOR_ID_LENGTH + vendorAttrLen
+		r.AttrLength = AttrHeaderLength + VendorIdLength + vendorAttrLen
 	}
 
 	return r.AttrLength
@@ -126,7 +126,7 @@ func (r *RadiusAttr) addSpecRadiusAttr(vendorAttr VendorAttr) {
 func (r *RadiusAttr) toBytes() []byte {
 	bs := make([]byte, 0, r.AttrLength)
 	bs = append(bs, r.AttrType, r.AttrLength)
-	if r.VendorId != 0 && r.AttrType == VENDOR_SPECIFIC_TYPE {
+	if r.VendorId != 0 && r.AttrType == VendorSpecificType {
 		var bts []byte
 		binary.BigEndian.PutUint32(bts, r.VendorId)
 		bs = append(bs, bts...)
@@ -157,7 +157,7 @@ func (r VendorAttr) String() string {
 
 // 获取厂商私有属性长度
 func (r *VendorAttr) Length() byte {
-	r.VendorLength = byte(len(r.VendorValue) + ATTR_HEADER_LENGHT)
+	r.VendorLength = byte(len(r.VendorValue) + AttrHeaderLength)
 	return r.VendorLength
 }
 

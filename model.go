@@ -1,17 +1,8 @@
 package main
 
 import (
-	"net"
 	"time"
 )
-
-type Context struct {
-	request RadiusPackage
-	response *RadiusPackage
-	User *User
-	listener *net.UDPConn
-	dst *net.UDPAddr
-}
 
 type User struct {
 	Id uint64

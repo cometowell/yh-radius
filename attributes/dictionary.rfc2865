@@ -7,7 +7,7 @@
 #	$Id: b800f754257b91c455ebcf9601343e933ce4ccd8 $
 #
 ATTRIBUTE	User-Name				1	string
-ATTRIBUTE	User-Password				2	string encrypt=1
+ATTRIBUTE	User-Password				2	octets
 ATTRIBUTE	CHAP-Password				3	octets
 ATTRIBUTE	NAS-IP-Address				4	ipaddr
 ATTRIBUTE	NAS-Port				5	integer

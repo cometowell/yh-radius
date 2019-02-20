@@ -37,12 +37,12 @@ func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  [
 	}
 
 	// 26号私有属性特殊处理
-	if attrType == VENDOR_SPECIFIC_TYPE {
-		attr.VendorId = binary.BigEndian.Uint32(attrBytes[ATTR_HEADER_LENGHT: ATTR_HEADER_LENGHT + 4])
+	if attrType == VendorSpecificType {
+		attr.VendorId = binary.BigEndian.Uint32(attrBytes[AttrHeaderLength : AttrHeaderLength+ 4])
 		attr.VendorAttrMap = make(map[AttrKey]VendorAttr)
-		parseSpecRadiusAttr(attrBytes[VENDOR_HEADER_LENGTH:attrLength], &attr, rp)
+		parseSpecRadiusAttr(attrBytes[VendorHeaderLength:attrLength], &attr, rp)
 	} else {
-		attr.AttrValue = attrBytes[ATTR_HEADER_LENGHT:attrLength]
+		attr.AttrValue = attrBytes[AttrHeaderLength:attrLength]
 		// 设置属性值的字符串形式值
 		attribute, ok := ATTRITUBES[AttrKey{0, int(attrType)}]
 		if ok {
@@ -76,7 +76,7 @@ func parseSpecRadiusAttr(specAttrBytes []byte, attr *RadiusAttr, rp *RadiusPacka
 		VendorId: attr.VendorId,
 		VendorType: vendorType,
 		VendorLength: vendorLength,
-		VendorValue: specAttrBytes[ATTR_HEADER_LENGHT: vendorLength],
+		VendorValue: specAttrBytes[AttrHeaderLength: vendorLength],
 	}
 	// 设置属性值的字符串形式值
 	vendorAttr.setVendorAttrStringValue()
@@ -93,9 +93,9 @@ func parseSpecRadiusAttr(specAttrBytes []byte, attr *RadiusAttr, rp *RadiusPacka
 }
 
 // 获取16字节Authenticator
-func getSixteenBytes(source []byte) (bts [AUTHENTICATOR_LENGTH]byte) {
+func getSixteenBytes(source []byte) (bts [AuthenticatorLength]byte) {
 	for index, val := range source {
-		if index >= AUTHENTICATOR_LENGTH {
+		if index >= AuthenticatorLength {
 			break
 		}
 		bts[index] = val
