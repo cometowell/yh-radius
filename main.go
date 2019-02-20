@@ -19,7 +19,7 @@ func Default(addr string) (r *radEngine) {
 	r = &radEngine{
 		addr: addr,
 	}
-	r.radMiddleWares = append(r.radMiddleWares, RecoveryWare(), NasValidation)
+	r.radMiddleWares = append(r.radMiddleWares, NasValidation)
 	return r
 }
 
@@ -53,8 +53,6 @@ func (r *radEngine) handlePackage() {
 		// 这里需要控制协程的数量
 		go func(recPkg []byte, listener *net.UDPConn, dst *net.UDPAddr) {
 			rp := parsePkg(recPkg)
-			log.Printf("%+v\n", rp)
-
 			cxt := &Context {
 				Request: rp,
 				Listener: listener,
@@ -84,8 +82,9 @@ func main() {
 
 	// 认证服务
 	authServer := Default(":1812")
+	authServer.Use(AuthRecoveryFunc())
 	authServer.Use(UserVerify)
-	authServer.Use(AuthReply)
+	authServer.Use(AuthAcceptReply)
 	go authServer.handlePackage()
 	log.Println("已经启动Radius认证监听...")
 

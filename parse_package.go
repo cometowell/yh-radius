@@ -47,15 +47,14 @@ func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  [
 		attribute, ok := ATTRITUBES[AttrKey{0, int(attrType)}]
 		if ok {
 			attr.AttrName = attribute.Name
+			attr.setStandardAttrStringVal()
 			rp.RadiusAttrStringKeyMap[attribute.Name] = attr
 		}
-		attr.setStandardAttrStringVal()
-
-		if attrType == 3 {
+		if attrType == CHAPPasswordType {
 			rp.isChap = true
 		}
 
-		if attrType == 60 {
+		if attrType == CHAPChallenge {
 			rp.challenge = attr.AttrValue
 		}
 	}

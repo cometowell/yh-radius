@@ -12,6 +12,8 @@ type Context struct {
 	Dst      *net.UDPAddr
 	index    int
 	Handlers []RadMiddleWare
+	RadiusAttrs []RadiusAttr
+	throwPackage bool
 }
 
 func (cxt *Context) Next() {

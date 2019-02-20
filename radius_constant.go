@@ -38,6 +38,9 @@ const (
 
 	// 授权改变否定响应
 	COANak = 45
+
+	CHAPPasswordType = 3
+	CHAPChallenge    = 60
 )
 
 const (

@@ -5,41 +5,52 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"fmt"
+	"log"
 )
 
 const (
-	ACCESS_ACCEPT_REPLY_MSG = "authenticate success"
+	AccessAcceptReplyMsg = "authenticate success"
 )
-
-func DefaultRecovery(cxt *Context) {
-
-}
 
 func NasValidation(cxt *Context) {
 	nasIp := cxt.Dst.IP.String()
-	fmt.Println(nasIp)
+	log.Println("UDP报文消息来源：", nasIp)
+	log.Printf("%+v\n", cxt.Request)
+
+	// 验证UPD消息来源，非法来源丢弃
+	// cxt.throwPackage = true
+
 	cxt.Next()
 }
 
 // 验证用户名，密码
 func UserVerify(cxt *Context) {
-	panic("开始搞事情了")
+	//panic("user's account number or password is incorrect")
 	// 验证用户名
 	attr, ok := cxt.Request.RadiusAttrStringKeyMap["User-Name"]
 	if !ok {
-		panic("user's account number or password is incorrect")
+		userVerifyPanic()
 	}
 
+	// TODO 验证用户名密码
 	userName := attr.AttrStringValue
 	fmt.Println(userName)
 
 	// 验证密码
 	if cxt.Request.isChap {
-
+		if !chap("111111", &cxt.Request) {
+			userVerifyPanic()
+		}
 	} else {
-
+		if !pap("111111", "111111", cxt.Request) {
+			userVerifyPanic()
+		}
 	}
 	cxt.Next()
+}
+
+func userVerifyPanic() {
+	panic("user's account number or password is incorrect")
 }
 
 // 验证MAC地址绑定
@@ -49,44 +60,26 @@ func MacAddrVerify(cxt *Context) {
 
 // 设置通用认证响应属性
 func AuthSetCommonResponseAttr(cxt *Context) {
+	// TODO 根据不同的厂商设置不同的响应属性
 	cxt.Next()
 }
 
-func RecoveryFunc() RadMiddleWare {
+func AuthRecoveryFunc() RadMiddleWare {
 	return func(cxt *Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				fmt.Println("recovery invoke", err)
+				log.Println("recovery invoke", err)
+				if cxt.Request.Code == AccessRequestCode {
+					authReply(cxt, AccessRejectCode, err.(string))
+				}
 			}
 		}()
 		cxt.Next()
 	}
 }
 
-func RecoveryWare() RadMiddleWare {
-	return RecoveryFunc()
-}
-
-func AuthReply(cxt *Context) {
-	cxt.Response = &RadiusPackage{
-		Code:          AccessAcceptCode,
-		Identifier:    cxt.Request.Identifier,
-		Authenticator: [16]byte{},
-	}
-
-	replyMessage := RadiusAttr{
-		AttrType:  18,
-		AttrValue: []byte(ACCESS_ACCEPT_REPLY_MSG),
-	}
-
-	replyMessage.Length()
-	cxt.Response.AddRadiusAttr(replyMessage)
-	cxt.Response.PackageLength()
-
-	// TODO secret
-	secret := "111111"
-	authReplyAuthenticator(cxt.Request.Authenticator, cxt.Response, secret)
-	cxt.Listener.WriteToUDP(cxt.Response.ToByte(), cxt.Dst)
+func AuthAcceptReply(cxt *Context) {
+	authReply(cxt, AccessAcceptCode, AccessAcceptReplyMsg)
 }
 
 // ResponseAuth = MD5(Code+ID+Length+RequestAuth+Attributes+Secret)
