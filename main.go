@@ -1,23 +1,26 @@
 package main
 
 import (
+	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
+	"io/ioutil"
 	"log"
 	"net"
+	"strconv"
 )
 
 var engine *xorm.Engine
 
 type radEngine struct {
 	radMiddleWares []RadMiddleWare
-	addr string
+	port int
 	listener *net.UDPConn
 }
 
-func Default(addr string) (r *radEngine) {
+func Default(port int) (r *radEngine) {
 	r = &radEngine{
-		addr: addr,
+		port: port,
 	}
 	r.radMiddleWares = append(r.radMiddleWares, NasValidation)
 	return r
@@ -29,7 +32,7 @@ func (r *radEngine) Use(rmw RadMiddleWare) {
 
 func (r *radEngine) handlePackage() {
 
-	UDPAddr, err := net.ResolveUDPAddr("udp", r.addr)
+	UDPAddr, err := net.ResolveUDPAddr("udp", ":" + strconv.Itoa(r.port))
 	if err != nil {
 		log.Fatalln("监听地址错误" + err.Error())
 	}
@@ -69,19 +72,23 @@ func (r *radEngine) handlePackage() {
 }
 
 func main() {
-	// 读取radius属性字典文件
+
+	// 加载配置文件
+	config := loadConfig()
+
+	// 加载radius属性字典文件
 	readAttributeFiles()
 	log.Println("字典文件加载完成, 正在启动radius服务...")
 
 	// 初始化数据库连接
 	var err error
-	engine, err = xorm.NewEngine("mysql", "root:root@/127.0.0.1:3306/user?charset=utf8")
+	engine, err = xorm.NewEngine("mysql", "root:root@/127.0.0.1:3306/radius?charset=utf8")
 	if err != nil {
 		log.Fatalf("连接数据库发生错误：%v", err)
 	}
 
 	// 认证服务
-	authServer := Default(":1812")
+	authServer := Default(int(config["authPort"].(float64)))
 	authServer.Use(AuthRecoveryFunc())
 	authServer.Use(UserVerify)
 	authServer.Use(AuthAcceptReply)
@@ -89,7 +96,7 @@ func main() {
 	log.Println("已经启动Radius认证监听...")
 
 	// 计费服务
-	accountServer := Default(":1813")
+	accountServer := Default(int(config["acctPort"].(float64)))
 	accountServer.Use(nil)
 	go accountServer.handlePackage()
 	log.Println("已经启动Radius计费监听...")
@@ -100,3 +107,13 @@ func main() {
 	select {}
 }
 
+func loadConfig() map[string]interface{} {
+	configBytes, err := ioutil.ReadFile("./config/radius.json")
+	if err != nil {
+		panic(err)
+	}
+
+	dst := make(map[string]interface{})
+	json.Unmarshal(configBytes, &dst)
+	return dst
+}
