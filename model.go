@@ -11,9 +11,9 @@ type User struct {
 	Password string
 	ProductId uint64
 	Status int
-	RemainingTime uint64 // sec
-	RemainingFlow uint64 // KB
-	ExpireDate *time.Time
+	AvailableTime uint64 // sec
+	AvailableFlow uint64 // KB
+	ExpireTime *time.Time
 	ConcurrentCount uint // 并发数
 	ShouldBindMacAddr int
 	ShouldBindVlan int
@@ -25,6 +25,7 @@ type User struct {
 	PauseTime *time.Time // 停机时间
 	CreateTime *time.Time
 	UpdateTime *time.Time
+	Description string
 }
 
 type UserWallet struct {
@@ -35,18 +36,19 @@ type UserWallet struct {
 }
 
 type UserSpecialBalance struct {
+	Id uint64
 	UserWalletId uint64
 	Type int // 1: 专项套餐，2：无限使用
 	ProductId uint64
 	Balance uint
-	Expire time.Time
+	ExpireTime time.Time
 }
 
 type OnlineUser struct {
 	Id uint64
 	UserName string
 	NasIpAddr string
-	SessionId string
+	AccSessionId string
 	StartTime time.Time
 	UsedDuration int //已记账时长:sec
 	IpAddr string
@@ -59,13 +61,13 @@ type OnlineUser struct {
 type Product struct {
 	Id uint64
 	Name string
-	Type int // 类型：0：时长，1：流量
+	Type int // 类型：1：时长，2：流量
 	Status int
 	ShouldBindMac int
 	ShouldBindVlan int
 	ConcurrentCount uint
-	PackageDuration uint64 // 套餐使用时长：sec
-	PackageFlow uint64 // 套餐流量 KB
+	ProductDuration uint64 // 套餐使用时长：sec
+	ProductFlow uint64 // 套餐流量 KB
 	FlowClearCycle uint // 计费周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）
 	Price uint //分
 	UpStreamLimit uint64 // 上行流量，KB
