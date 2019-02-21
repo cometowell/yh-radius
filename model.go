@@ -53,7 +53,7 @@ type OnlineUser struct {
 	UsedDuration int //已记账时长:sec
 	IpAddr string
 	MacAddr string
-	NasPortId string
+	NasPortId string // vlanid, vlanid2
 	TotalUpStream uint64
 	TotalDownStream uint64
 }
