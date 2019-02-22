@@ -15,7 +15,7 @@ func authReply(cxt *Context, replyCode byte, msg string) {
 	replyMessage.Length()
 	cxt.Response.AddRadiusAttr(replyMessage)
 
-	for _, attr := range cxt.RadiusAttrs {
+	for _, attr := range cxt.ReplyRadiusAttrs {
 		attr.Length()
 		cxt.Response.AddRadiusAttr(attr)
 	}

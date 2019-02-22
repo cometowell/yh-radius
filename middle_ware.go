@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/binary"
-	"fmt"
-	"log"
 )
 
 const (
@@ -14,27 +12,34 @@ const (
 
 func NasValidation(cxt *Context) {
 	nasIp := cxt.Dst.IP.String()
-	log.Println("UDP报文消息来源：", nasIp)
-	log.Printf("%+v\n", cxt.Request)
+	logger.Infoln("UDP报文消息来源：", nasIp)
+	logger.Infof("%+v\n", cxt.Request)
 
+	nas := new(RadNas)
+	engine.Where("ip_addr = ?", nasIp).Get(nas)
 	// 验证UPD消息来源，非法来源丢弃
-	// cxt.throwPackage = true
+	if nas.Id == 0 {
+		cxt.throwPackage = true
+		panic("package come from unknown NAS: " + nasIp)
+	}
 
 	cxt.Next()
 }
 
 // 验证用户名，密码
 func UserVerify(cxt *Context) {
-	//panic("user's account number or password is incorrect")
-	// 验证用户名
 	attr, ok := cxt.Request.RadiusAttrStringKeyMap["User-Name"]
 	if !ok {
 		userVerifyPanic()
 	}
 
-	// TODO 验证用户名密码
 	userName := attr.AttrStringValue
-	fmt.Println(userName)
+	user := RadUser{UserName: userName}
+	engine.Get(&user)
+
+	if user.Id == 0 {
+		userVerifyPanic()
+	}
 
 	// 验证密码
 	if cxt.Request.isChap {
@@ -64,11 +69,17 @@ func AuthSetCommonResponseAttr(cxt *Context) {
 	cxt.Next()
 }
 
-func AuthRecoveryFunc() RadMiddleWare {
+func RecoveryFunc() RadMiddleWare {
 	return func(cxt *Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println("recovery invoke", err)
+				logger.Errorln("recovery invoke", err)
+
+				if cxt.throwPackage {
+					logger.Errorf("throw away package from %s: %+v\n", cxt.RadNas.IpAddr, cxt.Request)
+					return
+				}
+
 				if cxt.Request.Code == AccessRequestCode {
 					authReply(cxt, AccessRejectCode, err.(string))
 				}

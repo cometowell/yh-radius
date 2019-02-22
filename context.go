@@ -5,15 +5,16 @@ import "net"
 type RadMiddleWare func(cxt *Context)
 
 type Context struct {
-	Request  RadiusPackage
-	Response *RadiusPackage
-	User     *User
-	Listener *net.UDPConn
-	Dst      *net.UDPAddr
-	index    int
-	Handlers []RadMiddleWare
-	RadiusAttrs []RadiusAttr
-	throwPackage bool
+	Request          RadiusPackage
+	Response         *RadiusPackage
+	User             *RadUser
+	Listener         *net.UDPConn
+	Dst              *net.UDPAddr
+	RadNas              RadNas
+	index            int
+	Handlers         []RadMiddleWare
+	ReplyRadiusAttrs []RadiusAttr
+	throwPackage     bool
 }
 
 func (cxt *Context) Next() {

@@ -4,9 +4,9 @@ import (
 	"time"
 )
 
-type User struct {
+type RadUser struct {
 	Id uint64
-	UserName string
+	UserName string `xorm:"'username'"`
 	RealName string
 	Password string
 	ProductId uint64
@@ -28,14 +28,14 @@ type User struct {
 	Description string
 }
 
-type UserWallet struct {
+type RadUserWallet struct {
 	Id uint64
 	UserId uint64
 	PaymentPassword string
 	Balance uint
 }
 
-type UserSpecialBalance struct {
+type RadUserSpecialBalance struct {
 	Id uint64
 	UserWalletId uint64
 	Type int // 1: 专项套餐，2：无限使用
@@ -58,7 +58,7 @@ type OnlineUser struct {
 	TotalDownStream uint64
 }
 
-type Product struct {
+type RadProduct struct {
 	Id uint64
 	Name string
 	Type int // 类型：1：时长，2：流量
@@ -77,7 +77,7 @@ type Product struct {
 	UpdateTime *time.Time
 }
 
-type Nas struct {
+type RadNas struct {
 	Id uint64
 	VendorId int
 	Name string

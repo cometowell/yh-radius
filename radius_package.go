@@ -32,7 +32,7 @@ func (r RadiusPackage) String() string {
 		Length=%d
 		Authenticator=%s
 		isChap=%v
-		RadiusAttrs: %v
+		ReplyRadiusAttrs: %v
 	}`, r.Code, r.Identifier, r.Length, r.AuthenticatorString, r.isChap, r.RadiusAttrs)
 }
 
