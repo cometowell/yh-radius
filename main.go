@@ -89,7 +89,7 @@ func main() {
 	engine, err = xorm.NewEngine(config["database.type"].(string), config["database.url"].(string))
 	engine.ShowSQL(true)
 	if err != nil {
-		logger.Fatalln("连接数据库发生错误：%v", err)
+		logger.Fatalf("连接数据库发生错误：%v", err)
 	}
 
 	// 认证服务

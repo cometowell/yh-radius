@@ -19,7 +19,7 @@ func pap(shareSecret, password string, rp RadiusPackage) bool {
 	length := len(value)
 
 	shortOf := length % 16
-	times := length / 16 + IfVal(shortOf > 0, 1 , 0).(int)
+	times := length / 16 + ifVal(shortOf > 0, 1 , 0).(int)
 	supplement := make([]byte, shortOf)
 	value = append(value, supplement...)
 	result := make([]byte, 0)
@@ -66,7 +66,7 @@ func chap(password string, rp *RadiusPackage) bool {
 	return bytes.Equal(sum[:], hashPassword)
 }
 
-func IfVal(condition bool, trueVal, falseVal interface{}) interface{} {
+func ifVal(condition bool, trueVal, falseVal interface{}) interface{} {
 	if condition {
 		return trueVal
 	}
