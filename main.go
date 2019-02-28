@@ -69,7 +69,7 @@ func (r *radEngine) handlePackage() {
 			}
 			//执行插件
 			cxt.Next()
-
+			logger.Infof("响应报文：%+v\n", cxt.Response)
 		}(pkg[:n], listener, dst)
 	}
 

@@ -69,3 +69,9 @@ const (
 	// code(1) + Identifier(1) + length(2) + Authenticator(16)
 	PackageHeaderLength = 20
 )
+
+const (
+	StandardVendorId = 0
+	Cisco = 9
+	HuaweiVendorId = 2011
+)

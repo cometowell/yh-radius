@@ -16,7 +16,7 @@ create table if not exists rad_user(
   vlan_id int DEFAULT 0 comment '内层vlanId',
   vlan_id2 int DEFAULT 0  comment '外层vlanId',
 	framed_ip_addr varchar(15) comment '用户绑定的静态IP地址',
-	install_addr varchar(256) comment '装机地址',
+	installed_addr varchar(256) comment '装机地址',
   pause_time datetime comment '最近停机时间',
   create_time datetime not null comment '创建时间',
   update_time datetime comment '更新时间',

@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -67,24 +69,57 @@ func userVerifyPanic() {
 
 // 验证MAC地址绑定
 func MacAddrVerify(cxt *Context) {
-	if cxt.User.ShouldBindMacAddr == ShouldBindMacAddrFlag {
+	user := cxt.User
+	if user.ShouldBindMacAddr == ShouldBindMacAddrFlag {
 		attr, ok := cxt.Request.RadiusAttrStringKeyMap["Calling-Station-Id"]
 		fmt.Println(attr, ok)
+		macAddr := getMacAddr(attr)
+
+		if user.MacAddr == "" {
+			user.MacAddr = macAddr
+		}
+
+		if macAddr != user.MacAddr {
+			logger.Panicf("用户MAC地址: %s != %s", user.MacAddr, macAddr)
+		}
 	}
 	cxt.Next()
+}
+
+// 获取MAC地址，使用：分隔方式 AA:BB:CC:DD:EE:FF
+// 有些厂商的MAC地址需要从(type=26)私有属性中获取
+func getMacAddr(attr RadiusAttr) string {
+	if attr.VendorId == 0 {
+		return strings.ToUpper(attr.AttrStringValue)
+	}
+
+	return ""
 }
 
 // 验证VLAN
 func VlanVerify(cxt *Context) {
-	if cxt.User.ShouldBindMacAddr == ShouldBindVlanFlag {
+	user := cxt.User
+	if user.ShouldBindMacAddr == ShouldBindVlanFlag {
 		attr, ok := cxt.Request.RadiusAttrStringKeyMap["NAS-Port-Id"]
-		fmt.Println(attr, ok)
+		
+		if ok {
+			vlanId, vlanId2 := standardGetVlanIds(attr.AttrStringValue)
+
+			if user.VlanId == 0 && user.VlanId2 == 0 {
+				user.VlanId = vlanId
+				user.VlanId2 = vlanId2
+			}
+
+			if vlanId != user.VlanId || vlanId2 != user.VlanId2 {
+				logger.Panicf("VLAN验证失败用户绑定Vlan信息(VlanId:%d, VlanId2:%d) != (VlanId:%d, VlanId2:%d)", user.VlanId, user.VlanId2, vlanId, vlanId2)
+			}
+		}
 	}
 	cxt.Next()
 }
 
-func getVlanIds(nasPortId string) (int, int) {
-
+// 不同厂商不同的解析方式，这里是通用的方式
+func standardGetVlanIds(nasPortId string) (int, int) {
 	ptn, _ := regexp.Compile(`vlanid=(\d);vlanid2=(\d)`)
 	retMatch := ptn.FindStringSubmatch(nasPortId)
 	vlanId := 0
@@ -162,4 +197,5 @@ func authReplyAuthenticator(authAuthenticator [16]byte, reply *RadiusPackage, se
 	sum := md5hash.Sum(nil)
 
 	reply.Authenticator = getSixteenBytes(sum)
+	reply.AuthenticatorString = hex.EncodeToString(sum)
 }
