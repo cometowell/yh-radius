@@ -24,8 +24,7 @@ func authReply(cxt *Context, replyCode byte, msg string) {
 	}
 
 	cxt.Response.PackageLength()
-	// TODO secret
-	secret := "111111"
+	secret := cxt.RadNas.Secret
 	authReplyAuthenticator(cxt.Request.Authenticator, cxt.Response, secret)
 	cxt.Listener.WriteToUDP(cxt.Response.ToByte(), cxt.Dst)
 }
