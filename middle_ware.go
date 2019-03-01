@@ -130,7 +130,7 @@ func VlanVerify(cxt *Context) {
 		attr, ok := cxt.Request.RadiusAttrStringKeyMap["NAS-Port-Id"]
 		
 		if ok {
-			vlanId, vlanId2 := standardGetVlanIds(attr.AttrStringValue)
+			vlanId, vlanId2 := getVlanIds(cxt.RadNas.VendorId, attr.AttrStringValue)
 
 			var shouldUpdate bool
 			if user.VlanId == 0 && user.VlanId2 == 0 {
@@ -154,9 +154,18 @@ func VlanVerify(cxt *Context) {
 }
 
 // 不同厂商不同的解析方式，这里是通用的方式
-func standardGetVlanIds(nasPortId string) (int, int) {
-	ptn, _ := regexp.Compile(`vlanid=(\d);vlanid2=(\d)`)
-	retMatch := ptn.FindStringSubmatch(nasPortId)
+func getVlanIds(vendorId int, nasPortId string) (int, int) {
+	var ptn *regexp.Regexp
+	var retMatch []string
+	if vendorId == Cisco {
+		// eth phy_slot/phy_subslot/phy_port:XPI.XCI
+		ptn, _ = regexp.Compile(`phy_port:(\d).(\d)`)
+		retMatch = ptn.FindStringSubmatch(nasPortId)
+	} else {
+		ptn, _ = regexp.Compile(`vlanid=(\d);vlanid2=(\d)`)
+		retMatch = ptn.FindStringSubmatch(nasPortId)
+	}
+
 	vlanId := 0
 	vlanId2 := 0
 	var err error
