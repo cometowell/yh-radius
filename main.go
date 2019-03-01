@@ -95,6 +95,9 @@ func main() {
 	// 认证服务
 	authServer := Default(int(config["authPort"].(float64)))
 	authServer.Use(UserVerify)
+	authServer.Use(VlanVerify)
+	authServer.Use(MacAddrVerify)
+	// 认证返回中间件函数必须放到最后
 	authServer.Use(AuthAcceptReply)
 	go authServer.handlePackage()
 	logger.Info("已经启动Radius认证监听...")

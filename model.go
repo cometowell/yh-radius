@@ -5,7 +5,7 @@ import (
 )
 
 type RadUser struct {
-	Id uint64
+	Id uint64 `xorm:"pk"`
 	UserName string `xorm:"'username'"`
 	RealName string
 	Password string
@@ -29,14 +29,14 @@ type RadUser struct {
 }
 
 type RadUserWallet struct {
-	Id uint64
+	Id uint64 `xorm:"pk"`
 	UserId uint64
 	PaymentPassword string
 	Balance uint
 }
 
 type RadUserSpecialBalance struct {
-	Id uint64
+	Id uint64 `xorm:"pk"`
 	UserWalletId uint64
 	Type int // 1: 专项套餐，2：无限使用
 	ProductId uint64
@@ -45,7 +45,7 @@ type RadUserSpecialBalance struct {
 }
 
 type OnlineUser struct {
-	Id uint64
+	Id uint64 `xorm:"pk"`
 	UserName string
 	NasIpAddr string
 	AccSessionId string
@@ -59,7 +59,7 @@ type OnlineUser struct {
 }
 
 type RadProduct struct {
-	Id uint64
+	Id uint64 `xorm:"pk"`
 	Name string
 	Type int // 类型：1：时长，2：流量
 	Status int
@@ -78,7 +78,7 @@ type RadProduct struct {
 }
 
 type RadNas struct {
-	Id uint64
+	Id uint64 `xorm:"pk"`
 	VendorId int
 	Name string
 	IpAddr string

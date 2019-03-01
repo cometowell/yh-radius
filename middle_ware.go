@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"regexp"
 	"strconv"
 	"strings"
@@ -77,6 +78,7 @@ func MacAddrVerify(cxt *Context) {
 
 		if user.MacAddr == "" {
 			user.MacAddr = macAddr
+			engine.Id(user.Id).Cols("mac_addr").Update(user)
 		}
 
 		if macAddr != user.MacAddr {
@@ -99,19 +101,27 @@ func getMacAddr(attr RadiusAttr) string {
 // 验证VLAN
 func VlanVerify(cxt *Context) {
 	user := cxt.User
-	if user.ShouldBindMacAddr == ShouldBindVlanFlag {
+	if user.ShouldBindVlan == ShouldBindVlanFlag {
 		attr, ok := cxt.Request.RadiusAttrStringKeyMap["NAS-Port-Id"]
 		
 		if ok {
 			vlanId, vlanId2 := standardGetVlanIds(attr.AttrStringValue)
 
+			var shouldUpdate bool
 			if user.VlanId == 0 && user.VlanId2 == 0 {
 				user.VlanId = vlanId
 				user.VlanId2 = vlanId2
+				shouldUpdate = true
 			}
 
 			if vlanId != user.VlanId || vlanId2 != user.VlanId2 {
-				logger.Panicf("VLAN验证失败用户绑定Vlan信息(VlanId:%d, VlanId2:%d) != (VlanId:%d, VlanId2:%d)", user.VlanId, user.VlanId2, vlanId, vlanId2)
+				msg := fmt.Sprintf("VLAN验证失败用户绑定Vlan信息(VlanId:%d, VlanId2:%d) != (VlanId:%d, VlanId2:%d)", user.VlanId, user.VlanId2, vlanId, vlanId2)
+				logger.Error(msg)
+				panic(msg)
+			}
+
+			if shouldUpdate {
+				engine.Id(user.Id).Cols("vlan_id", "vlan_id2").Update(user)
 			}
 		}
 	}
@@ -159,7 +169,16 @@ func RecoveryFunc() RadMiddleWare {
 				}
 
 				if cxt.Request.Code == AccessRequestCode {
-					authReply(cxt, AccessRejectCode, err.(string))
+					var errMsg string
+					if entry, ok := err.(*logrus.Entry); ok {
+						errMsg = entry.Message
+					} else if msg, ok := err.(string); ok {
+						errMsg = msg
+					} else {
+						errMsg = "occur unknown error"
+						logger.Errorf("occur unknown error: %v", err)
+					}
+					authReply(cxt, AccessRejectCode, errMsg)
 				}
 			}
 		}()

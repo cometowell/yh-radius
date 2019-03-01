@@ -40,6 +40,7 @@ func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  [
 	if attrType == VendorSpecificType {
 		attr.VendorId = binary.BigEndian.Uint32(attrBytes[AttrHeaderLength : AttrHeaderLength+ 4])
 		attr.VendorAttrMap = make(map[AttrKey]VendorAttr)
+		attr.VendorAttrStringKeyMap = make(map[string]VendorAttr)
 		parseSpecRadiusAttr(attrBytes[VendorHeaderLength:attrLength], &attr, rp)
 	} else {
 		attr.AttrValue = attrBytes[AttrHeaderLength:attrLength]
@@ -67,6 +68,10 @@ func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  [
 
 // 解析厂商私有属性
 func parseSpecRadiusAttr(specAttrBytes []byte, attr *RadiusAttr, rp *RadiusPackage) {
+
+	if len(specAttrBytes) == 0 {
+		return
+	}
 
 	vendorType := specAttrBytes[0]
 	vendorLength := specAttrBytes[1]

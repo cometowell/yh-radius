@@ -32,7 +32,7 @@ func (r RadiusPackage) String() string {
 		Length=%d
 		Authenticator=%s
 		isChap=%v
-		ReplyRadiusAttrs: %v
+		RadiusAttrs: %v
 	}`, r.Code, r.Identifier, r.Length, r.AuthenticatorString, r.isChap, r.RadiusAttrs)
 }
 
@@ -90,7 +90,11 @@ type RadiusAttr struct {
 }
 
 func (r RadiusAttr) String() string {
-	return fmt.Sprintf("\n \t\t\t %s=%s", r.AttrName, r.AttrStringValue)
+	if r.AttrType != VendorSpecificType {
+		return fmt.Sprintf("\n \t\t\t %s=%s", r.AttrName, r.AttrStringValue)
+	} else {
+		return fmt.Sprintf("\n \t\t\t VendorAttrs: %s", r.VendorAttrs)
+	}
 }
 
 func (r *RadiusAttr) setStandardAttrStringVal() {
@@ -152,7 +156,7 @@ type VendorAttr struct {
 }
 
 func (r VendorAttr) String() string {
-	return fmt.Sprintf("{%s=%s}", r.VendorTypeName, r.VendorValueString)
+	return fmt.Sprintf("\n \t\t\t   %s=%s", r.VendorTypeName, r.VendorValueString)
 }
 
 // 获取厂商私有属性长度
