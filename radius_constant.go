@@ -71,7 +71,7 @@ const (
 )
 
 const (
-	StandardVendorId = 0
+	Standard = 0
 	Cisco = 9
-	HuaweiVendorId = 2011
+	Huawei = 2011
 )

@@ -14,20 +14,21 @@ func parsePkg(pkg []byte) RadiusPackage {
 	rp.Authenticator = getSixteenBytes(pkg[4:20])
 	rp.AuthenticatorString = strings.ToUpper(hex.EncodeToString(rp.Authenticator[:]))
 	// 解析radius属性
-	attrs := make([]RadiusAttr, 0, 50)
-	rp.RadiusAttrMap = make(map[AttrKey]RadiusAttr)
-	rp.RadiusAttrStringKeyMap = make(map[string]RadiusAttr)
+	attrs := make([]*RadiusAttr, 0, 50)
+	rp.RadiusAttrMap = make(map[AttrKey] *RadiusAttr)
+	rp.RadiusAttrStringKeyMap = make(map[string] *RadiusAttr)
 	attrs = parseRadiusAttr(pkg[20:], attrs, &rp)
 	rp.RadiusAttrs = attrs
 	return rp
 }
 
 // 解析radius属性: type(1) + length(1) + value
-func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  []RadiusAttr {
+func parseRadiusAttr(attrBytes []byte, attrs []*RadiusAttr, rp *RadiusPackage)  []*RadiusAttr {
 	length := len(attrBytes)
 	if length == 0 {
 		return attrs
 	}
+
 
 	attrType := attrBytes[0]
 	attrLength := attrBytes[1]
@@ -41,6 +42,12 @@ func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  [
 		attr.VendorId = binary.BigEndian.Uint32(attrBytes[AttrHeaderLength : AttrHeaderLength+ 4])
 		attr.VendorAttrMap = make(map[AttrKey]VendorAttr)
 		attr.VendorAttrStringKeyMap = make(map[string]VendorAttr)
+		attribute, ok := ATTRITUBES[AttrKey{Standard, int(attrType)}]
+		if ok {
+			attr.AttrName = attribute.Name
+			attr.setStandardAttrStringVal()
+			rp.RadiusAttrStringKeyMap[attribute.Name] = &attr
+		}
 		parseSpecRadiusAttr(attrBytes[VendorHeaderLength:attrLength], &attr, rp)
 	} else {
 		attr.AttrValue = attrBytes[AttrHeaderLength:attrLength]
@@ -49,7 +56,7 @@ func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  [
 		if ok {
 			attr.AttrName = attribute.Name
 			attr.setStandardAttrStringVal()
-			rp.RadiusAttrStringKeyMap[attribute.Name] = attr
+			rp.RadiusAttrStringKeyMap[attribute.Name] = &attr
 		}
 		if attrType == CHAPPasswordType {
 			rp.isChap = true
@@ -59,8 +66,8 @@ func parseRadiusAttr(attrBytes []byte, attrs []RadiusAttr, rp *RadiusPackage)  [
 			rp.challenge = attr.AttrValue
 		}
 	}
-	attrs = append(attrs, attr)
-	rp.RadiusAttrMap[AttrKey{attr.VendorId, int(attr.AttrType)}] = attr
+	attrs = append(attrs, &attr)
+	rp.RadiusAttrMap[AttrKey{attr.VendorId, int(attr.AttrType)}] = &attr
 
 	attrs = parseRadiusAttr(attrBytes[attrLength:], attrs, rp)
 	return attrs

@@ -16,9 +16,9 @@ type RadiusPackage struct {
 	Authenticator [16]byte
 	AuthenticatorString string
 	// radius attributes
-	RadiusAttrs [] RadiusAttr
-	RadiusAttrMap map[AttrKey]RadiusAttr `json:"-"`
-	RadiusAttrStringKeyMap map[string]RadiusAttr `json:"-"`
+	RadiusAttrs []*RadiusAttr
+	RadiusAttrMap map[AttrKey] *RadiusAttr `json:"-"`
+	RadiusAttrStringKeyMap map[string] *RadiusAttr `json:"-"`
 	//是否是chap请求
 	isChap bool
 	challenge []byte
@@ -40,7 +40,7 @@ func (r *RadiusPackage) AddRadiusAttr(attr RadiusAttr)  {
 	if attr.Length() == 0 {
 		return
 	}
-	r.RadiusAttrs = append(r.RadiusAttrs, attr)
+	r.RadiusAttrs = append(r.RadiusAttrs, &attr)
 }
 
 // 计算radius package长度
@@ -93,7 +93,7 @@ func (r RadiusAttr) String() string {
 	if r.AttrType != VendorSpecificType {
 		return fmt.Sprintf("\n \t\t\t %s=%s", r.AttrName, r.AttrStringValue)
 	} else {
-		return fmt.Sprintf("\n \t\t\t VendorAttrs: %s", r.VendorAttrs)
+		return fmt.Sprintf("\n \t\t\t %s=%s", r.AttrName, r.VendorAttrs)
 	}
 }
 
@@ -156,7 +156,7 @@ type VendorAttr struct {
 }
 
 func (r VendorAttr) String() string {
-	return fmt.Sprintf("\n \t\t\t   %s=%s", r.VendorTypeName, r.VendorValueString)
+	return fmt.Sprintf("\n \t\t\t   VendorId=%d, %s=%s",r.VendorId, r.VendorTypeName, r.VendorValueString)
 }
 
 // 获取厂商私有属性长度

@@ -72,10 +72,7 @@ func userVerifyPanic() {
 func MacAddrVerify(cxt *Context) {
 	user := cxt.User
 	if user.ShouldBindMacAddr == ShouldBindMacAddrFlag {
-		attr, ok := cxt.Request.RadiusAttrStringKeyMap["Calling-Station-Id"]
-		fmt.Println(attr, ok)
-		macAddr := getMacAddr(attr)
-
+		macAddr := getMacAddr(cxt)
 		if user.MacAddr == "" {
 			user.MacAddr = macAddr
 			engine.Id(user.Id).Cols("mac_addr").Update(user)
@@ -90,11 +87,39 @@ func MacAddrVerify(cxt *Context) {
 
 // 获取MAC地址，使用：分隔方式 AA:BB:CC:DD:EE:FF
 // 有些厂商的MAC地址需要从(type=26)私有属性中获取
-func getMacAddr(attr RadiusAttr) string {
-	if attr.VendorId == 0 {
-		return strings.ToUpper(attr.AttrStringValue)
+func getMacAddr(cxt *Context) string {
+	vendorId := cxt.RadNas.VendorId
+	if vendorId == Standard {
+		attr, ok := cxt.Request.RadiusAttrStringKeyMap["Calling-Station-Id"]
+		if ok {
+			return strings.ToUpper(attr.AttrStringValue)
+		}
 	}
+	return getVendorMacAddr(vendorId, cxt)
+}
 
+func getVendorMacAddr(vendorId int, cxt *Context) string {
+	if vendorId == Huawei {
+		attr, ok := cxt.Request.RadiusAttrStringKeyMap["Calling-Station-Id"]
+		if ok {
+			return strings.ToUpper(attr.AttrStringValue)
+		}
+	} else if vendorId == Cisco {
+		avPairParttern, _ := regexp.Compile(`client-mac-address=(\w{4}\.\w{4}\.\w{4})`)
+		attr, ok := cxt.Request.RadiusAttrStringKeyMap["Vendor-Specific"]
+		if ok {
+			ciscoAVPair, ok := attr.VendorAttrStringKeyMap["Cisco-AVPair"]
+			if ok {
+				avPairVal := ciscoAVPair.VendorValueString
+				matchs := avPairParttern.FindStringSubmatch(avPairVal)
+				ciscoMacAddr := strings.Replace(matchs[1],".","", -1)
+				return strings.ToUpper(fmt.Sprintf("%s:%s:%s:%s:%s:%s",
+					ciscoMacAddr[0:2],ciscoMacAddr[2:4],ciscoMacAddr[4:6],
+					ciscoMacAddr[6:8],ciscoMacAddr[8:10],ciscoMacAddr[10:12]),
+				)
+			}
+		}
+	}
 	return ""
 }
 
