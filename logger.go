@@ -12,6 +12,8 @@ func NewLogger() *logrus.Logger {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{
 		ForceColors: true,
+		TimestampFormat: "2006-01-02 15:04:05.999",
+		FullTimestamp: true,
 	})
 	logger.SetOutput(os.Stdout)
 	logger.SetLevel(logrus.DebugLevel)
@@ -20,7 +22,10 @@ func NewLogger() *logrus.Logger {
 		logrus.InfoLevel:  "logs/info.log",
 		logrus.ErrorLevel: "logs/error.log",
 	}
-	logger.AddHook(lfshook.NewHook(pathMap, &logrus.TextFormatter{}))
+	logger.AddHook(lfshook.NewHook(pathMap, &logrus.JSONFormatter {
+		TimestampFormat: "2006-01-02 15:04:05.999",
+		PrettyPrint: true,
+	}))
 
 	return logger
 }

@@ -6,5 +6,5 @@ import (
 )
 
 func TestGetVlan(t *testing.T) {
-	fmt.Println(standardGetVlanIds("vlanid=1;vlanid2=6"))
+	fmt.Println(getVlanIds(0,"vlanid=1;vlanid2=6"))
 }

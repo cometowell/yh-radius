@@ -5,7 +5,7 @@ import (
 )
 
 type RadUser struct {
-	Id uint64 `xorm:"pk"`
+	Id uint64 `xorm:"pk autoincr"`
 	UserName string `xorm:"'username'"`
 	RealName string
 	Password string
@@ -29,14 +29,14 @@ type RadUser struct {
 }
 
 type RadUserWallet struct {
-	Id uint64 `xorm:"pk"`
+	Id uint64 `xorm:"pk autoincr"`
 	UserId uint64
 	PaymentPassword string
 	Balance uint
 }
 
 type RadUserSpecialBalance struct {
-	Id uint64 `xorm:"pk"`
+	Id uint64 `xorm:"pk autoincr"`
 	UserWalletId uint64
 	Type int // 1: 专项套餐，2：无限使用
 	ProductId uint64
@@ -45,7 +45,7 @@ type RadUserSpecialBalance struct {
 }
 
 type OnlineUser struct {
-	Id uint64 `xorm:"pk"`
+	Id uint64 `xorm:"pk autoincr"`
 	UserName string
 	NasIpAddr string
 	AccSessionId string
@@ -59,26 +59,27 @@ type OnlineUser struct {
 }
 
 type RadProduct struct {
-	Id uint64 `xorm:"pk"`
+	Id uint64 `xorm:"pk autoincr"`
 	Name string
 	Type int // 类型：1：时长，2：流量
 	Status int
-	ShouldBindMac int
+	ShouldBindMacAddr int
 	ShouldBindVlan int
 	ConcurrentCount uint
 	ProductDuration uint64 // 套餐使用时长：sec
 	ProductFlow uint64 // 套餐流量 KB
 	FlowClearCycle uint // 计费周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）
 	Price uint //分
-	UpStreamLimit uint64 // 上行流量，KB
-	DownStreamLimit uint64 // 下行流量，KB
+	UpStreamLimit uint32 // 上行流量，KB
+	DownStreamLimit uint32 // 下行流量，KB
+	DomainName string
 	Description string
 	CreateTime *time.Time
 	UpdateTime *time.Time
 }
 
 type RadNas struct {
-	Id uint64 `xorm:"pk"`
+	Id uint64 `xorm:"pk autoincr"`
 	VendorId int
 	Name string
 	IpAddr string

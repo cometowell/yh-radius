@@ -21,7 +21,7 @@ const (
 func NasValidation(cxt *Context) {
 	nasIp := cxt.Dst.IP.String()
 	logger.Infoln("UDP报文消息来源：", nasIp)
-	logger.Infof("%+v\n", cxt.Request)
+	logger.Infof("%v\n", cxt.Request)
 
 	nas := new(RadNas)
 	engine.Where("ip_addr = ?", nasIp).Get(nas)
@@ -185,11 +185,6 @@ func getVlanIds(vendorId int, nasPortId string) (int, int) {
 	return vlanId, vlanId2
 }
 
-// 设置通用认证响应属性
-func AuthSetCommonResponseAttr(cxt *Context) {
-	// TODO 根据不同的厂商设置不同的响应属性
-	cxt.Next()
-}
 
 func RecoveryFunc() RadMiddleWare {
 	return func(cxt *Context) {

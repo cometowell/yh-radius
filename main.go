@@ -67,6 +67,12 @@ func (r *radEngine) handlePackage() {
 				Handlers: r.radMiddleWares,
 				index:    -1,
 			}
+
+			cxt.Response = &RadiusPackage{
+				Identifier:    cxt.Request.Identifier,
+				Authenticator: [16]byte{},
+			}
+
 			//执行插件
 			cxt.Next()
 			logger.Infof("响应报文：%+v\n", cxt.Response)
@@ -97,6 +103,7 @@ func main() {
 	authServer.Use(UserVerify)
 	authServer.Use(VlanVerify)
 	authServer.Use(MacAddrVerify)
+	authServer.Use(AuthSpecAndCommonAttrSetter)
 	// 认证返回中间件函数必须放到最后
 	authServer.Use(AuthAcceptReply)
 	go authServer.handlePackage()

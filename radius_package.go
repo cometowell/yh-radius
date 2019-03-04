@@ -131,7 +131,7 @@ func (r *RadiusAttr) toBytes() []byte {
 	bs := make([]byte, 0, r.AttrLength)
 	bs = append(bs, r.AttrType, r.AttrLength)
 	if r.VendorId != 0 && r.AttrType == VendorSpecificType {
-		var bts []byte
+		var bts = make([]byte, 4)
 		binary.BigEndian.PutUint32(bts, r.VendorId)
 		bs = append(bs, bts...)
 

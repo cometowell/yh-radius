@@ -40,8 +40,8 @@ func getAttrValue(attributeType AttributeValueType, value []byte) string {
 	var ret string
 	switch attributeType {
 	case INTEGE:
-		val,_ := binary.Varint(value)
-		ret = strconv.FormatInt(val, 10)
+		val:= binary.BigEndian.Uint32(value)
+		ret = strconv.FormatUint(uint64(val), 10)
 	case STRING:
 		ret = string(value)
 	case OCTETS:

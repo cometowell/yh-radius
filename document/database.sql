@@ -1,6 +1,6 @@
 drop table if exists rad_user;
 create table if not exists rad_user(
-	id bigint(20) primary key comment '主键',
+	id bigint(20) primary key AUTO_INCREMENT,
 	username varchar(64) not null comment '账号',
   real_name varchar(128) comment '姓名',
 	password varchar(256) not null comment '密码',
@@ -25,14 +25,14 @@ create table if not exists rad_user(
 
 drop table if exists rad_user_wallet;
 create table rad_user_wallet(
-	id bigint(20) primary key,
+	id bigint(20) primary key AUTO_INCREMENT,
   user_id bigint(20) UNIQUE KEY comment '用户ID',
 	payment_password varchar(256) comment '支付密码'
 ) comment '用户钱包表';
 
 drop table if exists rad_user_balance;
 create table rad_user_balance(
-	id bigint(20) primary key,
+	id bigint(20) primary key AUTO_INCREMENT,
   user_wallet_id bigint(20) UNIQUE KEY comment '用户钱包ID',
 	type int comment '类型1: 专项套餐，2：无限使用',
 	product_id bigint comment '产品ID',
@@ -42,7 +42,7 @@ create table rad_user_balance(
 
 drop table if exists rad_nas;
 create table rad_nas(
-	id bigint primary key,
+	id bigint primary key AUTO_INCREMENT,
   vendor_id int not null comment '厂商ID',
   name varchar(60) not null comment '名称',
   ip_addr varchar(15) not null comment 'IP地址',
@@ -53,7 +53,7 @@ create table rad_nas(
 
 drop table if exists rad_product;
 create table rad_product(
-	id bigint primary key,
+	id bigint primary key AUTO_INCREMENT,
 	name varchar(60) not null comment '产品名称',
   type int not null comment '产品类型,1：时长，2：流量',
   status int not null comment '状态,0:停用，1：正常',
@@ -66,6 +66,7 @@ create table rad_product(
 	price int not null default 0 comment '产品价格，单位分',
   up_stream_limit bigint(20) not null comment '上行流量限制',
   down_stream_limit bigint(20) not null comment '下行流量限制',
+  domain_name varchar(200) null comment '用户域',
 	create_time datetime not null comment '创建时间',
 	update_time datetime comment '创建时间',
   description varchar(512) comment '描述'
@@ -73,7 +74,7 @@ create table rad_product(
 
 drop table if exists online_user;
 create table online_user(
-	id bigint(2) primary key,
+	id bigint(2) primary key AUTO_INCREMENT,
 	username varchar(64) not null comment '账号',
 	nas_ip_addr varchar(15) not null comment 'NAS IP地址',
 	acct_session_id varchar(128) not null comment '计费session id',

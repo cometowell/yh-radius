@@ -74,4 +74,6 @@ const (
 	Standard = 0
 	Cisco = 9
 	Huawei = 2011
+	Zte = 3902
+	MikroTik = 14988
 )
