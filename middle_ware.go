@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"regexp"
+	"runtime/debug"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -38,7 +40,7 @@ func NasValidation(cxt *Context) {
 func UserVerify(cxt *Context) {
 	attr, ok := cxt.Request.RadiusAttrStringKeyMap["User-Name"]
 	if !ok {
-		userVerifyPanic()
+		panic("user's account number or password is incorrect")
 	}
 
 	userName := attr.AttrStringValue
@@ -46,26 +48,64 @@ func UserVerify(cxt *Context) {
 	engine.Get(&user)
 
 	if user.Id == 0 {
-		userVerifyPanic()
+		panic("user's account number or password is incorrect")
 	}
 
 	// 验证密码
 	password := decrypt(user.Password)
 	if cxt.Request.isChap {
 		if !chap(password, &cxt.Request) {
-			userVerifyPanic()
+			panic("user's account number or password is incorrect")
 		}
 	} else {
 		if !pap(cxt.RadNas.Secret, password, cxt.Request) {
-			userVerifyPanic()
+			panic("user's account number or password is incorrect")
 		}
 	}
+
+	onlineUser := OnlineUser{UserName: userName}
+	onlineCount, _ := engine.Count(onlineUser)
+	userConcurrent := user.ConcurrentCount
+	if userConcurrent != 0 && userConcurrent <= uint(onlineCount) {
+		panic(fmt.Sprintf("the maximum number of concurrency has been reached: %d", onlineCount))
+	}
+
+	product := RadProduct{}
+	engine.Id(user.ProductId).Get(&product)
+
+	if product.Id == 0 {
+		panic("user did not purchase the product")
+	}
+
+	user.product = product
+	productType := product.Type
+
+	sessionTimeout := int(config["radius.session.timeout"].(float64))
+	user.sessionTimeout = sessionTimeout
+	if productType == ClacPriceByMonth { // 按月计费套餐
+		availableSeconds := int(user.ExpireTime.Sub(time.Now()).Seconds())
+		if availableSeconds <= 0 {
+			panic("user's service is expire")
+		}
+		if sessionTimeout > availableSeconds {
+			user.sessionTimeout = availableSeconds
+		}
+
+	} else if productType == UseTimesProductType { // 时长套餐
+		if user.AvailableTime <= 0 {
+			panic("user's service time already used up")
+		}
+		if sessionTimeout > user.AvailableTime {
+			user.sessionTimeout = user.AvailableTime
+		}
+	} else { // 流量套餐
+		if user.AvailableFlow <= 0 {
+			panic("user's service flow already used up")
+		}
+	}
+
 	cxt.User = &user
 	cxt.Next()
-}
-
-func userVerifyPanic() {
-	panic("user's account number or password is incorrect")
 }
 
 // 验证MAC地址绑定
@@ -203,9 +243,10 @@ func RecoveryFunc() RadMiddleWare {
 						errMsg = entry.Message
 					} else if msg, ok := err.(string); ok {
 						errMsg = msg
-					} else {
+					}  else {
 						errMsg = "occur unknown error"
-						logger.Errorf("occur unknown error: %v", err)
+						logger.Errorf("occur unknown error: %+v", err)
+						logger.Debug("异常堆栈信息：" + string(debug.Stack()))
 					}
 					authReply(cxt, AccessRejectCode, errMsg)
 				}

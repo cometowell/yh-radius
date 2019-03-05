@@ -60,6 +60,7 @@ create table rad_product(
 	should_bind_mac_addr tinyint(1) not null default 0 comment '需要绑定MAC地址，0：N，1：Y',
   should_bind_vlan tinyint(1) not null default 0 comment '需要绑定虚拟局域网，0：N，1：Y',
 	concurrent_count int not null DEFAULT 0 comment '并发数',
+	service_month int not null DEFAULT 0 comment '套餐购买月数',
 	product_duration bigint(20) not null default 0 comment '时长,单位秒',
   product_flow bigint(20) not null default 0 comment '流量，单位KB',
 	flow_clear_cycle tinyint(1) not null comment '计费周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）',

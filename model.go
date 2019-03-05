@@ -11,7 +11,7 @@ type RadUser struct {
 	Password string
 	ProductId uint64
 	Status int
-	AvailableTime uint64 // sec
+	AvailableTime int // sec
 	AvailableFlow uint64 // KB
 	ExpireTime *time.Time
 	ConcurrentCount uint // 并发数
@@ -26,6 +26,9 @@ type RadUser struct {
 	CreateTime *time.Time
 	UpdateTime *time.Time
 	Description string
+
+	sessionTimeout int `xorm:"-"`
+	product RadProduct `xorm:"-"`
 }
 
 type RadUserWallet struct {
@@ -46,7 +49,7 @@ type RadUserSpecialBalance struct {
 
 type OnlineUser struct {
 	Id uint64 `xorm:"pk autoincr"`
-	UserName string
+	UserName string `xorm:"'username'"`
 	NasIpAddr string
 	AccSessionId string
 	StartTime time.Time
@@ -61,14 +64,15 @@ type OnlineUser struct {
 type RadProduct struct {
 	Id uint64 `xorm:"pk autoincr"`
 	Name string
-	Type int // 类型：1：时长，2：流量
+	Type int // 类型：1:包月 2：自由时长，3：流量
 	Status int
 	ShouldBindMacAddr int
 	ShouldBindVlan int
 	ConcurrentCount uint
+	ServiceMonth uint
 	ProductDuration uint64 // 套餐使用时长：sec
 	ProductFlow uint64 // 套餐流量 KB
-	FlowClearCycle uint // 计费周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）
+	FlowClearCycle uint // 流量清零周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）
 	Price uint //分
 	UpStreamLimit uint32 // 上行流量，KB
 	DownStreamLimit uint32 // 下行流量，KB

@@ -3,5 +3,6 @@
   "acctPort": 1813,
   "database.type": "mysql",
   "database.url": "root:root@tcp(127.0.0.1:3306)/radius?charset=utf8",
-  "encrypt.key": "vbRIKz90HJ$jjwyzu3BsUdci1600l7rP"
+  "encrypt.key": "vbRIKz90HJ$jjwyzu3BsUdci1600l7rP",
+  "radius.session.timeout": 604800
 }

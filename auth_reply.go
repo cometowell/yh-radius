@@ -8,7 +8,7 @@ func authReply(cxt *Context, replyCode byte, msg string) {
 	}
 	replyMessage.Length()
 	replyMessage.setStandardAttrStringVal()
-	attr, _ := ATTRITUBES[AttrKey{0, int(replyMessage.AttrType)}]
+	attr, _ := ATTRITUBES[AttrKey{Standard, int(replyMessage.AttrType)}]
 	replyMessage.AttrName = attr.Name
 	cxt.Response.AddRadiusAttr(replyMessage)
 	cxt.Response.PackageLength()

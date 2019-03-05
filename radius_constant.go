@@ -77,3 +77,9 @@ const (
 	Zte = 3902
 	MikroTik = 14988
 )
+
+const (
+	ClacPriceByMonth = 1    // 按月收费
+	UseTimesProductType = 2 // 自由时长
+	UseFlowsProductType = 3 // 流量
+)
