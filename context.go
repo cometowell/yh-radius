@@ -1,6 +1,8 @@
 package main
 
-import "net"
+import (
+	"net"
+)
 
 type RadMiddleWare func(cxt *Context)
 
@@ -18,7 +20,7 @@ type Context struct {
 }
 
 func (cxt *Context) Next() {
-	if cxt.index >= len(cxt.Handlers) {
+	if cxt.index >= len(cxt.Handlers) - 1 {
 		return
 	}
 	cxt.index += 1

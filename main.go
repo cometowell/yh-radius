@@ -30,8 +30,8 @@ func Default(port int) (r *radEngine) {
 	return r
 }
 
-func (r *radEngine) Use(rmw RadMiddleWare) {
-	r.radMiddleWares = append(r.radMiddleWares, rmw)
+func (r *radEngine) Use(rms ...RadMiddleWare) {
+	r.radMiddleWares = append(r.radMiddleWares, rms...)
 }
 
 func (r *radEngine) handlePackage() {
@@ -111,7 +111,8 @@ func main() {
 
 	// 计费服务
 	accountServer := Default(int(config["acctPort"].(float64)))
-	accountServer.Use(nil)
+	accountServer.Use(AcctReply)
+	accountServer.Use(AcctRecord)
 	go accountServer.handlePackage()
 	logger.Info("已经启动Radius计费监听...")
 

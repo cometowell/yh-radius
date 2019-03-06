@@ -2,7 +2,6 @@ package main
 
 // radius codes constant,identifies the type of radius packet
 const (
-
 	// 认证请求
 	AccessRequestCode = 1
 
@@ -44,7 +43,6 @@ const (
 )
 
 const (
-
 	// 认证字长度
 	AuthenticatorLength = 16
 
@@ -72,14 +70,22 @@ const (
 
 const (
 	Standard = 0
-	Cisco = 9
-	Huawei = 2011
-	Zte = 3902
+	Cisco    = 9
+	Huawei   = 2011
+	Zte      = 3902
 	MikroTik = 14988
 )
 
 const (
-	ClacPriceByMonth = 1    // 按月收费
+	ClacPriceByMonth    = 1 // 按月收费
 	UseTimesProductType = 2 // 自由时长
 	UseFlowsProductType = 3 // 流量
+)
+
+const (
+	AcctStatusTypeStart         = 1
+	AcctStatusTypeStop          = 2
+	AcctStatusTypeInterimUpdate = 3
+	AcctStatusTypeAccountingOn  = 7
+	AcctStatusTypeAccountingOff = 8
 )

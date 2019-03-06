@@ -5,16 +5,16 @@ import (
 )
 
 type RadUser struct {
-	Id uint64 `xorm:"pk autoincr"`
-	UserName string `xorm:"'username'"`
+	Id int64 `xorm:"pk autoincr"`
+	UserName string `xorm:"unique 'username'"`
 	RealName string
 	Password string
-	ProductId uint64
+	ProductId int64
 	Status int
 	AvailableTime int // sec
-	AvailableFlow uint64 // KB
+	AvailableFlow int64 // KB
 	ExpireTime *time.Time
-	ConcurrentCount uint // 并发数
+	ConcurrentCount int // 并发数
 	ShouldBindMacAddr int
 	ShouldBindVlan int
 	MacAddr string
@@ -32,50 +32,50 @@ type RadUser struct {
 }
 
 type RadUserWallet struct {
-	Id uint64 `xorm:"pk autoincr"`
-	UserId uint64
+	Id int64 `xorm:"pk autoincr"`
+	UserId int64
 	PaymentPassword string
-	Balance uint
+	Balance int
 }
 
 type RadUserSpecialBalance struct {
-	Id uint64 `xorm:"pk autoincr"`
-	UserWalletId uint64
+	Id int64 `xorm:"pk autoincr"`
+	UserWalletId int64
 	Type int // 1: 专项套餐，2：无限使用
-	ProductId uint64
-	Balance uint
+	ProductId int64
+	Balance int
 	ExpireTime time.Time
 }
 
 type OnlineUser struct {
-	Id uint64 `xorm:"pk autoincr"`
+	Id int64 `xorm:"pk autoincr"`
 	UserName string `xorm:"'username'"`
 	NasIpAddr string
-	AccSessionId string
+	AcctSessionId string
 	StartTime time.Time
 	UsedDuration int //已记账时长:sec
 	IpAddr string
 	MacAddr string
 	NasPortId string // vlanid, vlanid2
-	TotalUpStream uint64
-	TotalDownStream uint64
+	TotalUpStream int64
+	TotalDownStream int64
 }
 
 type RadProduct struct {
-	Id uint64 `xorm:"pk autoincr"`
+	Id int64 `xorm:"pk autoincr"`
 	Name string
 	Type int // 类型：1:包月 2：自由时长，3：流量
 	Status int
 	ShouldBindMacAddr int
 	ShouldBindVlan int
-	ConcurrentCount uint
-	ServiceMonth uint
-	ProductDuration uint64 // 套餐使用时长：sec
-	ProductFlow uint64 // 套餐流量 KB
-	FlowClearCycle uint // 流量清零周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）
-	Price uint //分
-	UpStreamLimit uint32 // 上行流量，KB
-	DownStreamLimit uint32 // 下行流量，KB
+	ConcurrentCount int
+	ServiceMonth int
+	ProductDuration int64 // 套餐使用时长：sec
+	ProductFlow int64 // 套餐流量 KB
+	FlowClearCycle int // 流量清零周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）
+	Price int //分
+	UpStreamLimit int // 上行流量，Kb
+	DownStreamLimit int // 下行流量，Kb
 	DomainName string
 	Description string
 	CreateTime *time.Time
@@ -83,11 +83,24 @@ type RadProduct struct {
 }
 
 type RadNas struct {
-	Id uint64 `xorm:"pk autoincr"`
+	Id int64 `xorm:"pk autoincr"`
 	VendorId int
 	Name string
 	IpAddr string
 	Secret string
 	AuthorizePort int //授权端口
 	Description string
+}
+
+type UserOnlineLog struct {
+	Id int64 `xorm:"pk autoincr"`
+	UserName string `xorm:"'username'"`
+	StartTime time.Time
+	StopTime *time.Time
+	UsedDuration int
+	TotalUpStream int
+	TotalDownStream int
+	NasIpAddr string
+	IpAddr string
+	MacAddr string
 }

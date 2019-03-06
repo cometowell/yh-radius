@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/binary"
 	"fmt"
 )
 
@@ -12,7 +11,7 @@ var AuthResponseWares = map[int]func(cxt *Context){
 	Standard: StandardResponse,
 	Cisco:    CiscoResponse,
 	Huawei:   HuaweiResponse,
-	Zte:      zteResponse,
+	Zte:      ZteResponse,
 	MikroTik: MikroTikResponse,
 }
 
@@ -22,8 +21,8 @@ func HuaweiResponse(cxt *Context) {
 	product := user.product
 	// Huawei-Input-Burst-Size, Huawei-Input-Average-Rate
 	// Huawei-Output-Burst-Size, Huawei-Output-Average-Rate 单位 bit/s
-	upStreamLimit := product.UpStreamLimit * 1024 * 8
-	downStreamLimit := product.DownStreamLimit * 1024 * 8
+	upStreamLimit := product.UpStreamLimit * 1024
+	downStreamLimit := product.DownStreamLimit * 1024
 	specAttr := &RadiusAttr{
 		AttrType: VendorSpecificType,
 		VendorId: Huawei,
@@ -33,7 +32,7 @@ func HuaweiResponse(cxt *Context) {
 	inputAvgRateVendorAttr := VendorAttr{
 		VendorType:   2,
 		VendorLength: 6,
-		VendorValue:  getIntegerBytes(upStreamLimit),
+		VendorValue:  getIntegerBytes(uint32(upStreamLimit)),
 	}
 	setVendorStringValue(Huawei, &inputAvgRateVendorAttr)
 	specAttr.addSpecRadiusAttr(inputAvgRateVendorAttr)
@@ -43,7 +42,7 @@ func HuaweiResponse(cxt *Context) {
 	inputPeakRateVendorAttr := VendorAttr{
 		VendorType:   3,
 		VendorLength: 6,
-		VendorValue:  getIntegerBytes(upStreamLimit),
+		VendorValue:  getIntegerBytes(uint32(upStreamLimit)),
 	}
 	setVendorStringValue(Huawei, &inputPeakRateVendorAttr)
 	specAttr.addSpecRadiusAttr(inputPeakRateVendorAttr)
@@ -52,7 +51,7 @@ func HuaweiResponse(cxt *Context) {
 	outputAvgRateVendorAttr := VendorAttr{
 		VendorType:   5,
 		VendorLength: 6,
-		VendorValue:  getIntegerBytes(downStreamLimit),
+		VendorValue:  getIntegerBytes(uint32(downStreamLimit)),
 	}
 	setVendorStringValue(Huawei, &outputAvgRateVendorAttr)
 	specAttr.addSpecRadiusAttr(outputAvgRateVendorAttr)
@@ -61,7 +60,7 @@ func HuaweiResponse(cxt *Context) {
 	outputPeakRateVendorAttr := VendorAttr{
 		VendorType:   6,
 		VendorLength: 6,
-		VendorValue:  getIntegerBytes(downStreamLimit),
+		VendorValue:  getIntegerBytes(uint32(downStreamLimit)),
 	}
 	setVendorStringValue(Huawei, &outputPeakRateVendorAttr)
 	specAttr.addSpecRadiusAttr(outputPeakRateVendorAttr)
@@ -78,7 +77,6 @@ func HuaweiResponse(cxt *Context) {
 	}
 
 	specAttr.Length()
-
 	cxt.Response.AddRadiusAttr(*specAttr)
 }
 
@@ -86,8 +84,8 @@ func HuaweiResponse(cxt *Context) {
 // 思科
 func CiscoResponse(cxt *Context) {
 	product := cxt.User.product
-	upStreamLimit := product.UpStreamLimit * 1024 * 8
-	downStreamLimit := product.DownStreamLimit * 1024 * 8
+	upStreamLimit := product.UpStreamLimit * 1024
+	downStreamLimit := product.DownStreamLimit * 1024
 
 	specAttr := &RadiusAttr{
 		AttrType: VendorSpecificType,
@@ -132,12 +130,61 @@ func StandardResponse(cxt *Context) {
 
 // RouterOS
 func MikroTikResponse(cxt *Context) {
+	// Mikrotik-Rate-Limit	8
+	product := cxt.User.product
+	upStreamLimit := product.UpStreamLimit
+	downStreamLimit := product.DownStreamLimit
 
+	specAttr := &RadiusAttr{
+		AttrType: VendorSpecificType,
+		VendorId: MikroTik,
+		AttrName: "Vendor-Specific",
+	}
+
+	rateLimitAttr := VendorAttr{
+		VendorType: 8,
+		VendorValue: []byte(fmt.Sprintf("%dk/%dk", upStreamLimit, downStreamLimit)),
+	}
+	rateLimitAttr.Length()
+	setVendorStringValue(MikroTik, &rateLimitAttr)
+	specAttr.addSpecRadiusAttr(rateLimitAttr)
+
+	specAttr.Length()
+	cxt.Response.AddRadiusAttr(*specAttr)
 }
 
-// 中兴
-func zteResponse(cxt *Context) {
+// 中兴, 限速单位 kbit/s
+func ZteResponse(cxt *Context) {
+	// ZTE-Rate-Ctrl-SCR-Down	83
+	// ZTE-Rate-Ctrl-SCR-Up		89
+	product := cxt.User.product
+	upStreamLimit := product.UpStreamLimit
+	downStreamLimit := product.DownStreamLimit
 
+	specAttr := &RadiusAttr{
+		AttrType: VendorSpecificType,
+		VendorId: Zte,
+		AttrName: "Vendor-Specific",
+	}
+
+	upRateAttr := VendorAttr{
+		VendorType: 89,
+		VendorLength: 6,
+		VendorValue: getIntegerBytes(uint32(upStreamLimit)),
+	}
+	setVendorStringValue(Zte, &upRateAttr)
+	specAttr.addSpecRadiusAttr(upRateAttr)
+
+	downRateAttr := VendorAttr{
+		VendorType: 83,
+		VendorLength: 6,
+		VendorValue: getIntegerBytes(uint32(downStreamLimit)),
+	}
+	setVendorStringValue(Zte, &downRateAttr)
+	specAttr.addSpecRadiusAttr(downRateAttr)
+
+	specAttr.Length()
+	cxt.Response.AddRadiusAttr(*specAttr)
 }
 
 // 设置认证响应属性
@@ -157,35 +204,8 @@ func AuthSpecAndCommonAttrSetter(cxt *Context) {
 	sessionTimeoutAttr.Length()
 	attr, _ := ATTRITUBES[AttrKey{Standard, int(sessionTimeoutAttr.AttrType)}]
 	sessionTimeoutAttr.AttrName = attr.Name
-
-	//TODO 设置用户会话时长
-
 	sessionTimeoutAttr.setStandardAttrStringVal()
 	cxt.Response.AddRadiusAttr(sessionTimeoutAttr)
 	cxt.Next()
 }
 
-func FillBytesByString(size int, value string) []byte {
-	if len(value) >= size {
-		return []byte(value)
-	}
-	ret := make([]byte, size)
-	copy(ret, []byte(value))
-	return ret
-}
-
-
-func getIntegerBytes(val uint32) []byte {
-	container := make([]byte, 4)
-	binary.BigEndian.PutUint32(container, val)
-	return container
-}
-
-func setVendorStringValue(vendorId uint32, vendorAttr *VendorAttr) {
-	attr, ok := ATTRITUBES[AttrKey{vendorId, int(vendorAttr.VendorType)}]
-	if ok {
-		vendorAttr.VendorId = vendorId
-		vendorAttr.VendorTypeName = attr.Name
-		vendorAttr.VendorValueString = getAttrValue(attr.ValueType, vendorAttr.VendorValue)
-	}
-}
