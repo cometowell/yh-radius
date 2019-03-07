@@ -11,6 +11,7 @@ require (
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sirupsen/logrus v1.3.0
 	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
+	golang.org/x/time v0.0.0-20181108054448-85acf8d2951c
 	gopkg.in/go-playground/validator.v8 v8.18.2 // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )

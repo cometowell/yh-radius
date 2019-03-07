@@ -1,19 +1,25 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/time/rate"
 	"io/ioutil"
 	"net"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 )
 
 var (
 	engine *xorm.Engine
 	logger *logrus.Logger
 	config map[string]interface{}
+	limiter *rate.Limiter
 )
 
 type radEngine struct {
@@ -34,7 +40,7 @@ func (r *radEngine) Use(rms ...RadMiddleWare) {
 	r.radMiddleWares = append(r.radMiddleWares, rms...)
 }
 
-func (r *radEngine) handlePackage() {
+func (r *radEngine) handlePackage(cxt context.Context) {
 
 	UDPAddr, err := net.ResolveUDPAddr("udp", ":"+strconv.Itoa(r.port))
 	if err != nil {
@@ -50,6 +56,12 @@ func (r *radEngine) handlePackage() {
 	r.listener = listener
 
 	for {
+		select {
+		case <-cxt.Done():
+				return
+		default:
+		}
+
 		var pkg = make([]byte, MaxPackageLength)
 		n, dst, err := listener.ReadFromUDP(pkg)
 		if err != nil {
@@ -57,7 +69,11 @@ func (r *radEngine) handlePackage() {
 			continue
 		}
 
-		// 这里需要控制协程的数量
+		if !limiter.Allow() {
+			logger.Warn("服务器处理能力到底最高点：报文被丢弃", "消息来自 <<< ", dst.String())
+			continue
+		}
+
 		go func(recPkg []byte, listener *net.UDPConn, dst *net.UDPAddr) {
 			rp := parsePkg(recPkg)
 			cxt := &Context{
@@ -82,9 +98,13 @@ func (r *radEngine) handlePackage() {
 }
 
 func main() {
+	bgCtx, cancelFunc := context.WithCancel(context.Background())
 	// 加载配置文件
 	config = loadConfig()
 	logger = NewLogger()
+
+	// 处理协程数量限制
+	limiter = rate.NewLimiter(rate.Limit(config["limiter.limit"].(float64)), int(config["limiter.burst"].(float64)))
 
 	// 加载radius属性字典文件
 	readAttributeFiles()
@@ -104,22 +124,31 @@ func main() {
 	authServer.Use(VlanVerify)
 	authServer.Use(MacAddrVerify)
 	authServer.Use(AuthSpecAndCommonAttrSetter)
-	// 认证返回中间件函数必须放到最后
 	authServer.Use(AuthAcceptReply)
-	go authServer.handlePackage()
+	go authServer.handlePackage(bgCtx)
 	logger.Info("已经启动Radius认证监听...")
 
 	// 计费服务
 	accountServer := Default(int(config["acctPort"].(float64)))
 	accountServer.Use(AcctReply)
 	accountServer.Use(AcctRecord)
-	go accountServer.handlePackage()
+	go accountServer.handlePackage(bgCtx)
 	logger.Info("已经启动Radius计费监听...")
 
-	// TODO 优雅关闭服务
+	pid := syscall.Getpid()
+	pidStr := strconv.Itoa(pid)
+	err = ioutil.WriteFile("rad.pid", []byte(pidStr), 0777)
+	if err != nil {
+		panic(err)
+	}
 
-	// 防止主线程退出,监听退出信号
-	select {}
+	c := make(chan os.Signal)
+	signal.Notify(c, syscall.SIGTERM)
+	<-c
+
+	cancelFunc()
+	logger.Warnln("RADIUS程序已退出...")
+	os.Exit(0)
 }
 
 func loadConfig() map[string]interface{} {
