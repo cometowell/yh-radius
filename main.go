@@ -91,7 +91,9 @@ func (r *radEngine) handlePackage(cxt context.Context) {
 
 			//执行插件
 			cxt.Next()
-			logger.Infof("响应报文：%+v\n", cxt.Response)
+			if cxt.Response.Code != 0 {
+				logger.Infof("响应报文：%+v\n", cxt.Response)
+			}
 		}(pkg[:n], listener, dst)
 	}
 
@@ -130,8 +132,8 @@ func main() {
 
 	// 计费服务
 	accountServer := Default(int(config["acctPort"].(float64)))
-	accountServer.Use(AcctReply)
 	accountServer.Use(AcctRecord)
+	accountServer.Use(AcctReply)
 	go accountServer.handlePackage(bgCtx)
 	logger.Info("已经启动Radius计费监听...")
 

@@ -17,6 +17,10 @@ func NasValidation(cxt *Context) {
 		cxt.throwPackage = true
 		panic("package come from unknown NAS: " + nasIp)
 	}
+
+	// 验证
+
+
 	cxt.RadNas = *nas
 	cxt.Next()
 }

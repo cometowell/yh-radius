@@ -136,6 +136,7 @@ func accounting(online OnlineUser, totalUpStream int, totalDownStream int, sessi
 	_, err := engine.InsertOne(&onlineLog)
 	if err != nil {
 		session.Rollback()
+		return
 	}
 	// 扣除用户流量，时长
 	user := RadUser{UserName: online.UserName}
@@ -151,12 +152,14 @@ func accounting(online OnlineUser, totalUpStream int, totalDownStream int, sessi
 	_, err = engine.Cols("available_flow", "available_time").Update(&user)
 	if err != nil {
 		session.Rollback()
+		return
 	}
 	// 删除online
 	delOnline := &OnlineUser{}
 	_, err = engine.Id(online.Id).Delete(delOnline)
 	if err != nil {
 		session.Rollback()
+		return
 	}
 	session.Commit()
 }
