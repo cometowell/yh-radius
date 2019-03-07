@@ -6,5 +6,6 @@
   "encrypt.key": "vbRIKz90HJ$jjwyzu3BsUdci1600l7rP",
   "radius.session.timeout": 604800,
   "limiter.limit": 100,
-  "limiter.burst": 5000
+  "limiter.burst": 1000,
+  "max.procs": 3
 }

@@ -11,6 +11,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"syscall"
 )
@@ -104,6 +105,8 @@ func main() {
 	// 加载配置文件
 	config = loadConfig()
 	logger = NewLogger()
+
+	runtime.GOMAXPROCS(int(config["max.procs"].(float64)))
 
 	// 处理协程数量限制
 	limiter = rate.NewLimiter(rate.Limit(config["limiter.limit"].(float64)), int(config["limiter.burst"].(float64)))
