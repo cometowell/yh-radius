@@ -29,8 +29,6 @@ func PermCheck(c *gin.Context) {
 	}
 
 	//权限校验
-
-
 	c.Next()
 }
 
