@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/go-xorm/xorm"
 	"net"
 )
 
@@ -17,6 +18,7 @@ type Context struct {
 	Handlers         []RadMiddleWare
 	ReplyRadiusAttrs []RadiusAttr
 	throwPackage     bool
+	Session *xorm.Session
 }
 
 func (cxt *Context) Next() {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/binary"
-	"github.com/go-xorm/xorm"
 	"strconv"
 	"time"
 )
@@ -70,7 +69,7 @@ func acctStartHandler(acctSessionId string, cxt *Context) {
 
 	online.MacAddr = getMacAddr(cxt)
 
-	_, err := engine.InsertOne(&online)
+	_, err := cxt.Session.InsertOne(&online)
 	if err != nil {
 		cxt.throwPackage = true
 		panic("insert online user info failure" + err.Error())
@@ -79,15 +78,11 @@ func acctStartHandler(acctSessionId string, cxt *Context) {
 
 func acctStopHandler(acctSessionId string, cxt *Context) {
 
-	session := engine.NewSession()
-	defer session.Close()
-
 	online := OnlineUser{AcctSessionId: acctSessionId}
-	session.Get(&online)
+	cxt.Session.Get(&online)
 
 	if online.Id == 0 {
 		cxt.throwPackage = true
-		session.Rollback()
 		panic("in online records can not find this: " + online.AcctSessionId)
 	}
 
@@ -115,10 +110,10 @@ func acctStopHandler(acctSessionId string, cxt *Context) {
 		totalDownStream += int(binary.BigEndian.Uint32(attr.AttrValue)) * 4 * 1024 * 1024
 	}
 
-	accounting(online, totalUpStream, totalDownStream, session)
+	accounting(online, totalUpStream, totalDownStream, cxt)
 }
 
-func accounting(online OnlineUser, totalUpStream int, totalDownStream int, session *xorm.Session) {
+func accounting(online OnlineUser, totalUpStream int, totalDownStream int, cxt *Context) {
 	// 添加online log
 	now := time.Now()
 	usedDuration := int(now.Sub(online.StartTime).Seconds())
@@ -133,14 +128,17 @@ func accounting(online OnlineUser, totalUpStream int, totalDownStream int, sessi
 		IpAddr:          online.IpAddr,
 		MacAddr:         online.MacAddr,
 	}
-	_, err := engine.InsertOne(&onlineLog)
+	_, err := cxt.Session.InsertOne(&onlineLog)
 	if err != nil {
-		session.Rollback()
-		return
+		cxt.throwPackage = true
+		panic("data access error")
 	}
+
+	panic("test transaction")
+
 	// 扣除用户流量，时长
 	user := RadUser{UserName: online.UserName}
-	engine.Get(&user)
+	cxt.Session.Get(&user)
 	user.AvailableFlow -= int64(totalDownStream) - int64(totalUpStream)
 	user.AvailableTime -= usedDuration
 	if user.AvailableFlow < 0 {
@@ -149,24 +147,23 @@ func accounting(online OnlineUser, totalUpStream int, totalDownStream int, sessi
 	if user.AvailableTime < 0 {
 		user.AvailableTime = 0
 	}
-	_, err = engine.Cols("available_flow", "available_time").Update(&user)
+	_, err = cxt.Session.Cols("available_flow", "available_time").Update(&user)
 	if err != nil {
-		session.Rollback()
-		return
+		cxt.throwPackage = true
+		panic("data access error")
 	}
 	// 删除online
 	delOnline := &OnlineUser{}
-	_, err = engine.Id(online.Id).Delete(delOnline)
+	_, err = cxt.Session.Id(online.Id).Delete(delOnline)
 	if err != nil {
-		session.Rollback()
-		return
+		cxt.throwPackage = true
+		panic("data access error")
 	}
-	session.Commit()
 }
 
 func acctInterimUpdateHandler(acctSessionId string, cxt *Context) {
 	online := OnlineUser{AcctSessionId: acctSessionId}
-	engine.Get(&online)
+	cxt.Session.Get(&online)
 
 	if online.Id == 0 {
 		cxt.throwPackage = true
@@ -199,7 +196,7 @@ func acctInterimUpdateHandler(acctSessionId string, cxt *Context) {
 
 	online.TotalUpStream += int64(totalUpStream)
 	online.TotalUpStream += int64(totalUpStream)
-	engine.Id(online.Id).Cols("total_up_stream","total_down_stream").Update(&online)
+	cxt.Session.Id(online.Id).Cols("total_up_stream","total_down_stream").Update(&online)
 }
 
 // It may also be used to mark the start of accounting (for example, upon booting)
@@ -208,11 +205,9 @@ func acctInterimUpdateHandler(acctSessionId string, cxt *Context) {
 
 // 计费开始，通常为设备重启后
 func acctAccountingOn(cxt *Context) {
-	session := engine.NewSession()
-	defer session.Close()
 	onlineList := make([]OnlineUser, 0)
-	session.Find(&onlineList)
-	offline(onlineList, session)
+	cxt.Session.Find(&onlineList)
+	offline(onlineList, cxt)
 }
 
 // 计费结束，通常为设备重启前
@@ -220,9 +215,9 @@ func acctAccountingOff(cxt *Context) {
 	acctAccountingOn(cxt)
 }
 
-func offline(onlineList []OnlineUser, session *xorm.Session) {
+func offline(onlineList []OnlineUser, cxt *Context) {
 	for _, online := range onlineList {
-		accounting(online, int(online.TotalUpStream), int(online.TotalDownStream), session)
+		accounting(online, int(online.TotalUpStream), int(online.TotalDownStream), cxt)
 	}
 	logger.Info("AccountingOn/AccountingOff下线处理完成")
 }

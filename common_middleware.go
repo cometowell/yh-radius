@@ -9,9 +9,9 @@ func NasValidation(cxt *Context) {
 	nasIp := cxt.Dst.IP.String()
 	logger.Infoln("UDP报文消息来源：", nasIp)
 	logger.Infof("%v\n", cxt.Request)
-
+	cxt.Session.Begin()
 	nas := new(RadNas)
-	engine.Where("ip_addr = ?", nasIp).Get(nas)
+	cxt.Session.Where("ip_addr = ?", nasIp).Get(nas)
 	// 验证UPD消息来源，非法来源丢弃
 	if nas.Id == 0 {
 		cxt.throwPackage = true
@@ -19,8 +19,6 @@ func NasValidation(cxt *Context) {
 	}
 
 	// 验证
-
-
 	cxt.RadNas = *nas
 	cxt.Next()
 }
@@ -30,7 +28,10 @@ func RecoveryFunc() RadMiddleWare {
 		defer func() {
 			if err := recover(); err != nil {
 				logger.Errorln("recovery invoke", err)
-
+				if !cxt.Session.IsClosed() {
+					cxt.Session.Rollback()
+					cxt.Session.Close()
+				}
 				if cxt.throwPackage {
 					logger.Errorf("throw away package from %s: %+v\n", cxt.RadNas.IpAddr, cxt.Request)
 					if _, ok := err.(string); !ok {
@@ -55,5 +56,12 @@ func RecoveryFunc() RadMiddleWare {
 			}
 		}()
 		cxt.Next()
+	}
+}
+
+func TransactionCommitFunc(cxt *Context) {
+	if cxt.Session != nil && !cxt.Session.IsClosed() {
+		cxt.Session.Commit()
+		cxt.Session.Close()
 	}
 }

@@ -20,7 +20,7 @@ func UserVerify(cxt *Context) {
 
 	userName := attr.AttrStringValue
 	user := RadUser{UserName: userName}
-	engine.Get(&user)
+	cxt.Session.Get(&user)
 
 	if user.Id == 0 {
 		panic("user's account number or password is incorrect")
@@ -39,14 +39,14 @@ func UserVerify(cxt *Context) {
 	}
 
 	onlineUser := OnlineUser{UserName: userName}
-	onlineCount, _ := engine.Count(onlineUser)
+	onlineCount, _ := cxt.Session.Count(onlineUser)
 	userConcurrent := user.ConcurrentCount
 	if userConcurrent != 0 && userConcurrent <= int(onlineCount) {
 		panic(fmt.Sprintf("the maximum number of concurrency has been reached: %d", onlineCount))
 	}
 
 	product := RadProduct{}
-	engine.Id(user.ProductId).Get(&product)
+	cxt.Session.Id(user.ProductId).Get(&product)
 
 	if product.Id == 0 {
 		panic("user did not purchase the product")
@@ -90,7 +90,7 @@ func MacAddrVerify(cxt *Context) {
 		macAddr := getMacAddr(cxt)
 		if user.MacAddr == "" {
 			user.MacAddr = macAddr
-			engine.Id(user.Id).Cols("mac_addr").Update(user)
+			cxt.Session.Id(user.Id).Cols("mac_addr").Update(user)
 		}
 
 		if macAddr != user.MacAddr {
@@ -123,7 +123,7 @@ func VlanVerify(cxt *Context) {
 			}
 
 			if shouldUpdate {
-				engine.Id(user.Id).Cols("vlan_id", "vlan_id2").Update(user)
+				cxt.Session.Id(user.Id).Cols("vlan_id", "vlan_id2").Update(user)
 			}
 		}
 	}

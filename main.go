@@ -83,6 +83,7 @@ func (r *radEngine) handlePackage(cxt context.Context) {
 				Dst:      dst,
 				Handlers: r.radMiddleWares,
 				index:    -1,
+				Session: engine.NewSession(),
 			}
 
 			cxt.Response = &RadiusPackage{
@@ -130,6 +131,7 @@ func main() {
 	authServer.Use(MacAddrVerify)
 	authServer.Use(AuthSpecAndCommonAttrSetter)
 	authServer.Use(AuthAcceptReply)
+	authServer.Use(TransactionCommitFunc)
 	go authServer.handlePackage(bgCtx)
 	logger.Info("已经启动Radius认证监听...")
 
@@ -137,6 +139,7 @@ func main() {
 	accountServer := Default(int(config["acctPort"].(float64)))
 	accountServer.Use(AcctRecord)
 	accountServer.Use(AcctReply)
+	accountServer.Use(TransactionCommitFunc)
 	go accountServer.handlePackage(bgCtx)
 	logger.Info("已经启动Radius计费监听...")
 
