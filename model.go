@@ -106,7 +106,7 @@ type UserOnlineLog struct {
 }
 
 type Manager struct {
-	Id int64
+	Id int64 `xorm:"pk autoincr"`
 	DepartmentId int64
 	Username *string
 	Password *string
@@ -114,6 +114,16 @@ type Manager struct {
 	Status int8
 	Mobile string
 	Email string
+	CreateTime time.Time
+	UpdateTime *time.Time
+	Description string
+}
+
+type Department struct {
+	Id int64 `xorm:"pk autoincr"`
+	Code *string
+	Name *string
+	ParentId int64
 	CreateTime time.Time
 	UpdateTime *time.Time
 	Description string

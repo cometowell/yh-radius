@@ -36,7 +36,18 @@ func LoginPage(c *gin.Context) {
 func Login(c *gin.Context)  {
 	var manager Manager
 	err := c.ShouldBind(&manager)
-	if err != nil || manager.Id == 0 {
+
+	if err != nil {
+		c.Redirect(http.StatusMovedPermanently, "/login")
+		return
+	}
+
+	dbSession := engine.NewSession()
+	dbSession.Begin()
+	defer dbSession.Close()
+
+	dbSession.Where("username = ?", manager.Username).Get(&manager)
+	if manager.Id == 0 {
 		c.Redirect(http.StatusMovedPermanently, "/login")
 		return
 	}
@@ -45,6 +56,7 @@ func Login(c *gin.Context)  {
 
 	//加入菜单信息
 
+	dbSession.Commit()
 	c.Redirect(http.StatusMovedPermanently, "/index")
 }
 
