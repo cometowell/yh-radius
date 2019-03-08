@@ -3,16 +3,28 @@ go-rad is a Radius protocol implement written in Golang. It supports NAS devices
 
 ## Installation
 
-### run this application
-build this source code for Specific platform(linux,mac, windows)
+How to install golang?  please visit the golang's website: https://golang.google.cn/.
 
-> cd source_dir
+you should download golang1.11 or higher and set related environment variables for golang.
 
-> go build 
+then compile source code according to different platforms
 
-copy this file or dir to the dst dir: go-rad, attributes, config, startup.sh, shutdown.sh.
+for example:
+``` 
+ On the windows platform
+ for linux: 
+    cd source_code_dir
+    set CGO_ENABLED=0
+    set GOOS=linux
+    set GOARCH=amd64 
+    go build
+```
 
-go-rad directory structure 
+## run this application
+
+copy there files or dirs to the target dir: go-rad, attributes, config, startup.sh, shutdown.sh
+
+the target directory structure like below:
 
     |___ attributes
   
@@ -24,36 +36,36 @@ go-rad directory structure
     
     |__ shutdown.sh
 
-#### run application: 
+#### run application on linux: 
 
 > chmod +x startup.sh
 
 > ./startup.sh
 
-#### stop application:
+#### stop application on linux:
 
 > chmod +x shutdown.sh
 
 > ./shutdown.sh
 
-### configuration
-config.json file in config directory,you can modify the config item.
+## configuration file
+config.json file in config directory, you can modify the config item.
 
 | name | default | type | desc |
 | ------| ------ | ------ | ----- |
 | authPort | 1812 | int |  authenticate port  |
 | acctPort | 1813 | int |  accounting port  |
-| encrypt.key | hex string | string |  used to encrypt passwords  |
+| encrypt.key | 16/24/32 length hex string | string |  used to encrypt passwords  |
 | radius.session.timeout | 604800 | int | session duration, default: sec of a week  |
 | limiter.limit | 100 | int | to limit the amount of goroutine |
 | limiter.burst | 1000 | int | to limit the amount of goroutine  |
 
-### database tables
-database.sql
+## database tables
+the database table structure is defined in the database.sql
 
 
 ## third-party dependencies
-```go
+``` 
 github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74 // indirect
 github.com/gin-gonic/gin v1.3.0
 github.com/go-sql-driver/mysql v1.4.1
@@ -68,3 +80,6 @@ golang.org/x/time v0.0.0-20181108054448-85acf8d2951c
 gopkg.in/go-playground/validator.v8 v8.18.2 // indirect
 gopkg.in/yaml.v2 v2.2.2 // indirect
 ```
+
+## License
+[MIT](http://www.baidu.com)

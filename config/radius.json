@@ -7,5 +7,7 @@
   "radius.session.timeout": 604800,
   "limiter.limit": 100,
   "limiter.burst": 1000,
-  "max.procs": 3
+  "max.procs": 3,
+  "web.server.url": "0.0.0.0:8099",
+  "web.session.timeout": 3600
 }

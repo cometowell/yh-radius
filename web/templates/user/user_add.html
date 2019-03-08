@@ -1,0 +1,152 @@
+{{ define "user_add.html" }}
+<!DOCTYPE html>
+<html>
+  {{template "head.html"}}
+  <body class="hold-transition skin-blue sidebar-mini">
+  <!-- Site wrapper -->
+<div class="wrapper">
+
+  {{template "header.html"}}
+
+  <!-- =============================================== -->
+
+  <!-- Left side column. contains the sidebar -->
+  {{template "menu.html"}}
+
+  <!-- =============================================== -->
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+
+    </section>
+
+      <!-- Main content -->
+      <section class="content">
+          <div class="container-fluid">
+              <div>
+                  <div class="box box-default">
+                      <div class="box-header with-border">
+                          <ol class="breadcrumb">
+                              <span>当前页面：</span>
+                              <li><a href="#">基础资料</a></li>
+                              <li><a href="#">用户管理</a></li>
+                              <li class="active">用户信息列表</li>
+                          </ol>
+                      </div>
+                      <!-- /.box-header -->
+                      <div class="box-body">
+                          <form class="form-horizontal" method="post">
+                              <div class="form-group">
+                                  <label for="departmentId" class="col-sm-2 control-label">部门</label>
+                                  <div class="col-sm-4">
+                                      <select id="departmentId" name="departmentId" class="form-control">
+                                          <option></option>
+                                      </select>
+                                  </div>
+                                  <div class="pull-left col-sm-3">
+                                      <label class="control-label text-danger"></label>
+                                  </div>
+                              </div>
+                              <div class="form-group">
+                                  <label for="username" class="col-sm-2 control-label">用户登录名</label>
+                                  <div class="col-sm-4">
+                                      <input class="form-control" id="username" name="username" placeholder="用户登录名">
+                                  </div>
+                                  <div class="pull-left col-sm-3">
+                                      <label class="control-label text-danger"></label>
+                                  </div>
+                              </div>
+                              <div class="form-group">
+                                  <label for="realName" class="col-sm-2 control-label">真实姓名</label>
+                                  <div class="col-sm-4">
+                                      <input class="form-control" id="realName" name="realName" placeholder="用户真实姓名">
+                                  </div>
+                                  <div class="pull-left col-sm-3">
+                                      <label class="control-label text-danger"></label>
+                                  </div>
+                              </div>
+                              <div class="form-group">
+                                  <label for="password" class="col-sm-2 control-label">密码</label>
+                                  <div class="col-sm-4">
+                                      <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码">
+                                  </div>
+                                  <div class="pull-left col-sm-3">
+                                      <label class="control-label text-danger"></label>
+                                  </div>
+                              </div>
+                              <div class="form-group">
+                                  <label for="level" class="col-sm-2 control-label">用户级别</label>
+                                  <div class="col-sm-4">
+                                      <select id="level" name="level" class="form-control">
+                                          <option value="1">管理员</option>
+                                          <option value="2">普通用户</option>
+                                      </select>
+                                  </div>
+                              </div>
+                              <div class="form-group">
+                                  <label for="enable" class="col-sm-2 control-label">是否启用</label>
+                                  <div class="col-sm-4">
+                                      <select id="enable" name="enable" class="form-control">
+                                          <option value="0">关闭</option>
+                                          <option value="1">启用</option>
+                                      </select>
+                                  </div>
+                              </div>
+                              <div class="form-group">
+                                  <label for="email" class="col-sm-2 control-label">邮件地址</label>
+                                  <div class="col-sm-4">
+                                      <input class="form-control" id="email" name="email" placeholder="邮件地址">
+                                  </div>
+                                  <div class="pull-left col-sm-3">
+                                      <label class="control-label text-danger"></label>
+                                  </div>
+                              </div>
+                              <div class="form-group">
+                                  <label for="mobile" class="col-sm-2 control-label">联系方式</label>
+                                  <div class="col-sm-4">
+                                      <input type="text" class="form-control" name="mobile" id="mobile" placeholder="联系方式，电话">
+                                  </div>
+                                  <div class="pull-left col-sm-3">
+                                      <label class="control-label text-danger"></label>
+                                  </div>
+                              </div>
+                              <div class="form-group">
+                                  <label for="remark" class="col-sm-2 control-label">描述</label>
+                                  <div class="col-sm-4">
+                                      <textarea class="form-control" id="remark" name="remark"  placeholder="描述"></textarea>
+                                  </div>
+                                  <div class="pull-left col-sm-3">
+                                      <label class="control-label text-danger"></label>
+                                  </div>
+                              </div>
+                              <div class="form-group">
+                                  <div class="col-sm-offset-2 col-sm-4">
+                                      <button type="submit" class="btn btn-info btn-block">确定</button>
+                                  </div>
+                              </div>
+                          </form>
+                      </div>
+                      <!-- /.box-body -->
+                      <div class="box-footer">
+                          <span class="pull-right text-muted">社会主义核心价值观</span>
+                      </div>
+                      <!-- /.box-footer-->
+                  </div>
+                  <!-- /.box -->
+              </div>
+          </div>
+      </section>
+      <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- footer -->
+  {{template "footer.html"}}
+</div>
+<!-- ./wrapper -->
+
+</body>
+</html>
+{{end}}

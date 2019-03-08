@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 	"github.com/sirupsen/logrus"
@@ -143,6 +144,9 @@ func main() {
 	go accountServer.handlePackage(bgCtx)
 	logger.Info("已经启动Radius计费监听...")
 
+	go webServer()
+	logger.Info("已启动web服务")
+
 	pid := syscall.Getpid()
 	pidStr := strconv.Itoa(pid)
 	err = ioutil.WriteFile("rad.pid", []byte(pidStr), 0777)
@@ -159,6 +163,19 @@ func main() {
 	os.Exit(0)
 }
 
+func webServer() {
+	initWeb()
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
+	r.LoadHTMLGlob("web/templates/**/*")
+	// 映射静态文件目录
+	r.StaticFile("/favicon.ico", "web/statics/favicon.ico")
+	r.Static("/statics", "web/statics")
+	r.Use(PermCheck)
+	LoadController(r)
+	r.Run(config["web.server.url"].(string))
+}
+
 func loadConfig() map[string]interface{} {
 	configBytes, err := ioutil.ReadFile("./config/radius.json")
 	if err != nil {
@@ -168,4 +185,8 @@ func loadConfig() map[string]interface{} {
 	dst := make(map[string]interface{})
 	json.Unmarshal(configBytes, &dst)
 	return dst
+}
+
+func GetConfig() map[string]interface{} {
+	return config
 }

@@ -9,6 +9,7 @@ require (
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
+	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.3.0
 	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
 	golang.org/x/time v0.0.0-20181108054448-85acf8d2951c

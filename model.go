@@ -104,3 +104,17 @@ type UserOnlineLog struct {
 	IpAddr string
 	MacAddr string
 }
+
+type Manager struct {
+	Id int64
+	DepartmentId int64
+	Username *string
+	Password *string
+	RealName *string
+	Status int8
+	Mobile string
+	Email string
+	CreateTime time.Time
+	UpdateTime *time.Time
+	Description string
+}
