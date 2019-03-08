@@ -82,4 +82,4 @@ gopkg.in/yaml.v2 v2.2.2 // indirect
 ```
 
 ## License
-[MIT](http://www.baidu.com)
+[MIT](https://mit-license.org/)
