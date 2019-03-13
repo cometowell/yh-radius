@@ -32,37 +32,42 @@ func LoginPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", nil)
 }
 
-
-func Login(c *gin.Context)  {
-	var manager Manager
-	err := c.ShouldBind(&manager)
-
-	if err != nil {
-		c.Redirect(http.StatusMovedPermanently, "/login")
-		return
-	}
-
+func Login(c *gin.Context) {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
 	dbSession := engine.NewSession()
 	dbSession.Begin()
 	defer dbSession.Close()
 
+	manager := SysManager{Username: username}
 	dbSession.Where("username = ?", manager.Username).Get(&manager)
 	if manager.Id == 0 {
-		c.Redirect(http.StatusMovedPermanently, "/login")
+		loginError(c)
 		return
 	}
+
+	if manager.Password != encrypt(password) {
+		loginError(c)
+		return
+	}
+
+	//加入权限信息
+
 	session := GlobalSessionManager.CreateSession(c)
 	fmt.Println(session)
-
-	//加入菜单信息
 
 	dbSession.Commit()
 	c.Redirect(http.StatusMovedPermanently, "/index")
 }
 
+func loginError(c *gin.Context) {
+	c.Keys["errMsg"] = "username or password is incorrect"
+	c.Redirect(http.StatusMovedPermanently, "/login")
+}
+
 func Logout(c *gin.Context) {
 	GlobalSessionManager.DestroySession(c)
-	c.Redirect(http.StatusFound, "/login")
+	c.Redirect(http.StatusMovedPermanently, "/login")
 }
 
 func UserAdd(c *gin.Context) {
@@ -72,7 +77,6 @@ func UserAdd(c *gin.Context) {
 func UserInsert(c *gin.Context) {
 
 }
-
 
 func UserList(c *gin.Context) {
 	c.HTML(http.StatusOK, "user_list.html", nil)

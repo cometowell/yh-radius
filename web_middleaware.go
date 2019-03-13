@@ -6,7 +6,7 @@ import (
 	"regexp"
 )
 
-var urls  =  []string{"/login","/statics/.+","/favicon.ico"}
+var urls = []string{"/login", "/statics/.+", "/favicon.ico"}
 
 func PermCheck(c *gin.Context) {
 	url := c.Request.URL.Path
@@ -17,19 +17,24 @@ func PermCheck(c *gin.Context) {
 
 	sessionVal, err := c.Cookie(SessionName)
 	if err != nil {
-		c.Redirect(http.StatusMovedPermanently, "/login")
+		loginTimeOut(c)
 		return
 	}
 
 	session := GlobalSessionManager.Provider.ReadSession(sessionVal)
 	if session == nil {
-		c.SetCookie(SessionName, "",  -1, "/", "", false, true)
-		c.Redirect(http.StatusMovedPermanently, "/login")
+		loginTimeOut(c)
 		return
 	}
 
 	//权限校验
 	c.Next()
+}
+
+func loginTimeOut(c *gin.Context) {
+	c.Keys["errMsg"] = "login timeout"
+	c.SetCookie(SessionName, "", -1, "/", "", false, true)
+	c.Redirect(http.StatusMovedPermanently, "/login")
 }
 
 func checkUrl(url string) bool {

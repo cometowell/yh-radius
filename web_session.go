@@ -11,13 +11,13 @@ import (
 )
 
 // 全局Provide映射关系
-var providers = make(map[string] Provider)
+var providers = make(map[string]Provider)
 var GlobalSessionManager *SessionManager
 
 func initWeb() {
-	provider := &MemoryProvider{SesList:list.New()}
+	provider := &MemoryProvider{SesList: list.New()}
 	providers["memory"] = provider
-	provider.Sessions = make(map[string] *list.Element)
+	provider.Sessions = make(map[string]*list.Element)
 	gsm, err := CreateSessionManager(SessionName, "memory", int64(config["web.session.timeout"].(float64)))
 	if err != nil {
 		panic(err)
@@ -35,11 +35,11 @@ type ISession interface {
 }
 
 type Session struct {
-	Id string
-	CreateTime int64
+	Id             string
+	CreateTime     int64
 	LastAccessTime int64
-	Attributes map[string] interface{}
-	Host string
+	Attributes     map[string]interface{}
+	Host           string
 }
 
 func (r *Session) GetCreateTime() time.Time {
@@ -72,23 +72,22 @@ func (r *Session) SessionId() string {
 
 // ********************** session manager ***************************
 type SessionManager struct {
-	tokenName string // cookie or token name
-	Lock sync.RWMutex
-	Provider Provider
+	tokenName   string // cookie or token name
+	Lock        sync.RWMutex
+	Provider    Provider
 	MaxLifeTime int64 // session timeout
 }
-
 
 func CreateSessionManager(tokenName string, providerName string, maxLifeTime int64) (*SessionManager, error) {
 	provider, ok := providers[providerName]
 	if !ok {
 		return nil, fmt.Errorf("unkown provide be used %s, please init it", providerName)
 	}
-	return &SessionManager{tokenName:tokenName, Provider:provider, MaxLifeTime:maxLifeTime}, nil
+	return &SessionManager{tokenName: tokenName, Provider: provider, MaxLifeTime: maxLifeTime}, nil
 }
 
 func (*SessionManager) genSessionId() string {
-	uuidVal:= uuid.NewV4()
+	uuidVal := uuid.NewV4()
 	sessionId := uuidVal.String()
 	return strings.Replace(sessionId, "-", "", -1)
 }
@@ -98,7 +97,7 @@ func (mgr *SessionManager) CreateSession(c *gin.Context) (session ISession) {
 	defer mgr.Lock.Unlock()
 	sessionId := mgr.genSessionId()
 	session = mgr.Provider.CreateSession(sessionId, c.Request.Host)
-	c.SetCookie(mgr.tokenName, sessionId,  int(config["web.session.timeout"].(float64)), "/", "", false, true)
+	c.SetCookie(mgr.tokenName, sessionId, int(config["web.session.timeout"].(float64)), "/", "", false, true)
 	return
 }
 
@@ -107,9 +106,9 @@ func (mgr *SessionManager) DestroySession(c *gin.Context) error {
 	defer mgr.Lock.Unlock()
 	cookie, err := c.Cookie(mgr.tokenName)
 	if err != nil {
-		return fmt.Errorf("用户未登录")
+		return fmt.Errorf("user not logged in")
 	}
-	c.SetCookie(mgr.tokenName, cookie,  -1, "/", "", false, true)
+	c.SetCookie(mgr.tokenName, cookie, -1, "/", "", false, true)
 	mgr.Provider.DestroySession(cookie)
 	return nil
 }
@@ -117,9 +116,9 @@ func (mgr *SessionManager) DestroySession(c *gin.Context) error {
 func (mgr *SessionManager) Gc() {
 	mgr.Lock.Lock()
 	defer mgr.Lock.Unlock()
-	logger.Info("web service session超时定时任务开始执行")
+	logger.Info("web service session timeout timing task begins execution")
 	mgr.Provider.SessionGC(mgr.MaxLifeTime)
-	time.AfterFunc(time.Duration(int64(time.Second) * mgr.MaxLifeTime), func() {
+	time.AfterFunc(time.Duration(int64(time.Second)*mgr.MaxLifeTime), func() {
 		mgr.Gc()
 	})
 }
