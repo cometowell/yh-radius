@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"regexp"
+	"time"
 )
 
 var urls = []string{"/login", "/statics/.+", "/favicon.ico"}
@@ -11,7 +12,12 @@ var urls = []string{"/login", "/statics/.+", "/favicon.ico"}
 func PermCheck(c *gin.Context) {
 	url := c.Request.URL.Path
 	isOkay := checkUrl(url)
-	if isOkay {
+	if isOkay  {
+		return
+	}
+
+	if 1==1 {
+		c.Next()
 		return
 	}
 
@@ -32,7 +38,7 @@ func PermCheck(c *gin.Context) {
 }
 
 func loginTimeOut(c *gin.Context) {
-	c.Keys["errMsg"] = "login timeout"
+	c.Set("errMsg","login timeout")
 	c.SetCookie(SessionName, "", -1, "/", "", false, true)
 	c.Redirect(http.StatusMovedPermanently, "/login")
 }
@@ -47,4 +53,8 @@ func checkUrl(url string) bool {
 		}
 	}
 	return false
+}
+
+func FormatDateTime(datatime time.Time) string {
+	return datatime.Format(DateTimeFormat)
 }

@@ -169,3 +169,34 @@ func setVendorStringValue(vendorId uint32, vendorAttr *VendorAttr) {
 		vendorAttr.VendorValueString = getAttrValue(attr.ValueType, vendorAttr.VendorValue)
 	}
 }
+
+func buildUrlParamsFromMap(params map[string]interface{}) string {
+	var result string = "?"
+	for key, val := range params {
+		result += fmt.Sprintf("%s=%s&", key, val)
+	}
+
+	if strings.HasSuffix(result, "&") {
+		result = result[:len(result)-1]
+	}
+
+	return result
+}
+
+func buildUrlParams(params ...interface{}) string {
+
+	if len(params) % 2 != 0 {
+		return ""
+	}
+
+	var result string = "?"
+	for i:=0; i<len(params); i += 2 {
+		result += fmt.Sprintf("%s=%s&", params[i], params[i+1])
+	}
+
+	if strings.HasSuffix(result, "&") {
+		result = result[:len(result)-1]
+	}
+
+	return result
+}

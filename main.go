@@ -8,6 +8,7 @@ import (
 	"github.com/go-xorm/xorm"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/time/rate"
+	"html/template"
 	"io/ioutil"
 	"net"
 	"os"
@@ -165,8 +166,13 @@ func main() {
 
 func webServer() {
 	initWeb()
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
+
+	r.SetFuncMap(template.FuncMap{
+		"formatDateTime": FormatDateTime,
+	})
+
 	r.LoadHTMLGlob("web/templates/**/*")
 	// 映射静态文件目录
 	r.StaticFile("/favicon.ico", "web/statics/favicon.ico")

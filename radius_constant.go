@@ -89,3 +89,5 @@ const (
 	AcctStatusTypeAccountingOn  = 7
 	AcctStatusTypeAccountingOff = 8
 )
+
+const DateTimeFormat = "2006-01-02 15:04:05"

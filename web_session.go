@@ -126,3 +126,7 @@ func (mgr *SessionManager) Gc() {
 func (mgr *SessionManager) GetActiveSessions() []ISession {
 	return mgr.Provider.GetActiveSessions()
 }
+
+func (mgr *SessionManager) GetSession(sid string) ISession {
+	return mgr.Provider.ReadSession(sid)
+}

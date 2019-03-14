@@ -41,7 +41,7 @@
 <div id="panel">
     <!--面板的头部-->
     <div class="panel-top">
-        <h2>统一登录平台</h2>
+        <h2>认证计费管理系统</h2>
     </div>
     <form id="theForm" action="/login" method="post">
         <!--面板的主要内容-->
@@ -58,7 +58,7 @@
                 <button type="button" onclick="doLogin()">登录</button>
             </div>
             <div class="reg">
-                <span style="font-weight: 500;color: orangered"></span>
+                <span style="font-weight: 500;color: orangered">{{.errMsg}}</span>
             </div>
         </div>
     </form>

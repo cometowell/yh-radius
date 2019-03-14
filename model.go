@@ -27,8 +27,17 @@ type RadUser struct {
 	UpdateTime        *time.Time
 	Description       string
 
+	product RadProduct `xorm:"-"`
 	sessionTimeout int        `xorm:"-"`
-	product        RadProduct `xorm:"-"`
+}
+
+type UserProduct struct {
+	RadUser `xorm:"extends"`
+	RadProduct `xorm:"extends"`
+}
+
+func (UserProduct) TableName() string {
+	return "rad_user"
 }
 
 type RadUserWallet struct {

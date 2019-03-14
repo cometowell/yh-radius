@@ -17,7 +17,7 @@ func LoadController(router *gin.Engine) {
 	router.GET("/user/update", UserUpdate)
 
 	router.GET("/login", LoginPage)
-	//router.GET("/", LoginPage)
+	router.GET("/", LoginPage)
 	router.POST("/login", Login)
 	router.GET("/logout", Logout)
 	router.GET("/index", Index)
@@ -29,10 +29,20 @@ func Index(c *gin.Context) {
 }
 
 func LoginPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.html", nil)
+	errMsg := c.Query("errMsg")
+	data := make(map[string]interface{})
+	if errMsg != "" {
+		data["errMsg"] = errMsg
+	}
+	c.HTML(http.StatusOK, "login.html", data)
 }
 
 func Login(c *gin.Context) {
+	if 1==1 {
+		c.Redirect(http.StatusMovedPermanently, "/index")
+		return
+	}
+
 	username := c.PostForm("username")
 	password := c.PostForm("password")
 	dbSession := engine.NewSession()
@@ -40,7 +50,7 @@ func Login(c *gin.Context) {
 	defer dbSession.Close()
 
 	manager := SysManager{Username: username}
-	dbSession.Where("username = ?", manager.Username).Get(&manager)
+	dbSession.Get(&manager)
 	if manager.Id == 0 {
 		loginError(c)
 		return
@@ -61,8 +71,7 @@ func Login(c *gin.Context) {
 }
 
 func loginError(c *gin.Context) {
-	c.Keys["errMsg"] = "username or password is incorrect"
-	c.Redirect(http.StatusMovedPermanently, "/login")
+	c.Redirect(http.StatusMovedPermanently, "/login" + buildUrlParams("errMsg", "username or password is incorrect"))
 }
 
 func Logout(c *gin.Context) {
@@ -79,7 +88,10 @@ func UserInsert(c *gin.Context) {
 }
 
 func UserList(c *gin.Context) {
-	c.HTML(http.StatusOK, "user_list.html", nil)
+	var userList []UserProduct
+	engine.Table("rad_user").Alias("ru").
+		Join("INNER", []string{"rad_product", "rp"}, "ru.product_id = rp.id").Find(&userList)
+	c.HTML(http.StatusOK, "user_list.html", userList)
 }
 
 func UserModify(c *gin.Context) {
