@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"regexp"
-	"time"
 )
 
 var urls = []string{"/login", "/statics/.+", "/favicon.ico"}
@@ -53,8 +52,4 @@ func checkUrl(url string) bool {
 		}
 	}
 	return false
-}
-
-func FormatDateTime(datatime time.Time) string {
-	return datatime.Format(DateTimeFormat)
 }

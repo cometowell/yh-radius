@@ -171,6 +171,7 @@ func webServer() {
 
 	r.SetFuncMap(template.FuncMap{
 		"formatDateTime": FormatDateTime,
+		"paginationBar": PaginationBar,
 	})
 
 	r.LoadHTMLGlob("web/templates/**/*")
