@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -63,8 +62,13 @@ func Login(c *gin.Context) {
 
 	//加入权限信息
 
-	session := GlobalSessionManager.CreateSession(c)
-	fmt.Println(session)
+	//session := GlobalSessionManager.CreateSession(c)
+
+	// 加入权限菜单
+	//var resList []SysResource
+	//dbSession.Find(&resList)
+	//fmt.Printf("%v", resList)
+	//session.SetAttr("menus", resList)
 
 	dbSession.Commit()
 	c.Redirect(http.StatusMovedPermanently, "/index")
@@ -89,9 +93,12 @@ func UserInsert(c *gin.Context) {
 
 func UserList(c *gin.Context) {
 	var userList []UserProduct
-	engine.Table("rad_user").Alias("ru").
-		Join("INNER", []string{"rad_product", "rp"}, "ru.product_id = rp.id").Find(&userList)
-	c.HTML(http.StatusOK, "user_list.html", userList)
+	totalCount, _ := engine.Table("rad_user").Alias("ru").
+		Join("INNER", []string{"rad_product", "rp"}, "ru.product_id = rp.id").FindAndCount(&userList)
+
+	pagination := NewPagination(userList, totalCount)
+	pagination.setTotalPage()
+	c.HTML(http.StatusOK, "user_list.html", pagination)
 }
 
 func UserModify(c *gin.Context) {

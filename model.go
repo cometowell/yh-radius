@@ -182,3 +182,28 @@ type SysManagerRole struct {
 func (SysManagerRole) TableName() string {
 	return "sys_manager"
 }
+
+type Pagination struct {
+	Size int64
+	Current int64
+	TotalPage int64
+	TotalCount int64
+	Data interface{}
+}
+
+func NewPagination(data interface{}, totalCount int64) *Pagination {
+	return &Pagination{
+		Size: 20,
+		Current: 1,
+		Data: data,
+		TotalCount: totalCount,
+	}
+}
+
+func (p *Pagination) setTotalPage() {
+	if p.TotalCount % p.Size != 0 {
+		p.TotalPage = p.TotalCount / p.Size + 1
+		return
+	}
+	p.TotalPage = p.TotalCount / p.Size
+}

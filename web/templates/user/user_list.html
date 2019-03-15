@@ -55,7 +55,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {{ range . }}
+                            {{ range .Data }}
                             <tr>
                                 <td><input id="radio" type="radio" class="flat-red" name="radio" value="{{.RadUser.Id}}" /></td>
                                 <td>{{.RadUser.RealName}}</td>
