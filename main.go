@@ -8,7 +8,6 @@ import (
 	"github.com/go-xorm/xorm"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/time/rate"
-	"html/template"
 	"io/ioutil"
 	"net"
 	"os"
@@ -168,18 +167,8 @@ func webServer() {
 	initWeb()
 	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
-
-	r.SetFuncMap(template.FuncMap{
-		"formatDateTime": FormatDateTime,
-		"paginationBar": PaginationBar,
-	})
-
-	r.LoadHTMLGlob("web/templates/**/*")
 	// 映射静态文件目录
-	r.StaticFile("/favicon.ico", "web/statics/favicon.ico")
-	r.Static("/statics", "web/statics")
 	r.Use(PermCheck)
-	LoadController(r)
 	r.Run(config["web.server.url"].(string))
 }
 

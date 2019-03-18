@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"reflect"
 	"testing"
+	"unsafe"
 )
 
 func TestLeftPadChar(t *testing.T) {
@@ -24,4 +26,41 @@ func TestBinary(t *testing.T) {
 
 func TestFillBytes(t *testing.T) {
 	fmt.Println(FillBytesByString(64, "abasdeas"))
+}
+
+func TestStructReflect(t *testing.T) {
+	// 通过反射，对user进行赋值
+	type user struct {
+		name    string
+		age     int
+		feature map[string]interface{}
+	}
+
+	var u interface{}
+	u = new(user)
+	value := reflect.ValueOf(u)
+	if value.Kind() == reflect.Ptr {
+		elem := value.Elem()
+		name := elem.FieldByName("name")
+		if name.Kind() == reflect.String {
+			*(*string)(unsafe.Pointer(name.Addr().Pointer())) = "fangwendong"
+		}
+
+		age := elem.FieldByName("age")
+		if age.Kind() == reflect.Int {
+			*(*int)(unsafe.Pointer(age.Addr().Pointer())) = 24
+		}
+
+		feature := elem.FieldByName("feature")
+		if feature.Kind() == reflect.Map {
+			*(*map[string]interface{})(unsafe.Pointer(feature.Addr().Pointer())) = map[string]interface{}{
+				"爱好": "篮球",
+				"体重": 60,
+				"视力": 5.2,
+			}
+		}
+
+	}
+
+	fmt.Println(u)
 }
