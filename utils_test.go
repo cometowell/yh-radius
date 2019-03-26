@@ -28,14 +28,18 @@ func TestFillBytes(t *testing.T) {
 	fmt.Println(FillBytesByString(64, "abasdeas"))
 }
 
-func TestStructReflect(t *testing.T) {
-	// 通过反射，对user进行赋值
-	type user struct {
-		name    string
-		age     int
-		feature map[string]interface{}
-	}
+// 通过反射，对user进行赋值
+type user struct {
+	name    string
+	age     int
+	feature map[string]interface{}
+}
 
+func (u *user) test1() {
+
+}
+
+func TestStructReflect(t *testing.T) {
 	var u interface{}
 	u = new(user)
 	value := reflect.ValueOf(u)
