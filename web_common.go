@@ -13,7 +13,7 @@ type JsonResult struct {
 	Data interface{} `json:"data"`
 }
 
-const SessionName = "RadAccessToken"
+const SessionName = "rad_access_token"
 
 type Time time.Time
 

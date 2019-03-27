@@ -167,8 +167,8 @@ func webServer() {
 	initWeb()
 	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
-	// 映射静态文件目录
 	r.Use(PermCheck)
+	loadControllers(r)
 	r.Run(config["web.server.url"].(string))
 }
 

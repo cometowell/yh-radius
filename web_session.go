@@ -97,19 +97,14 @@ func (mgr *SessionManager) CreateSession(c *gin.Context) (session ISession) {
 	defer mgr.Lock.Unlock()
 	sessionId := mgr.genSessionId()
 	session = mgr.Provider.CreateSession(sessionId, c.Request.Host)
-	c.SetCookie(mgr.tokenName, sessionId, int(config["web.session.timeout"].(float64)), "/", "", false, true)
 	return
 }
 
 func (mgr *SessionManager) DestroySession(c *gin.Context) error {
 	mgr.Lock.Lock()
 	defer mgr.Lock.Unlock()
-	cookie, err := c.Cookie(mgr.tokenName)
-	if err != nil {
-		return fmt.Errorf("user not logged in")
-	}
-	c.SetCookie(mgr.tokenName, cookie, -1, "/", "", false, true)
-	mgr.Provider.DestroySession(cookie)
+	token := c.GetHeader(mgr.tokenName)
+	mgr.Provider.DestroySession(token)
 	return nil
 }
 
