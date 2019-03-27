@@ -13,6 +13,29 @@ type JsonResult struct {
 	Data interface{} `json:"data"`
 }
 
+func newJsonResult(code int, message string, data interface{}) JsonResult {
+	return JsonResult{
+		Code:code,
+		Message: message,
+		Data: data,
+	}
+}
+
+func newSuccessJsonResult(message string, data interface{}) JsonResult {
+	return JsonResult{
+		Code: 0,
+		Message: message,
+		Data: data,
+	}
+}
+
+func newErrorJsonResult(message string) JsonResult {
+	return JsonResult{
+		Code: 1,
+		Message: message,
+	}
+}
+
 const SessionName = "rad_access_token"
 
 type Time time.Time

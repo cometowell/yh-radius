@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -12,11 +11,21 @@ func loadControllers(router *gin.Engine) {
 }
 
 func login(c *gin.Context) {
-	rawData, _ := c.GetRawData()
-	fmt.Println(string(rawData))
-	c.JSON(http.StatusOK, gin.H{
-		"ok": "bbb",
-	})
+	var manager SysManager
+	c.ShouldBindJSON(&manager)
+	manager.Password = encrypt(manager.Password)
+	ok, _ := engine.Get(&manager)
+
+	if !ok {
+		c.JSON(http.StatusOK, newErrorJsonResult("username or password is incorrect"))
+		return
+	}
+
+	session := GlobalSessionManager.CreateSession(c)
+	manager.Password = ""
+	session.SetAttr("manager", manager)
+
+	c.JSON(http.StatusOK, newSuccessJsonResult("success", manager))
 }
 
 func logout(c *gin.Context) {
