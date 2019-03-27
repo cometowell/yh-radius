@@ -16,19 +16,18 @@ type Provider interface {
 	SessionGC(int64)
 }
 
-
 // 使用内存存储session
 // 需实现Provider接口
 type MemoryProvider struct {
-	Lock sync.RWMutex
-	Sessions map[string] *list.Element
-	SesList *list.List
+	Lock     sync.RWMutex
+	Sessions map[string]*list.Element
+	SesList  *list.List
 }
 
 func (r *MemoryProvider) GetActiveSessions() (s []ISession) {
 	s = make([]ISession, r.SesList.Len())
 	sesList := r.SesList
-	for e:=sesList.Front(); e != nil; e = e.Next() {
+	for e := sesList.Front(); e != nil; e = e.Next() {
 		session := e.Value.(*Session)
 		s = append(s, session)
 	}
@@ -38,7 +37,9 @@ func (r *MemoryProvider) GetActiveSessions() (s []ISession) {
 func (r *MemoryProvider) CreateSession(sid, host string) (s ISession) {
 	r.Lock.Lock()
 	defer r.Lock.Unlock()
-	s = &Session{Id:sid, CreateTime:time.Now().Unix(),LastAccessTime:time.Now().Unix(), Host:host}
+	session := Session{Id: sid, CreateTime: time.Now().Unix(), LastAccessTime: time.Now().Unix(), Host: host}
+	session.Attributes = make(map[string]interface{})
+	s = &session
 	e := r.SesList.PushFront(s)
 	r.Sessions[sid] = e
 	return
@@ -94,7 +95,7 @@ func (r *MemoryProvider) SessionGC(timeout int64) {
 		}
 
 		session, _ := ele.Value.(*Session)
-		if session.LastAccessTime + timeout < time.Now().Unix() {
+		if session.LastAccessTime+timeout < time.Now().Unix() {
 			fmt.Println(session.Id)
 			r.SesList.Remove(ele)
 			delete(r.Sessions, session.Id)
@@ -103,7 +104,6 @@ func (r *MemoryProvider) SessionGC(timeout int64) {
 		}
 	}
 }
-
 
 // 使用redis管理session
 // 需实现Provider接口
