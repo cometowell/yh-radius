@@ -111,7 +111,7 @@ func (mgr *SessionManager) DestroySession(c *gin.Context) error {
 func (mgr *SessionManager) Gc() {
 	mgr.Lock.Lock()
 	defer mgr.Lock.Unlock()
-	logger.Info("web service session timeout timing task begins execution")
+	logger.Info("web service session timeout scheduled task begins execution")
 	mgr.Provider.SessionGC(mgr.MaxLifeTime)
 	time.AfterFunc(time.Duration(int64(time.Second)*mgr.MaxLifeTime), func() {
 		mgr.Gc()

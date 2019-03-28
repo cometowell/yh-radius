@@ -193,7 +193,7 @@ type Pagination struct {
 
 func NewPagination(data interface{}, totalCount int64) *Pagination {
 	return &Pagination{
-		Size: 20,
+		Size: 1,
 		Current: 1,
 		Data: data,
 		TotalCount: totalCount,

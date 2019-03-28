@@ -9,6 +9,7 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/login", login)
 	router.POST("/logout", logout)
 	router.POST("/manager/info", fetchManagerInfo)
+	router.POST("/manager/list", managerList)
 }
 
 func login(c *gin.Context) {
@@ -38,4 +39,14 @@ func fetchManagerInfo(c *gin.Context) {
 	token := c.GetHeader(SessionName)
 	session := GlobalSessionManager.GetSession(token)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "suceess", Data: session.GetAttr("manager")})
+}
+
+func managerList(c *gin.Context) {
+
+	params := make(map[string]interface{})
+	c.ShouldBindJSON(&params)
+	var managers []SysManager
+	totalCount, _ := engine.FindAndCount(&managers)
+	pagination := NewPagination(managers, totalCount)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "suceess", Data: pagination})
 }

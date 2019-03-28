@@ -41,7 +41,7 @@ func PermCheck(c *gin.Context) {
 }
 
 func unauthorizedAccess(c *gin.Context) {
-	c.JSON(http.StatusUnauthorized, gin.H{
+	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 		"code": 999,
 		"msg": "无权限访问!",
 	})
