@@ -58,6 +58,11 @@ func (t Time) String() string {
 	return time.Time(t).Format(TimeFormat)
 }
 
-func NowTime() Time {
-	return Time(time.Now())
+func (t *Time) convert(datetime time.Time) Time {
+	return Time(datetime)
+}
+
+func NowTime() *Time {
+	now := Time(time.Now())
+	return &now
 }

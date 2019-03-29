@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 type RadUser struct {
 	Id                int64  `xorm:"pk autoincr"`
 	UserName          string `xorm:"unique 'username'"`
@@ -13,7 +9,7 @@ type RadUser struct {
 	Status            int
 	AvailableTime     int   // sec
 	AvailableFlow     int64 // KB
-	ExpireTime        *time.Time
+	ExpireTime        *Time
 	ConcurrentCount   int // 并发数
 	ShouldBindMacAddr int
 	ShouldBindVlan    int
@@ -22,9 +18,9 @@ type RadUser struct {
 	VlanId2           int
 	FramedIpAddr      string // 静态IP
 	InstalledAddr     string
-	PauseTime         *time.Time // 停机时间
-	CreateTime        *time.Time
-	UpdateTime        *time.Time
+	PauseTime         *Time // 停机时间
+	CreateTime        *Time
+	UpdateTime        *Time
 	Description       string
 
 	product RadProduct `xorm:"-"`
@@ -53,7 +49,7 @@ type RadUserSpecialBalance struct {
 	Type         int // 1: 专项套餐，2：无限使用
 	ProductId    int64
 	Balance      int
-	ExpireTime   time.Time
+	ExpireTime   Time
 }
 
 type OnlineUser struct {
@@ -61,7 +57,7 @@ type OnlineUser struct {
 	UserName        string `xorm:"'username'"`
 	NasIpAddr       string
 	AcctSessionId   string
-	StartTime       time.Time
+	StartTime       Time
 	UsedDuration    int //已记账时长:sec
 	IpAddr          string
 	MacAddr         string
@@ -87,8 +83,8 @@ type RadProduct struct {
 	DownStreamLimit   int   // 下行流量，Kb
 	DomainName        string
 	Description       string
-	CreateTime        *time.Time
-	UpdateTime        *time.Time
+	CreateTime        *Time
+	UpdateTime        *Time
 }
 
 type RadNas struct {
@@ -104,8 +100,8 @@ type RadNas struct {
 type UserOnlineLog struct {
 	Id              int64  `xorm:"pk autoincr"`
 	UserName        string `xorm:"'username'"`
-	StartTime       time.Time
-	StopTime        *time.Time
+	StartTime       Time
+	StopTime        *Time
 	UsedDuration    int
 	TotalUpStream   int
 	TotalDownStream int
@@ -123,8 +119,8 @@ type SysManager struct {
 	Status       int8
 	Mobile       string
 	Email        string
-	CreateTime   time.Time
-	UpdateTime   *time.Time
+	CreateTime   Time
+	UpdateTime   *Time
 	Description  string
 }
 
@@ -133,8 +129,8 @@ type SysDepartment struct {
 	Code        string
 	Name        string
 	ParentId    int64
-	CreateTime  time.Time
-	UpdateTime  *time.Time
+	CreateTime  Time
+	UpdateTime  *Time
 	Description string
 }
 
@@ -142,8 +138,8 @@ type SysRole struct {
 	Id          int64 `xorm:"pk autoincr"`
 	Code        string
 	Name        string
-	CreateTime  time.Time
-	UpdateTime  *time.Time
+	CreateTime  Time
+	UpdateTime  *Time
 	Description string
 }
 

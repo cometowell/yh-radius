@@ -49,7 +49,7 @@ func acctStartHandler(acctSessionId string, cxt *Context) {
 	online := OnlineUser{
 		AcctSessionId:  acctSessionId,
 		NasIpAddr: cxt.RadNas.IpAddr,
-		StartTime: time.Now(),
+		StartTime: *NowTime(),
 	}
 
 	attr, ok := cxt.Request.RadiusAttrStringKeyMap["User-Name"]
@@ -116,11 +116,11 @@ func acctStopHandler(acctSessionId string, cxt *Context) {
 func accounting(online OnlineUser, totalUpStream int, totalDownStream int, cxt *Context) {
 	// 添加online log
 	now := time.Now()
-	usedDuration := int(now.Sub(online.StartTime).Seconds())
+	usedDuration := int(now.Sub(time.Time(online.StartTime)).Seconds())
 	onlineLog := UserOnlineLog{
 		UserName:        online.UserName,
 		StartTime:       online.StartTime,
-		StopTime:        &now,
+		StopTime:        NowTime(),
 		UsedDuration:    usedDuration,
 		TotalUpStream:   totalUpStream,
 		TotalDownStream: totalDownStream,
