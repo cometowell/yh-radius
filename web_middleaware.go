@@ -37,6 +37,20 @@ func PermCheck(c *gin.Context) {
 
 	// TODO 权限校验
 
+	// 分页参数处理
+	params := make(map[string]interface{})
+	c.ShouldBindJSON(&params)
+	pageSize := PageSize
+	if size, ok := params["pageSize"]; ok {
+		pageSize = int(size.(float64))
+	}
+	current := 0
+	if page, ok := params["page"]; ok {
+		current = int(page.(float64)) - 1
+	}
+
+	c.Set("pageSize", pageSize);
+	c.Set("current", current);
 	c.Next()
 }
 

@@ -179,6 +179,7 @@ func (SysManagerRole) TableName() string {
 	return "sys_manager"
 }
 
+const PageSize = 20
 type Pagination struct {
 	Size int64
 	Current int64
@@ -189,7 +190,7 @@ type Pagination struct {
 
 func NewPagination(data interface{}, totalCount int64) *Pagination {
 	return &Pagination{
-		Size: 1,
+		Size: PageSize,
 		Current: 1,
 		Data: data,
 		TotalCount: totalCount,

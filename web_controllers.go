@@ -38,15 +38,14 @@ func logout(c *gin.Context) {
 func fetchManagerInfo(c *gin.Context) {
 	token := c.GetHeader(SessionName)
 	session := GlobalSessionManager.GetSession(token)
-	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "suceess", Data: session.GetAttr("manager")})
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: session.GetAttr("manager")})
 }
 
 func managerList(c *gin.Context) {
-
-	params := make(map[string]interface{})
-	c.ShouldBindJSON(&params)
 	var managers []SysManager
-	totalCount, _ := engine.FindAndCount(&managers)
+	pageSize, _ := c.Get("pageSize")
+	current, _ := c.Get("current")
+	totalCount, _ := engine.Limit(pageSize.(int) , current.(int) * pageSize.(int)).FindAndCount(&managers)
 	pagination := NewPagination(managers, totalCount)
-	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "suceess", Data: pagination})
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
 }
