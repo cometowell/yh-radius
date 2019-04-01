@@ -111,17 +111,19 @@ type UserOnlineLog struct {
 }
 
 type SysManager struct {
-	Id           int64 `xorm:"pk autoincr"`
-	DepartmentId int64
-	Username     string
-	Password     string
-	RealName     string
-	Status       int8
-	Mobile       string
-	Email        string
-	CreateTime   Time
-	UpdateTime   *Time
-	Description  string
+	Id           int64 `xorm:"pk autoincr" json:"id"`
+	DepartmentId int64 `json:"departmentId"`
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+	RealName     string `json:"realName"`
+	Status       int8 `json:"status"`
+	Mobile       string `json:"mobile"`
+	Email        string `json:"email"`
+	CreateTime   Time `json:"createTime"`
+	UpdateTime   *Time `json:"updateTime"`
+	Description  string `json:"description"`
+
+	Page `xorm:"-" json:"page"`
 }
 
 type SysDepartment struct {
@@ -181,20 +183,22 @@ func (SysManagerRole) TableName() string {
 
 const PageSize = 20
 type Pagination struct {
-	Size int64
-	Current int64
-	TotalPage int64
-	TotalCount int64
-	Data interface{}
+	Size int64 `json:"size"`
+	Current int64 `json:"current"`
+	TotalPage int64 `json:"totalPage"`
+	TotalCount int64 `json:"totalCount"`
+	Data interface{} `json:"data"`
 }
 
 func NewPagination(data interface{}, totalCount int64) *Pagination {
-	return &Pagination{
+	p := &Pagination{
 		Size: PageSize,
 		Current: 1,
 		Data: data,
 		TotalCount: totalCount,
 	}
+	p.setTotalPage()
+	return p
 }
 
 func (p *Pagination) setTotalPage() {
@@ -203,4 +207,9 @@ func (p *Pagination) setTotalPage() {
 		return
 	}
 	p.TotalPage = p.TotalCount / p.Size
+}
+
+type Page struct {
+	Current int `json:"current"`
+	PageSize int `json:"pageSize"`
 }

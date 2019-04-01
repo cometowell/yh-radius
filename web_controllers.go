@@ -8,8 +8,9 @@ import (
 func loadControllers(router *gin.Engine) {
 	router.POST("/login", login)
 	router.POST("/logout", logout)
-	router.POST("/manager/info", fetchManagerInfo)
+	router.POST("/session/manager/info", sessionManagerInfo)
 	router.POST("/manager/list", managerList)
+	router.POST("/manager/info", managerById)
 }
 
 func login(c *gin.Context) {
@@ -35,17 +36,25 @@ func logout(c *gin.Context) {
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success"})
 }
 
-func fetchManagerInfo(c *gin.Context) {
+func sessionManagerInfo(c *gin.Context) {
 	token := c.GetHeader(SessionName)
 	session := GlobalSessionManager.GetSession(token)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: session.GetAttr("manager")})
 }
 
 func managerList(c *gin.Context) {
+	var params SysManager
+	c.ShouldBindJSON(&params)
+	c.Set("current", params.Current)
+	c.Set("pageSize", params.PageSize)
 	var managers []SysManager
-	pageSize, _ := c.Get("pageSize")
-	current, _ := c.Get("current")
-	totalCount, _ := engine.Limit(pageSize.(int) , current.(int) * pageSize.(int)).FindAndCount(&managers)
-	pagination := NewPagination(managers, totalCount)
-	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
+	page(c, &managers)
+}
+
+func managerById(c *gin.Context) {
+	var manager SysManager
+	c.ShouldBindJSON(&manager)
+	engine.Id(manager.Id).Get(&manager)
+	manager.Password = ""
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: manager})
 }

@@ -7,6 +7,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -199,4 +201,13 @@ func buildUrlParams(params ...interface{}) string {
 	}
 
 	return result
+}
+
+// 分页
+func page(c *gin.Context, result interface{}) {
+	pageSize, _ := c.Get("pageSize")
+	current, _ := c.Get("current")
+	totalCount, _ := engine.Limit(pageSize.(int) , (current.(int) - 1) * pageSize.(int)).FindAndCount(result)
+	pagination := NewPagination(result, totalCount)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
 }
