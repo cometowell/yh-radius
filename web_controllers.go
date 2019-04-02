@@ -8,9 +8,13 @@ import (
 func loadControllers(router *gin.Engine) {
 	router.POST("/login", login)
 	router.POST("/logout", logout)
+
 	router.POST("/session/manager/info", sessionManagerInfo)
 	router.POST("/manager/list", managerList)
 	router.POST("/manager/info", managerById)
+	router.POST("/manager/add", addManager)
+
+	router.POST("/fetch/department", fetchDepartments)
 }
 
 func login(c *gin.Context) {
@@ -36,6 +40,7 @@ func logout(c *gin.Context) {
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success"})
 }
 
+// ======================= manager start =========================
 func sessionManagerInfo(c *gin.Context) {
 	token := c.GetHeader(SessionName)
 	session := GlobalSessionManager.GetSession(token)
@@ -57,4 +62,29 @@ func managerById(c *gin.Context) {
 	engine.Id(manager.Id).Get(&manager)
 	manager.Password = ""
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: manager})
+}
+
+func addManager(c *gin.Context) {
+	var manager SysManager
+	c.ShouldBindJSON(&manager)
+	manager.Status = 1
+	manager.CreateTime = *NowTime()
+	engine.InsertOne(&manager)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success"})
+}
+
+func updateManager(c *gin.Context) {
+	var manager SysManager
+	c.ShouldBindJSON(&manager)
+	engine.Update(&manager)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success"})
+}
+
+// ======================= manager end =========================
+
+// system
+func fetchDepartments(c *gin.Context) {
+	var departments []SysDepartment
+	engine.Find(&departments)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: departments})
 }

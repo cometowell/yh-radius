@@ -31,7 +31,7 @@ func PermCheck(c *gin.Context) {
 	accessToken := c.GetHeader(SessionName)
 	session := GlobalSessionManager.Provider.ReadSession(accessToken)
 	if session == nil {
-		unauthorizedAccess(c)
+		notLoggedIn(c)
 		return
 	}
 
@@ -39,11 +39,8 @@ func PermCheck(c *gin.Context) {
 	c.Next()
 }
 
-func unauthorizedAccess(c *gin.Context) {
-	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-		"code": 999,
-		"msg": "无权限访问!",
-	})
+func notLoggedIn(c *gin.Context) {
+	c.AbortWithStatus(http.StatusUnauthorized)
 }
 
 func isPassableUrl(c *gin.Context) bool {

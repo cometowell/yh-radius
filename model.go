@@ -127,13 +127,13 @@ type SysManager struct {
 }
 
 type SysDepartment struct {
-	Id          int64 `xorm:"pk autoincr"`
-	Code        string
-	Name        string
-	ParentId    int64
-	CreateTime  Time
-	UpdateTime  *Time
-	Description string
+	Id          int64 `xorm:"pk autoincr" json:"id"`
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	ParentId    int64 `json:"parentId"`
+	CreateTime  Time `json:"createTime"`
+	UpdateTime  *Time `json:"updateTime"`
+	Description string `json:"description"`
 }
 
 type SysRole struct {
