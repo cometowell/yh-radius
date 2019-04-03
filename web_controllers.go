@@ -13,6 +13,8 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/manager/list", managerList)
 	router.POST("/manager/info", managerById)
 	router.POST("/manager/add", addManager)
+	router.POST("/manager/update", updateManager)
+	router.POST("/manager/del", delManager)
 
 	router.POST("/fetch/department", fetchDepartments)
 }
@@ -68,16 +70,28 @@ func addManager(c *gin.Context) {
 	var manager SysManager
 	c.ShouldBindJSON(&manager)
 	manager.Status = 1
+	manager.Password = encrypt(manager.Password)
 	manager.CreateTime = *NowTime()
 	engine.InsertOne(&manager)
-	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success"})
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "管理员信息添加成功!"})
 }
 
 func updateManager(c *gin.Context) {
 	var manager SysManager
 	c.ShouldBindJSON(&manager)
-	engine.Update(&manager)
-	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success"})
+	if manager.Password != "" {
+		manager.Password = encrypt(manager.Password)
+	}
+	engine.Id(manager.Id).Update(&manager)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "管理员信息更新成功!"})
+}
+
+func delManager(c *gin.Context) {
+	var manager SysManager
+	c.ShouldBindJSON(&manager)
+	manager.Status = 2 // 标记为已删除
+	engine.Id(manager.Id).Cols("status").Update(&manager)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "删除成功!"})
 }
 
 // ======================= manager end =========================
