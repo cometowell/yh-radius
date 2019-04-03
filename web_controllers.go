@@ -89,7 +89,7 @@ func updateManager(c *gin.Context) {
 func delManager(c *gin.Context) {
 	var manager SysManager
 	c.ShouldBindJSON(&manager)
-	manager.Status = 2 // 标记为已删除
+	manager.Status = 3 // 标记为已删除
 	engine.Id(manager.Id).Cols("status").Update(&manager)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "删除成功!"})
 }
