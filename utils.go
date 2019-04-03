@@ -204,10 +204,14 @@ func buildUrlParams(params ...interface{}) string {
 }
 
 // 分页
-func page(c *gin.Context, result interface{}) {
+func pageByWhereSql(c *gin.Context, result interface{}, whereSql string, whereArgs []interface{}) {
 	pageSize, _ := c.Get("pageSize")
 	current, _ := c.Get("current")
 	totalCount, _ := engine.Limit(pageSize.(int) , (current.(int) - 1) * pageSize.(int)).FindAndCount(result)
-	pagination := NewPagination(result, totalCount)
+	pagination := NewPagination(result, totalCount, current.(int))
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
+}
+
+func pageByConditions(c *gin.Context, result interface{}, conditions interface{}) {
+
 }

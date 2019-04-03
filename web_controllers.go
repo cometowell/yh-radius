@@ -52,10 +52,10 @@ func sessionManagerInfo(c *gin.Context) {
 func managerList(c *gin.Context) {
 	var params SysManager
 	c.ShouldBindJSON(&params)
-	c.Set("current", params.Current)
+	c.Set("current", params.Page)
 	c.Set("pageSize", params.PageSize)
 	var managers []SysManager
-	page(c, &managers)
+	pageByWhereSql(c, &managers, "" ,nil)
 }
 
 func managerById(c *gin.Context) {

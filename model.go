@@ -123,7 +123,7 @@ type SysManager struct {
 	UpdateTime   *Time `json:"updateTime"`
 	Description  string `json:"description"`
 
-	Page `xorm:"-" json:"page"`
+	Pager `xorm:"-" json:"page"`
 }
 
 type SysDepartment struct {
@@ -184,16 +184,16 @@ func (SysManagerRole) TableName() string {
 const PageSize = 20
 type Pagination struct {
 	Size int64 `json:"size"`
-	Current int64 `json:"current"`
+	Current int `json:"current"`
 	TotalPage int64 `json:"totalPage"`
 	TotalCount int64 `json:"totalCount"`
 	Data interface{} `json:"data"`
 }
 
-func NewPagination(data interface{}, totalCount int64) *Pagination {
+func NewPagination(data interface{}, totalCount int64, current int) *Pagination {
 	p := &Pagination{
 		Size: PageSize,
-		Current: 1,
+		Current: current,
 		Data: data,
 		TotalCount: totalCount,
 	}
@@ -209,7 +209,7 @@ func (p *Pagination) setTotalPage() {
 	p.TotalPage = p.TotalCount / p.Size
 }
 
-type Page struct {
-	Current int `json:"current"`
+type Pager struct {
+	Page int `json:"page"`
 	PageSize int `json:"pageSize"`
 }
