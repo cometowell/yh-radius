@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -207,11 +208,29 @@ func buildUrlParams(params ...interface{}) string {
 func pageByWhereSql(c *gin.Context, result interface{}, whereSql string, whereArgs []interface{}) {
 	pageSize, _ := c.Get("pageSize")
 	current, _ := c.Get("current")
-	totalCount, _ := engine.Limit(pageSize.(int) , (current.(int) - 1) * pageSize.(int)).FindAndCount(result)
-	pagination := NewPagination(result, totalCount, current.(int))
+	totalCount, err := engine.Where(whereSql, whereArgs...).Limit(pageSize.(int) , (current.(int) - 1) * pageSize.(int)).FindAndCount(result)
+	if err != nil  {
+		panic(err)
+	}
+	pagination := NewPagination(result, totalCount, current.(int), pageSize.(int))
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
 }
 
 func pageByConditions(c *gin.Context, result interface{}, conditions interface{}) {
 
+}
+
+// tools
+func structToMap(data interface{}) (dst map[string]interface{}) {
+	dst = make(map[string]interface{})
+	dataType := reflect.TypeOf(data)
+	dataValue := reflect.ValueOf(data)
+	for i:=0; i<dataType.NumField(); i++ {
+		field := dataType.Field(i)
+		val := dataValue.FieldByName(field.Name)
+		if val.IsValid() { // filter zero value
+			dst[field.Name] = val.Interface()
+		}
+	}
+	return dst
 }

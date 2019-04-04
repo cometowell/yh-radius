@@ -181,18 +181,18 @@ func (SysManagerRole) TableName() string {
 	return "sys_manager"
 }
 
-const PageSize = 20
+const PageSize = 10
 type Pagination struct {
-	Size int64 `json:"size"`
+	Size int `json:"size"`
 	Current int `json:"current"`
 	TotalPage int64 `json:"totalPage"`
 	TotalCount int64 `json:"totalCount"`
 	Data interface{} `json:"data"`
 }
 
-func NewPagination(data interface{}, totalCount int64, current int) *Pagination {
+func NewPagination(data interface{}, totalCount int64, current, pageSize int) *Pagination {
 	p := &Pagination{
-		Size: PageSize,
+		Size: pageSize,
 		Current: current,
 		Data: data,
 		TotalCount: totalCount,
@@ -202,11 +202,11 @@ func NewPagination(data interface{}, totalCount int64, current int) *Pagination 
 }
 
 func (p *Pagination) setTotalPage() {
-	if p.TotalCount % p.Size != 0 {
-		p.TotalPage = p.TotalCount / p.Size + 1
+	if p.TotalCount % int64(p.Size) != 0 {
+		p.TotalPage = p.TotalCount / int64(p.Size) + 1
 		return
 	}
-	p.TotalPage = p.TotalCount / p.Size
+	p.TotalPage = p.TotalCount / int64(p.Size)
 }
 
 type Pager struct {

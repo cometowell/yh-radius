@@ -55,7 +55,24 @@ func managerList(c *gin.Context) {
 	c.Set("current", params.Page)
 	c.Set("pageSize", params.PageSize)
 	var managers []SysManager
-	pageByWhereSql(c, &managers, "" ,nil)
+	whereSql := "1=1 "
+	whereArgs := make([]interface{}, 0)
+	if params.Username != "" {
+		whereSql += "and username like ? "
+		whereArgs = append(whereArgs, "%" + params.Username + "%")
+	}
+
+	if params.RealName != "" {
+		whereSql += "and real_name like ? "
+		whereArgs = append(whereArgs, "%" + params.RealName + "%")
+	}
+
+	if params.Status != 0 {
+		whereSql += "and status = ?"
+		whereArgs = append(whereArgs, params.Status)
+	}
+
+	pageByWhereSql(c, &managers, whereSql ,whereArgs)
 }
 
 func managerById(c *gin.Context) {
