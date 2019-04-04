@@ -47,6 +47,11 @@ func (t *Time) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (t Time) MarshalJSON() ([]byte, error) {
+	// when time is zero value return empty string
+	if time.Time(t).IsZero() {
+		return []byte(`""`), nil
+	}
+
 	b := make([]byte, 0, len(TimeFormat)+2)
 	b = append(b, '"')
 	b = time.Time(t).AppendFormat(b, TimeFormat)
@@ -62,7 +67,6 @@ func (t *Time) convert(datetime time.Time) Time {
 	return Time(datetime)
 }
 
-func NowTime() *Time {
-	now := Time(time.Now())
-	return &now
+func NowTime() Time {
+	return Time(time.Now())
 }

@@ -204,11 +204,21 @@ func buildUrlParams(params ...interface{}) string {
 	return result
 }
 
-// 分页
+// pagination with where condition string
 func pageByWhereSql(c *gin.Context, result interface{}, whereSql string, whereArgs []interface{}) {
 	pageSize, _ := c.Get("pageSize")
 	current, _ := c.Get("current")
-	totalCount, err := engine.Where(whereSql, whereArgs...).Limit(pageSize.(int) , (current.(int) - 1) * pageSize.(int)).FindAndCount(result)
+	totalCount, _ := engine.Omit("password").Where(whereSql, whereArgs...).Limit(pageSize.(int) , (current.(int) - 1) * pageSize.(int)).FindAndCount(result)
+	pagination := NewPagination(result, totalCount, current.(int), pageSize.(int))
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
+}
+
+// pagination with conditions
+// conditions should be struct or map
+func pageByConditions(c *gin.Context, result interface{}, conditions interface{}) {
+	pageSize, _ := c.Get("pageSize")
+	current, _ := c.Get("current")
+	totalCount, err := engine.Limit(pageSize.(int) , (current.(int) - 1) * pageSize.(int)).FindAndCount(result, conditions)
 	if err != nil  {
 		panic(err)
 	}
@@ -216,11 +226,7 @@ func pageByWhereSql(c *gin.Context, result interface{}, whereSql string, whereAr
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
 }
 
-func pageByConditions(c *gin.Context, result interface{}, conditions interface{}) {
-
-}
-
-// tools
+// struct to map
 func structToMap(data interface{}) (dst map[string]interface{}) {
 	dst = make(map[string]interface{})
 	dataType := reflect.TypeOf(data)
@@ -233,4 +239,20 @@ func structToMap(data interface{}) (dst map[string]interface{}) {
 		}
 	}
 	return dst
+}
+
+// build xorm where sql and where args
+func buildWhereSql(params map[string]interface{}, limitConditions map[string]string) (whereSql string, whereArgs []interface{}) {
+	whereSql += "1=1"
+	template := "and %s %s ? "
+	whereArgs = make([]interface{}, 0)
+	for key, value := range params {
+		condition, ok := limitConditions[key]
+		if !ok {
+			condition = "="
+		}
+		whereSql += fmt.Sprintf(template, key, condition)
+		whereArgs = append(whereArgs, value)
+	}
+	return
 }

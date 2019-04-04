@@ -49,7 +49,7 @@ func acctStartHandler(acctSessionId string, cxt *Context) {
 	online := OnlineUser{
 		AcctSessionId:  acctSessionId,
 		NasIpAddr: cxt.RadNas.IpAddr,
-		StartTime: *NowTime(),
+		StartTime: NowTime(),
 	}
 
 	attr, ok := cxt.Request.RadiusAttrStringKeyMap["User-Name"]

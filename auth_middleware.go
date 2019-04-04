@@ -58,7 +58,7 @@ func UserVerify(cxt *Context) {
 	sessionTimeout := int(config["radius.session.timeout"].(float64))
 	user.sessionTimeout = sessionTimeout
 	if productType == ClacPriceByMonth { // 按月计费套餐
-		availableSeconds := int((*time.Time)(user.ExpireTime).Sub(time.Now()).Seconds())
+		availableSeconds := int(time.Time(user.ExpireTime).Sub(time.Now()).Seconds())
 		if availableSeconds <= 0 {
 			panic("user's service is expire")
 		}

@@ -16,6 +16,8 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/manager/update", updateManager)
 	router.POST("/manager/del", delManager)
 
+	router.POST("/user/list", listUser)
+
 	router.POST("/fetch/department", fetchDepartments)
 }
 
@@ -42,7 +44,7 @@ func logout(c *gin.Context) {
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success"})
 }
 
-// ======================= manager start =========================
+// -------------------------- manager start ----------------------------
 func sessionManagerInfo(c *gin.Context) {
 	token := c.GetHeader(SessionName)
 	session := GlobalSessionManager.GetSession(token)
@@ -88,7 +90,7 @@ func addManager(c *gin.Context) {
 	c.ShouldBindJSON(&manager)
 	manager.Status = 1
 	manager.Password = encrypt(manager.Password)
-	manager.CreateTime = *NowTime()
+	manager.CreateTime = NowTime()
 	engine.InsertOne(&manager)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "管理员信息添加成功!"})
 }
@@ -110,8 +112,35 @@ func delManager(c *gin.Context) {
 	engine.Id(manager.Id).Cols("status").Update(&manager)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "删除成功!"})
 }
+// -------------------------- manager end ----------------------------
 
-// ======================= manager end =========================
+// -------------------------- user start -----------------------------
+func listUser(c *gin.Context) {
+	var params RadUser
+	c.ShouldBindJSON(&params)
+	var users []RadUserProduct
+	totalCount, _ := engine.Table("rad_user").Alias("ru").
+		Limit(params.PageSize, (params.Page - 1) * params.PageSize).
+		Join("INNER", []string{"rad_product", "sp"}, "ru.product_id = sp.id").
+		FindAndCount(&users)
+
+	pagination := NewPagination(users, totalCount, params.Page, params.PageSize)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
+}
+
+func updateUser(c *gin.Context) {
+
+}
+
+func addUser(c *gin.Context) {
+
+}
+
+func deleteUser(c *gin.Context) {
+
+}
+
+// -------------------------- user end -----------------------------
 
 // system
 func fetchDepartments(c *gin.Context) {

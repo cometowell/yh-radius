@@ -42,3 +42,22 @@ func TestJoin(t *testing.T) {
 		fmt.Printf("%+v", v)
 	}
 }
+
+func TestJoin1(t *testing.T) {
+	tsEngine, _ := xorm.NewEngine("mysql",
+		"root:root@tcp(127.0.0.1:3306)/radius?charset=utf8")
+
+	tsEngine.ShowSQL(true)
+	//var users = make([]RadUserProduct, 0)
+	//total, err := tsEngine.Table("rad_user").Alias("r").
+	//	Limit(10, 0).Join("INNER", []string{"rad_product", "sp"}, "r.product_id = sp.id").
+	//	FindAndCount(&users)
+	//if err != nil {
+	//	fmt.Println("你妹的异常了", err.Error())
+	//}
+	//users := make([]RadUser, 0)
+	var users RadUser
+	tsEngine.Get(&users)
+
+	fmt.Printf("%#v", users)//, total, err)
+}
