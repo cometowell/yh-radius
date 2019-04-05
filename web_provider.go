@@ -96,7 +96,6 @@ func (r *MemoryProvider) SessionGC(timeout int64) {
 
 		session, _ := ele.Value.(*Session)
 		if session.LastAccessTime+timeout < time.Now().Unix() {
-			fmt.Println(session.Id)
 			r.SesList.Remove(ele)
 			delete(r.Sessions, session.Id)
 		} else {
