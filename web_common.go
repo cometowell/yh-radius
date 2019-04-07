@@ -1,37 +1,52 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 const (
 	DateFormat = "2006-01-02"
 	TimeFormat = "2006-01-02 15:04:05"
 )
 
+const (
+	MonthlyProduct = 1
+	TimeProduct    = 2
+	FlowProduct    = 3
+)
+
+const (
+	DefaultFlowClearCycle     = 0
+	DayFlowClearCycle         = 1
+	MonthFlowClearCycle       = 2
+	FixedPeriodFlowClearCycle = 3
+)
+
 type JsonResult struct {
-	Code int `json:"code"`
-	Message string `json:"message"`
-	Data interface{} `json:"data"`
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 func newJsonResult(code int, message string, data interface{}) JsonResult {
 	return JsonResult{
-		Code:code,
+		Code:    code,
 		Message: message,
-		Data: data,
+		Data:    data,
 	}
 }
 
 func newSuccessJsonResult(message string, data interface{}) JsonResult {
 	return JsonResult{
-		Code: 0,
+		Code:    0,
 		Message: message,
-		Data: data,
+		Data:    data,
 	}
 }
 
 func newErrorJsonResult(message string) JsonResult {
 	return JsonResult{
-		Code: 1,
+		Code:    1,
 		Message: message,
 	}
 }
@@ -69,4 +84,34 @@ func (t *Time) convert(datetime time.Time) Time {
 
 func NowTime() Time {
 	return Time(time.Now())
+}
+
+func getStdTimeFromString(value string) (time.Time, error) {
+	return time.ParseInLocation(TimeFormat, value, time.Local)
+}
+
+func getTodayLastTime() time.Time {
+	today := time.Now()
+	return time.Time(time.Date(today.Year(), today.Month(), today.Day(),
+		23, 59, 59, 0, today.Location()))
+}
+
+func getNextDayLastTime() time.Time {
+	today := time.Now()
+	return time.Time(time.Date(today.Year(), today.Month(), today.Day()+1,
+		23, 59, 59, 0, today.Location()))
+}
+
+func getMonthLastTime() time.Time {
+	today := time.Now()
+	today = today.AddDate(0, 1, -today.Day())
+	return time.Time(time.Date(today.Year(), today.Month(), today.Day(),
+		23, 59, 59, 0, today.Location()))
+}
+
+func getDayLastTimeAfterAYear() time.Time {
+	today := time.Now()
+	today = today.AddDate(1, 0, 0)
+	return time.Time(time.Date(today.Year(), today.Month(), today.Day(),
+		23, 59, 59, 0, today.Location()))
 }

@@ -108,12 +108,14 @@ func (mgr *SessionManager) DestroySession(c *gin.Context) error {
 	return nil
 }
 
+const MaxGcInterval = 5 * 60
+
 func (mgr *SessionManager) Gc() {
 	mgr.Lock.Lock()
 	defer mgr.Lock.Unlock()
 	logger.Info("web service session timeout scheduled task begins execution")
 	mgr.Provider.SessionGC(mgr.MaxLifeTime)
-	time.AfterFunc(time.Duration(int64(time.Second)*mgr.MaxLifeTime), func() {
+	time.AfterFunc(time.Duration(int64(time.Second)*MaxGcInterval), func() {
 		mgr.Gc()
 	})
 }

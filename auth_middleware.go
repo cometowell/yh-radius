@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	AccessAcceptReplyMsg = "authenticate success"
+	AccessAcceptReplyMsg  = "authenticate success"
 	ShouldBindMacAddrFlag = 1 // 用户绑定MAC地址标识
-	ShouldBindVlanFlag 		  // 用户绑定虚拟专网标识
+	ShouldBindVlanFlag        // 用户绑定虚拟专网标识
 )
 
 // 验证用户名，密码
@@ -70,8 +70,8 @@ func UserVerify(cxt *Context) {
 		if user.AvailableTime <= 0 {
 			panic("user's service time already used up")
 		}
-		if sessionTimeout > user.AvailableTime {
-			user.sessionTimeout = user.AvailableTime
+		if int64(sessionTimeout) > user.AvailableTime {
+			user.sessionTimeout = int(user.AvailableTime)
 		}
 	} else { // 流量套餐
 		if user.AvailableFlow <= 0 {
@@ -105,7 +105,7 @@ func VlanVerify(cxt *Context) {
 	user := cxt.User
 	if user.ShouldBindVlan == ShouldBindVlanFlag {
 		attr, ok := cxt.Request.RadiusAttrStringKeyMap["NAS-Port-Id"]
-		
+
 		if ok {
 			vlanId, vlanId2 := getVlanIds(cxt.RadNas.VendorId, attr.AttrStringValue)
 
@@ -151,4 +151,3 @@ func authReply(cxt *Context, replyCode byte, msg string) {
 	replyAuthenticator(cxt.Request.Authenticator, cxt.Response, secret)
 	cxt.Listener.WriteToUDP(cxt.Response.ToByte(), cxt.Dst)
 }
-

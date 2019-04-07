@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 func loadControllers(router *gin.Engine) {
@@ -14,9 +16,16 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/manager/info", managerById)
 	router.POST("/manager/add", addManager)
 	router.POST("/manager/update", updateManager)
-	router.POST("/manager/del", delManager)
+	router.POST("/manager/delete", delManager)
+
+	router.POST("/product/add", addProduct)
+	router.POST("/product/update", updateProduct)
+	router.POST("/fetch/product", fetchProductList)
+	router.POST("/product/info", getProductInfo)
+	router.POST("/product/delete", deleteProduct)
 
 	router.POST("/user/list", listUser)
+	router.POST("/user/add", addUser)
 
 	router.POST("/fetch/department", fetchDepartments)
 }
@@ -162,7 +171,55 @@ func updateUser(c *gin.Context) {
 }
 
 func addUser(c *gin.Context) {
+	var user RadUser
+	c.ShouldBindJSON(&user)
+	user.Status = 1
+	user.CreateTime = NowTime()
+	fmt.Printf("%#v", user)
+	session := engine.NewSession()
+	defer session.Close()
+	var product RadProduct
+	session.ID(user.ProductId).Get(&product)
 
+	if product.Id == 0 {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"Code":    1,
+			"Message": "产品不存在",
+		})
+		return
+	}
+	user.Password = encrypt(user.Password)
+	user.ShouldBindMacAddr = product.ShouldBindMacAddr
+	user.ShouldBindVlan = product.ShouldBindVlan
+	user.ConcurrentCount = product.ConcurrentCount
+	user.AvailableTime = product.ProductDuration
+	user.AvailableFlow = product.ProductFlow
+	if product.Type == MonthlyProduct {
+		if time.Time(user.ExpireTime).IsZero() {
+			user.ExpireTime = Time(time.Now().AddDate(0, product.ServiceMonth, 0))
+		}
+	} else if product.Type == TimeProduct {
+		if time.Time(user.ExpireTime).IsZero() {
+			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
+			user.ExpireTime = Time(expireTime)
+		}
+	} else if product.Type == FlowProduct {
+		if product.FlowClearCycle == DefaultFlowClearCycle {
+			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
+			user.ExpireTime = Time(expireTime)
+		} else if product.FlowClearCycle == DayFlowClearCycle {
+			user.ExpireTime = Time(getNextDayLastTime())
+		} else if product.FlowClearCycle == MonthFlowClearCycle {
+			user.ExpireTime = Time(getMonthLastTime())
+		} else if product.FlowClearCycle == FixedPeriodFlowClearCycle {
+			if time.Time(user.ExpireTime).IsZero() {
+				user.ExpireTime = Time(getDayLastTimeAfterAYear())
+			}
+		}
+	}
+	session.InsertOne(&user)
+	session.Commit()
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "用户添加成功!"})
 }
 
 func deleteUser(c *gin.Context) {
@@ -170,6 +227,36 @@ func deleteUser(c *gin.Context) {
 }
 
 // -------------------------- user end -----------------------------
+
+// -------------------------- product start -----------------------------
+
+func addProduct(c *gin.Context) {
+
+}
+
+func updateProduct(c *gin.Context) {
+
+}
+
+func fetchProductList(c *gin.Context) {
+	var products []RadProduct
+	engine.Where("status = ?", 1).Find(&products)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: products})
+}
+
+func listProduct(c *gin.Context) {
+
+}
+
+func deleteProduct(c *gin.Context) {
+
+}
+
+func getProductInfo(c *gin.Context) {
+
+}
+
+// -------------------------- product end -----------------------------
 
 // system
 func fetchDepartments(c *gin.Context) {

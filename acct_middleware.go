@@ -47,9 +47,9 @@ func setAcctRecord(acctSessionId string, cxt *Context) {
 
 func acctStartHandler(acctSessionId string, cxt *Context) {
 	online := OnlineUser{
-		AcctSessionId:  acctSessionId,
-		NasIpAddr: cxt.RadNas.IpAddr,
-		StartTime: NowTime(),
+		AcctSessionId: acctSessionId,
+		NasIpAddr:     cxt.RadNas.IpAddr,
+		StartTime:     NowTime(),
 	}
 
 	attr, ok := cxt.Request.RadiusAttrStringKeyMap["User-Name"]
@@ -140,7 +140,7 @@ func accounting(online OnlineUser, totalUpStream int, totalDownStream int, cxt *
 	user := RadUser{UserName: online.UserName}
 	cxt.Session.Get(&user)
 	user.AvailableFlow -= int64(totalDownStream) - int64(totalUpStream)
-	user.AvailableTime -= usedDuration
+	user.AvailableTime -= int64(usedDuration)
 	if user.AvailableFlow < 0 {
 		user.AvailableFlow = 0
 	}
@@ -196,7 +196,7 @@ func acctInterimUpdateHandler(acctSessionId string, cxt *Context) {
 
 	online.TotalUpStream += int64(totalUpStream)
 	online.TotalUpStream += int64(totalUpStream)
-	cxt.Session.Id(online.Id).Cols("total_up_stream","total_down_stream").Update(&online)
+	cxt.Session.Id(online.Id).Cols("total_up_stream", "total_down_stream").Update(&online)
 }
 
 // It may also be used to mark the start of accounting (for example, upon booting)

@@ -16,9 +16,9 @@ type RadUser struct {
 	Password          string `json:"password"`
 	ProductId         int64  `json:"productId"`
 	Status            int    `json:"status"`
-	AvailableTime     int    `json:"availableTime"` // sec
+	AvailableTime     int64  `json:"availableTime"` // sec
 	AvailableFlow     int64  `json:"availableFlow"` // KB
-	ExpireTime        Time  `json:"expireTime"`
+	ExpireTime        Time   `json:"expireTime"`
 	ConcurrentCount   int    `json:"concurrentCount"` // 并发数
 	ShouldBindMacAddr int    `json:"shouldBindMacAddr"`
 	ShouldBindVlan    int    `json:"shouldBindVlan"`
@@ -27,16 +27,16 @@ type RadUser struct {
 	VlanId2           int    `json:"vlanId2"`
 	FramedIpAddr      string `json:"framedIpAddr"` // 静态IP
 	InstalledAddr     string `json:"installedAddr"`
-	PauseTime         Time  `json:"pauseTime"` // 停机时间
+	PauseTime         Time   `json:"pauseTime"` // 停机时间
 	CreateTime        Time   `json:"createTime"`
-	UpdateTime        Time  `json:"updateTime"`
+	UpdateTime        Time   `json:"updateTime"`
 	Mobile            string `json:"mobile"`
 	Email             string `json:"email"`
 	Description       string `json:"description"`
 
 	product        RadProduct `xorm:"-"`
 	sessionTimeout int        `xorm:"-"`
-	Pager `xorm:"-" json:"page"`
+	Pager          `xorm:"-" json:"page"`
 }
 
 type RadUserWallet struct {
@@ -87,7 +87,7 @@ type RadProduct struct {
 	DomainName        string `json:"domainName"`
 	Description       string `json:"description"`
 	CreateTime        Time   `json:"createTime"`
-	UpdateTime        Time  `json:"updateTime"`
+	UpdateTime        Time   `json:"updateTime"`
 
 	Pager `xorm:"-" json:"page"`
 }
@@ -106,7 +106,7 @@ type UserOnlineLog struct {
 	Id              int64  `xorm:"pk autoincr" json:"id"`
 	UserName        string `xorm:"'username'" json:"username"`
 	StartTime       Time   `json:"startTime"`
-	StopTime        Time  `json:"stopTime"`
+	StopTime        Time   `json:"stopTime"`
 	UsedDuration    int    `json:"usedDuration"`
 	TotalUpStream   int    `json:"totalUpStream"`
 	TotalDownStream int    `json:"totalDownStream"`
@@ -125,7 +125,7 @@ type SysManager struct {
 	Mobile       string `json:"mobile"`
 	Email        string `json:"email"`
 	CreateTime   Time   `json:"createTime"`
-	UpdateTime   Time  `json:"updateTime"`
+	UpdateTime   Time   `json:"updateTime"`
 	Description  string `json:"description"`
 
 	Pager `xorm:"-" json:"page"`
@@ -137,7 +137,7 @@ type SysDepartment struct {
 	Name        string `json:"name"`
 	ParentId    int64  `json:"parentId"`
 	CreateTime  Time   `json:"createTime"`
-	UpdateTime  Time  `json:"updateTime"`
+	UpdateTime  Time   `json:"updateTime"`
 	Description string `json:"description"`
 }
 
@@ -146,7 +146,7 @@ type SysRole struct {
 	Code        string `json:"code"`
 	Name        string `json:"name"`
 	CreateTime  Time   `json:"createTime"`
-	UpdateTime  Time  `json:"updateTime"`
+	UpdateTime  Time   `json:"updateTime"`
 	Description string `json:"description"`
 }
 

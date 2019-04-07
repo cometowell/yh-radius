@@ -68,3 +68,12 @@ func TestStructReflect(t *testing.T) {
 
 	fmt.Println(u)
 }
+
+func TestMonthLastTime(t *testing.T) {
+	fmt.Println(getMonthLastTime())
+}
+
+func TestDefaultTime(t *testing.T) {
+	t1, _ := getStdTimeFromString("2099-12-31 23:59:59")
+	fmt.Println(t1)
+}
