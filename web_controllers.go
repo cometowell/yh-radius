@@ -26,6 +26,9 @@ func loadControllers(router *gin.Engine) {
 
 	router.POST("/user/list", listUser)
 	router.POST("/user/add", addUser)
+	router.POST("/user/info", fetchUser)
+	router.POST("/user/update", updateUser)
+	router.POST("/user/delete", deleteUser)
 
 	router.POST("/fetch/department", fetchDepartments)
 }
@@ -167,13 +170,16 @@ func listUser(c *gin.Context) {
 }
 
 func updateUser(c *gin.Context) {
-
+	var user RadUser
+	c.ShouldBindJSON(&user)
+	engine.Id(user.Id).Update(&user)
+	c.JSON(http.StatusOK, newSuccessJsonResult("success", nil))
 }
 
 func addUser(c *gin.Context) {
 	var user RadUser
 	c.ShouldBindJSON(&user)
-	user.Status = 1
+	user.Status = UserAvailableStatus
 	user.CreateTime = NowTime()
 	fmt.Printf("%#v", user)
 	session := engine.NewSession()
@@ -223,8 +229,22 @@ func addUser(c *gin.Context) {
 }
 
 func deleteUser(c *gin.Context) {
-
+	var user RadUser
+	c.ShouldBindJSON(&user)
+	user.Status = UserDeletedStatus
+	engine.Id(user.Id).Update(&user)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "删除成功!"})
 }
+
+// get user info by id
+func fetchUser(c *gin.Context) {
+	var user RadUser
+	c.ShouldBindJSON(&user)
+	engine.Id(user.Id).Get(&user)
+	user.Password = ""
+	c.JSON(http.StatusOK, defaultSuccessJsonResult(user))
+}
+
 
 // -------------------------- user end -----------------------------
 

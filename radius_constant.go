@@ -90,4 +90,9 @@ const (
 	AcctStatusTypeAccountingOff = 8
 )
 
-const DateTimeFormat = "2006-01-02 15:04:05"
+const (
+	UserAvailableStatus = 1
+	UserPauseStatus = 2
+	UserDisableStatus = 3
+	UserDeletedStatus = 4
+)

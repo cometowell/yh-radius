@@ -44,6 +44,14 @@ func newSuccessJsonResult(message string, data interface{}) JsonResult {
 	}
 }
 
+func defaultSuccessJsonResult(data interface{}) JsonResult {
+	return JsonResult{
+		Code:    0,
+		Message: "success",
+		Data:    data,
+	}
+}
+
 func newErrorJsonResult(message string) JsonResult {
 	return JsonResult{
 		Code:    1,
