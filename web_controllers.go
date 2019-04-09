@@ -28,6 +28,7 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/user/add", addUser)
 	router.POST("/user/info", fetchUser)
 	router.POST("/user/update", updateUser)
+	router.POST("/user/order/record", fetchUserOrderRecord)
 	router.POST("/user/delete", deleteUser)
 
 	router.POST("/fetch/department", fetchDepartments)
@@ -169,6 +170,14 @@ func listUser(c *gin.Context) {
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
 }
 
+func fetchUserOrderRecord(c *gin.Context) {
+	var user RadUser
+	c.ShouldBindJSON(&user)
+	var records []UserOrderRecordProduct
+	engine.Join("INNER", "rad_product", "rad_product.id = user_order_record.product_id").Where("user_id = ?", user.Id).Asc("user_order_record.status").Find(&records)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: records})
+}
+
 func updateUser(c *gin.Context) {
 	var user RadUser
 	c.ShouldBindJSON(&user)
@@ -237,6 +246,8 @@ func addUser(c *gin.Context) {
 		Price: user.Count * product.Price,
 		ManagerId: manager.Id,
 		OrderTime:NowTime(),
+		Status: OrderUsingStatus,
+		EndDate: user.ExpireTime,
 	}
 	session.InsertOne(&orderRecord)
 

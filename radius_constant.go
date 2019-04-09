@@ -96,3 +96,10 @@ const (
 	UserDisableStatus = 3
 	UserDeletedStatus = 4
 )
+
+const (
+	OrderBookStatus = 1
+	OrderUsingStatus = 2
+	OrderCancelStatus = 3
+	OrderCompletedStatus = 4
+)

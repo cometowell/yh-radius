@@ -100,6 +100,17 @@ type UserOrderRecord struct {
 	Price int `json:"price"`
 	ManagerId int64 `json:"managerId"`// 操作人
 	OrderTime Time `json:"orderTime"`
+	Status int `json:"status"`
+	EndDate Time `json:"endDate"`
+}
+
+type UserOrderRecordProduct struct {
+	UserOrderRecord `xorm:"extends" json:"userOrderRecord"`
+	RadProduct `xorm:"extends" json:"radProduct"`
+}
+
+func (UserOrderRecordProduct) TableName() string {
+	return "user_order_record"
 }
 
 type RadNas struct {
