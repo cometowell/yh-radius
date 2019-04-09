@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 
@@ -255,4 +256,8 @@ func buildWhereSql(params map[string]interface{}, limitConditions map[string]str
 		whereArgs = append(whereArgs, value)
 	}
 	return
+}
+
+func isExpire(t Time) bool {
+	return time.Time(t).Sub(time.Now()) >= 0
 }

@@ -56,7 +56,7 @@ func UserVerify(cxt *Context) {
 		panic("user did not purchase the product")
 	}
 
-	user.product = product
+	user.Product = product
 	productType := product.Type
 
 	sessionTimeout := int(config["radius.session.timeout"].(float64))

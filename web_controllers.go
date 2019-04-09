@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-xorm/xorm"
 	"net/http"
 	"time"
 )
@@ -181,7 +182,17 @@ func fetchUserOrderRecord(c *gin.Context) {
 func updateUser(c *gin.Context) {
 	var user RadUser
 	c.ShouldBindJSON(&user)
-	engine.Id(user.Id).Update(&user)
+	session := engine.NewSession()
+	defer session.Close()
+	var oldUser RadUser
+	session.ID(user.Id).Get(&oldUser);
+	// 停机用户重新使用需要顺延过期时间
+	if oldUser.Status == UserPauseStatus && user.Status == UserAvailableStatus {
+		hours := time.Now().Sub(time.Time(oldUser.PauseTime)).Hours()
+		user.ExpireTime = Time(time.Time(user.ExpireTime).AddDate(0, 0, int(hours)/24))
+	}
+	session.ID(user.Id).Update(&user)
+	session.Commit()
 	c.JSON(http.StatusOK, newSuccessJsonResult("success", nil))
 }
 
@@ -195,7 +206,6 @@ func addUser(c *gin.Context) {
 	defer session.Close()
 	var product RadProduct
 	session.ID(user.ProductId).Get(&product)
-
 	if product.Id == 0 {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
 			"Code":    1,
@@ -204,46 +214,15 @@ func addUser(c *gin.Context) {
 		return
 	}
 	user.Password = encrypt(user.Password)
-	user.ShouldBindMacAddr = product.ShouldBindMacAddr
-	user.ShouldBindVlan = product.ShouldBindVlan
-	user.ConcurrentCount = product.ConcurrentCount
-	user.AvailableTime = product.ProductDuration
-	user.AvailableFlow = product.ProductFlow
-	if product.Type == MonthlyProduct {
-		expire := time.Time(user.ExpireTime);
-		if time.Time(expire).IsZero() {
-			expire = time.Now()
-		}
-		expire = time.Time(time.Date(expire.Year(), expire.Month() + time.Month(product.ServiceMonth), expire.Day(), 23, 59, 59, 0, expire.Location()))
-		user.ExpireTime = Time(expire)
-	} else if product.Type == TimeProduct {
-		if time.Time(user.ExpireTime).IsZero() {
-			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
-			user.ExpireTime = Time(expireTime)
-		}
-	} else if product.Type == FlowProduct {
-		if product.FlowClearCycle == DefaultFlowClearCycle {
-			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
-			user.ExpireTime = Time(expireTime)
-		} else if product.FlowClearCycle == DayFlowClearCycle {
-			user.ExpireTime = Time(getNextDayLastTime())
-		} else if product.FlowClearCycle == MonthFlowClearCycle {
-			user.ExpireTime = Time(getMonthLastTime())
-		} else if product.FlowClearCycle == FixedPeriodFlowClearCycle {
-			if time.Time(user.ExpireTime).IsZero() {
-				user.ExpireTime = Time(getDayLastTimeAfterAYear())
-			}
-		}
-	}
+	purchaseProduct(&user, &product, c, session)
 	session.InsertOne(&user)
-
 	// 订购信息
 	webSession := GlobalSessionManager.GetSessionByGinContext(c)
 	manager := webSession.GetAttr("manager").(SysManager)
 	orderRecord := UserOrderRecord{
 		UserId: user.Id,
 		ProductId: product.Id,
-		Price: user.Count * product.Price,
+		Price: user.Price,
 		ManagerId: manager.Id,
 		OrderTime:NowTime(),
 		Status: OrderUsingStatus,
@@ -272,8 +251,89 @@ func fetchUser(c *gin.Context) {
 	c.JSON(http.StatusOK, defaultSuccessJsonResult(user))
 }
 
+func continueProduct(c *gin.Context) {
+	webSession := GlobalSessionManager.GetSessionByGinContext(c)
+	manager := webSession.GetAttr("manager").(SysManager)
+	var user RadUser
+	c.ShouldBindJSON(&user)
+	session := engine.NewSession()
+	defer session.Close()
 
-// -------------------------- user end -----------------------------
+	var oldUser RadUser
+	session.ID(user.Id).Get(&oldUser);
+	var newProduct RadProduct
+	session.ID(user.ProductId).Get(&newProduct)
+
+	var oldProduct RadProduct
+	session.ID(oldUser.ProductId).Get(&oldProduct)
+
+	if newProduct.Id == 0 {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"Code":    1,
+			"Message": "产品不存在",
+		})
+		return
+	}
+	if isExpire(oldUser.ExpireTime) { // 产品到期, 直接更新产品信息
+		purchaseProduct(&oldUser, &newProduct, c, session)
+	} else {
+		// 产品未到期续订同一产品，修改过期时间
+		if oldUser.ProductId == user.ProductId {
+			oldUser.ExpireTime = Time(time.Time(oldUser.ExpireTime).AddDate(0, newProduct.ServiceMonth * user.Count, 0))
+		} else {
+			// 产品未到期续订不同产品，作为预定订单，当产品到期定时任务更换为预定产品
+			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
+			orderRecord := UserOrderRecord{
+				UserId: user.Id,
+				ProductId: newProduct.Id,
+				Price: user.Price,
+				ManagerId: manager.Id,
+				OrderTime:NowTime(),
+				Status: OrderBookStatus,
+				EndDate: Time(expireTime),
+			}
+			session.InsertOne(&orderRecord)
+		}
+	}
+
+	session.ID(oldUser.Id).Update(&oldUser)
+	session.Commit()
+}
+
+func purchaseProduct(user *RadUser, product *RadProduct, c *gin.Context, session *xorm.Session) {
+	user.ShouldBindMacAddr = product.ShouldBindMacAddr
+	user.ShouldBindVlan = product.ShouldBindVlan
+	user.ConcurrentCount = product.ConcurrentCount
+	user.AvailableTime = product.ProductDuration
+	user.AvailableFlow = product.ProductFlow
+	if product.Type == MonthlyProduct {
+		expire := time.Time(user.ExpireTime)
+		if time.Time(expire).IsZero() {
+			expire = time.Now()
+		}
+		expire = time.Time(time.Date(expire.Year(), expire.Month() + time.Month(product.ServiceMonth), expire.Day(), 23, 59, 59, 0, expire.Location()))
+		user.ExpireTime = Time(expire)
+	} else if product.Type == TimeProduct {
+		if time.Time(user.ExpireTime).IsZero() {
+			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
+			user.ExpireTime = Time(expireTime)
+		}
+	} else if product.Type == FlowProduct {
+		if product.FlowClearCycle == DefaultFlowClearCycle {
+			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
+			user.ExpireTime = Time(expireTime)
+		} else if product.FlowClearCycle == DayFlowClearCycle {
+			user.ExpireTime = Time(getNextDayLastTime())
+		} else if product.FlowClearCycle == MonthFlowClearCycle {
+			user.ExpireTime = Time(getMonthLastTime())
+		} else if product.FlowClearCycle == FixedPeriodFlowClearCycle {
+			if time.Time(user.ExpireTime).IsZero() {
+				user.ExpireTime = Time(getDayLastTimeAfterAYear())
+			}
+		}
+	}
+}
+// -------------------------- user end ----------------------------------
 
 // -------------------------- product start -----------------------------
 

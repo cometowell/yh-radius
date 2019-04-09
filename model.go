@@ -34,10 +34,11 @@ type RadUser struct {
 	Email             string `json:"email"`
 	Description       string `json:"description"`
 
-	product        RadProduct `xorm:"-"`
+	Product        RadProduct `xorm:"-" json:"product"`
 	sessionTimeout int        `xorm:"-"`
 	Pager          `xorm:"-" json:"page"`
 	Count int `xorm:"-" json:"count"`
+	Price int `xorm:"-" json:"price"`
 }
 
 type RadUserWallet struct {

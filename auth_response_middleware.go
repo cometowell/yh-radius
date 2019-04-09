@@ -18,7 +18,7 @@ var AuthResponseWares = map[int]func(cxt *Context){
 // 华为
 func HuaweiResponse(cxt *Context) {
 	user := cxt.User
-	product := user.product
+	product := user.Product
 	// Huawei-Input-Burst-Size, Huawei-Input-Average-Rate
 	// Huawei-Output-Burst-Size, Huawei-Output-Average-Rate 单位 bit/s
 	upStreamLimit := product.UpStreamLimit * 1024
@@ -83,7 +83,7 @@ func HuaweiResponse(cxt *Context) {
 
 // 思科
 func CiscoResponse(cxt *Context) {
-	product := cxt.User.product
+	product := cxt.User.Product
 	upStreamLimit := product.UpStreamLimit * 1024
 	downStreamLimit := product.DownStreamLimit * 1024
 
@@ -131,7 +131,7 @@ func StandardResponse(cxt *Context) {
 // RouterOS
 func MikroTikResponse(cxt *Context) {
 	// Mikrotik-Rate-Limit	8
-	product := cxt.User.product
+	product := cxt.User.Product
 	upStreamLimit := product.UpStreamLimit
 	downStreamLimit := product.DownStreamLimit
 
@@ -157,7 +157,7 @@ func MikroTikResponse(cxt *Context) {
 func ZteResponse(cxt *Context) {
 	// ZTE-Rate-Ctrl-SCR-Down	83
 	// ZTE-Rate-Ctrl-SCR-Up		89
-	product := cxt.User.product
+	product := cxt.User.Product
 	upStreamLimit := product.UpStreamLimit
 	downStreamLimit := product.DownStreamLimit
 
