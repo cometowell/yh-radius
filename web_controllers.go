@@ -201,9 +201,12 @@ func addUser(c *gin.Context) {
 	user.AvailableTime = product.ProductDuration
 	user.AvailableFlow = product.ProductFlow
 	if product.Type == MonthlyProduct {
-		if time.Time(user.ExpireTime).IsZero() {
-			user.ExpireTime = Time(time.Now().AddDate(0, product.ServiceMonth, 0))
+		expire := time.Time(user.ExpireTime);
+		if time.Time(expire).IsZero() {
+			expire = time.Now()
 		}
+		expire = time.Time(time.Date(expire.Year(), expire.Month() + time.Month(product.ServiceMonth), expire.Day(), 23, 59, 59, 0, expire.Location()))
+		user.ExpireTime = Time(expire)
 	} else if product.Type == TimeProduct {
 		if time.Time(user.ExpireTime).IsZero() {
 			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
@@ -224,6 +227,19 @@ func addUser(c *gin.Context) {
 		}
 	}
 	session.InsertOne(&user)
+
+	// 订购信息
+	webSession := GlobalSessionManager.GetSessionByGinContext(c)
+	manager := webSession.GetAttr("manager").(SysManager)
+	orderRecord := UserOrderRecord{
+		UserId: user.Id,
+		ProductId: product.Id,
+		Price: user.Count * product.Price,
+		ManagerId: manager.Id,
+		OrderTime:NowTime(),
+	}
+	session.InsertOne(&orderRecord)
+
 	session.Commit()
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "用户添加成功!"})
 }

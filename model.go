@@ -37,6 +37,7 @@ type RadUser struct {
 	product        RadProduct `xorm:"-"`
 	sessionTimeout int        `xorm:"-"`
 	Pager          `xorm:"-" json:"page"`
+	Count int `xorm:"-" json:"count"`
 }
 
 type RadUserWallet struct {
@@ -90,6 +91,15 @@ type RadProduct struct {
 	UpdateTime        Time   `json:"updateTime"`
 
 	Pager `xorm:"-" json:"page"`
+}
+
+type UserOrderRecord struct {
+	Id int64 `xorm:"pk autoincr" json:"id"`
+	UserId int64 `json:"userId"`
+	ProductId int64 `json:"productId"`
+	Price int `json:"price"`
+	ManagerId int64 `json:"managerId"`// 操作人
+	OrderTime Time `json:"orderTime"`
 }
 
 type RadNas struct {

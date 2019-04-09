@@ -127,3 +127,8 @@ func (mgr *SessionManager) GetActiveSessions() []ISession {
 func (mgr *SessionManager) GetSession(sid string) ISession {
 	return mgr.Provider.ReadSession(sid)
 }
+
+func (mgr *SessionManager) GetSessionByGinContext(c *gin.Context) ISession {
+	accessToken := c.GetHeader(SessionName)
+	return mgr.Provider.ReadSession(accessToken)
+}

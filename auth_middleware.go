@@ -26,6 +26,10 @@ func UserVerify(cxt *Context) {
 		panic("user's account number or password is incorrect")
 	}
 
+	if user.Status > UserAvailableStatus {
+		panic("status of user's account number status abnormal")
+	}
+
 	// 验证密码
 	password := decrypt(user.Password)
 	if cxt.Request.isChap {

@@ -35,6 +35,7 @@ func PermCheck(c *gin.Context) {
 		return
 	}
 
+	c.Set("session", session)
 	// TODO 权限校验
 	c.Next()
 }
