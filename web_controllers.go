@@ -30,6 +30,7 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/user/info", fetchUser)
 	router.POST("/user/update", updateUser)
 	router.POST("/user/order/record", fetchUserOrderRecord)
+	router.POST("/user/continue", continueProduct)
 	router.POST("/user/delete", deleteUser)
 
 	router.POST("/fetch/department", fetchDepartments)
@@ -185,7 +186,7 @@ func updateUser(c *gin.Context) {
 	session := engine.NewSession()
 	defer session.Close()
 	var oldUser RadUser
-	session.ID(user.Id).Get(&oldUser);
+	session.ID(user.Id).Get(&oldUser)
 	// 停机用户重新使用需要顺延过期时间
 	if oldUser.Status == UserPauseStatus && user.Status == UserAvailableStatus {
 		hours := time.Now().Sub(time.Time(oldUser.PauseTime)).Hours()
@@ -220,13 +221,13 @@ func addUser(c *gin.Context) {
 	webSession := GlobalSessionManager.GetSessionByGinContext(c)
 	manager := webSession.GetAttr("manager").(SysManager)
 	orderRecord := UserOrderRecord{
-		UserId: user.Id,
+		UserId:    user.Id,
 		ProductId: product.Id,
-		Price: user.Price,
+		Price:     user.Price,
 		ManagerId: manager.Id,
-		OrderTime:NowTime(),
-		Status: OrderUsingStatus,
-		EndDate: user.ExpireTime,
+		OrderTime: NowTime(),
+		Status:    OrderUsingStatus,
+		EndDate:   user.ExpireTime,
 	}
 	session.InsertOne(&orderRecord)
 
@@ -252,20 +253,32 @@ func fetchUser(c *gin.Context) {
 }
 
 func continueProduct(c *gin.Context) {
-	webSession := GlobalSessionManager.GetSessionByGinContext(c)
-	manager := webSession.GetAttr("manager").(SysManager)
 	var user RadUser
 	c.ShouldBindJSON(&user)
 	session := engine.NewSession()
 	defer session.Close()
 
+	bookOrderCount, e := session.Table("user_order_record").Where("user_id = ? and status = ?", user.Id, OrderBookStatus).Count()
+
+	if e != nil {
+		panic(e)
+	}
+
+	if bookOrderCount > 0 {
+		c.JSON(http.StatusOK, newErrorJsonResult("用户已经预定了套餐暂未生效，不允许再次预定"))
+		return
+	}
+
 	var oldUser RadUser
-	session.ID(user.Id).Get(&oldUser);
+	session.ID(user.Id).Get(&oldUser)
 	var newProduct RadProduct
 	session.ID(user.ProductId).Get(&newProduct)
 
 	var oldProduct RadProduct
 	session.ID(oldUser.ProductId).Get(&oldProduct)
+
+	webSession := GlobalSessionManager.GetSessionByGinContext(c)
+	manager := webSession.GetAttr("manager").(SysManager)
 
 	if newProduct.Id == 0 {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -279,18 +292,18 @@ func continueProduct(c *gin.Context) {
 	} else {
 		// 产品未到期续订同一产品，修改过期时间
 		if oldUser.ProductId == user.ProductId {
-			oldUser.ExpireTime = Time(time.Time(oldUser.ExpireTime).AddDate(0, newProduct.ServiceMonth * user.Count, 0))
+			oldUser.ExpireTime = Time(time.Time(oldUser.ExpireTime).AddDate(0, newProduct.ServiceMonth*user.Count, 0))
 		} else {
 			// 产品未到期续订不同产品，作为预定订单，当产品到期定时任务更换为预定产品
 			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
 			orderRecord := UserOrderRecord{
-				UserId: user.Id,
+				UserId:    user.Id,
 				ProductId: newProduct.Id,
-				Price: user.Price,
+				Price:     user.Price,
 				ManagerId: manager.Id,
-				OrderTime:NowTime(),
-				Status: OrderBookStatus,
-				EndDate: Time(expireTime),
+				OrderTime: NowTime(),
+				Status:    OrderBookStatus,
+				EndDate:   Time(expireTime),
 			}
 			session.InsertOne(&orderRecord)
 		}
@@ -311,7 +324,7 @@ func purchaseProduct(user *RadUser, product *RadProduct, c *gin.Context, session
 		if time.Time(expire).IsZero() {
 			expire = time.Now()
 		}
-		expire = time.Time(time.Date(expire.Year(), expire.Month() + time.Month(product.ServiceMonth), expire.Day(), 23, 59, 59, 0, expire.Location()))
+		expire = time.Time(time.Date(expire.Year(), expire.Month()+time.Month(product.ServiceMonth), expire.Day(), 23, 59, 59, 0, expire.Location()))
 		user.ExpireTime = Time(expire)
 	} else if product.Type == TimeProduct {
 		if time.Time(user.ExpireTime).IsZero() {
@@ -333,6 +346,7 @@ func purchaseProduct(user *RadUser, product *RadProduct, c *gin.Context, session
 		}
 	}
 }
+
 // -------------------------- user end ----------------------------------
 
 // -------------------------- product start -----------------------------
