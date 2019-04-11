@@ -77,3 +77,18 @@ func TestDefaultTime(t *testing.T) {
 	t1, _ := getStdTimeFromString("2099-12-31 23:59:59")
 	fmt.Println(t1)
 }
+
+type A struct {
+	B string
+}
+
+func TestSlice(t *testing.T) {
+	l := []A{{"F"}, {"A"}, {"c"}, {"b"}, {"H"}}
+	ls := make([]*A, 0)
+	for _, item := range l {
+		r := item
+		//ls = append(ls, &item) // item指向同一内存地址，表明：item变量用于存储循环变量，地址不变
+		ls = append(ls, &r)
+	}
+	fmt.Println(ls)
+}

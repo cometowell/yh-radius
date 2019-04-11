@@ -37,8 +37,8 @@ type RadUser struct {
 	Product        RadProduct `xorm:"-" json:"product"`
 	sessionTimeout int        `xorm:"-"`
 	Pager          `xorm:"-" json:"page"`
-	Count int `xorm:"-" json:"count"`
-	Price int `xorm:"-" json:"price"`
+	Count          int `xorm:"-" json:"count"`
+	Price          int `xorm:"-" json:"price"`
 }
 
 type RadUserWallet struct {
@@ -95,19 +95,19 @@ type RadProduct struct {
 }
 
 type UserOrderRecord struct {
-	Id int64 `xorm:"pk autoincr" json:"id"`
-	UserId int64 `json:"userId"`
+	Id        int64 `xorm:"pk autoincr" json:"id"`
+	UserId    int64 `json:"userId"`
 	ProductId int64 `json:"productId"`
-	Price int `json:"price"`
-	ManagerId int64 `json:"managerId"`// 操作人
-	OrderTime Time `json:"orderTime"`
-	Status int `json:"status"`
-	EndDate Time `json:"endDate"`
+	Price     int   `json:"price"`
+	ManagerId int64 `json:"managerId"` // 操作人
+	OrderTime Time  `json:"orderTime"`
+	Status    int   `json:"status"`
+	EndDate   Time  `json:"endDate"`
 }
 
 type UserOrderRecordProduct struct {
 	UserOrderRecord `xorm:"extends" json:"userOrderRecord"`
-	RadProduct `xorm:"extends" json:"radProduct"`
+	RadProduct      `xorm:"extends" json:"radProduct"`
 }
 
 func (UserOrderRecordProduct) TableName() string {
@@ -186,9 +186,9 @@ type SysResource struct {
 	SortOrder         int    `json:"sortOrder"`
 	Description       string `json:"description"`
 	ShouldPermControl int    `json:"shouldPermControl"`
-	Level int `json:"level"`
+	Level             int    `json:"level"`
 
-	Children []*SysResource `xorm:"-" json:"children"`
+	Children []SysResource `xorm:"-" json:"children"`
 }
 
 type SysManagerRoleRel struct {
@@ -235,7 +235,7 @@ func NewPagination(data interface{}, totalCount int64, current, pageSize int) *P
 }
 
 func (p *Pagination) setTotalPage() {
-	if p.TotalCount % int64(p.Size) != 0 {
+	if p.TotalCount%int64(p.Size) != 0 {
 		p.TotalPage = p.TotalCount/int64(p.Size) + 1
 		return
 	}

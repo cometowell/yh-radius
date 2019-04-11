@@ -41,9 +41,7 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/nas/update", updateNas)
 	router.POST("/nas/delete", deleteNas)
 
-
 	router.POST("/resource/list", listRes)
-
 
 }
 
@@ -459,33 +457,28 @@ func listRes(c *gin.Context) {
 
 // 菜单分层展示
 func getResLevel(resList []SysResource) []SysResource {
-
-	resMap := make(map[int64] *SysResource)
-
+	result := make([]SysResource, 0, 20)
 	for _, res := range resList {
-		r := res
-		resMap[res.Id] = &r
-	}
-
-	// TODO 第三层没有赋值
-	for _, res := range resList {
-		r := res
-		parent, ok := resMap[r.ParentId]
-		if ok {
-			if parent.Children == nil {
-				parent.Children = make([] *SysResource, 0)
-			}
-			parent.Children = append(parent.Children, &r)
-		}
-	}
-
-	result := make([]SysResource, 0)
-	for _, res := range resMap {
 		if res.ParentId == 0 {
-			result = append(result, *res)
+			r := res
+			setChildren(&r, resList)
+			result = append(result, r)
 		}
 	}
 	return result
+}
+
+func setChildren(r *SysResource, resList []SysResource) {
+	if r.Children == nil {
+		r.Children = make([]SysResource, 0, 20)
+	}
+	for _, item := range resList {
+		res := item
+		if r.Id == res.ParentId {
+			setChildren(&res, resList)
+			r.Children = append(r.Children, res)
+		}
+	}
 }
 
 // -------------------------- resource end -----------------------------
