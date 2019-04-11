@@ -34,6 +34,17 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/user/delete", deleteUser)
 
 	router.POST("/fetch/department", fetchDepartments)
+
+	router.POST("/nas/info", getNasInfo)
+	router.POST("/nas/list", listNas)
+	router.POST("/nas/add", addNas)
+	router.POST("/nas/update", updateNas)
+	router.POST("/nas/delete", deleteNas)
+
+
+	router.POST("/resource/list", listRes)
+
+
 }
 
 func login(c *gin.Context) {
@@ -378,6 +389,106 @@ func getProductInfo(c *gin.Context) {
 }
 
 // -------------------------- product end -----------------------------
+
+// -------------------------- nas start -----------------------------
+
+func getNasInfo(c *gin.Context) {
+	var nas RadNas
+	c.ShouldBindJSON(&nas)
+	engine.Id(nas.Id).Get(&nas)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: nas})
+}
+
+func addNas(c *gin.Context) {
+	var nas RadNas
+	c.ShouldBindJSON(&nas)
+	session := engine.NewSession()
+	defer session.Close()
+
+	count, _ := session.Table("rad_nas").Where("ip_addr = ?", nas.IpAddr).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：IP地址重复"})
+		return
+	}
+	session.InsertOne(&nas)
+	session.Commit()
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success"})
+}
+
+func updateNas(c *gin.Context) {
+	var nas RadNas
+	c.ShouldBindJSON(&nas)
+	session := engine.NewSession()
+	defer session.Close()
+
+	count, _ := session.Table("rad_nas").Where("ip_addr = ? and id != ?", nas.IpAddr, nas.Id).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：IP地址重复"})
+		return
+	}
+	session.ID(nas.Id).Update(&nas)
+	session.Commit()
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "修改成功"})
+}
+
+func listNas(c *gin.Context) {
+	var nas RadNas
+	c.ShouldBindJSON(&nas)
+	c.Set("current", nas.Page)
+	c.Set("pageSize", nas.PageSize)
+	var nasList []RadNas
+	pageByConditions(c, &nasList, &nas)
+}
+
+func deleteNas(c *gin.Context) {
+	var nas RadNas
+	c.ShouldBindJSON(&nas)
+	engine.Id(nas.Id).Delete(&nas)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "已删除"})
+}
+
+// -------------------------- nas end -----------------------------
+
+// -------------------------- resource start ---------------------------
+
+func listRes(c *gin.Context) {
+	var resList []SysResource
+	engine.Find(&resList)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: getResLevel(resList)})
+}
+
+// 菜单分层展示
+func getResLevel(resList []SysResource) []SysResource {
+
+	resMap := make(map[int64] *SysResource)
+
+	for _, res := range resList {
+		r := res
+		resMap[res.Id] = &r
+	}
+
+	// TODO 第三层没有赋值
+	for _, res := range resList {
+		r := res
+		parent, ok := resMap[r.ParentId]
+		if ok {
+			if parent.Children == nil {
+				parent.Children = make([] *SysResource, 0)
+			}
+			parent.Children = append(parent.Children, &r)
+		}
+	}
+
+	result := make([]SysResource, 0)
+	for _, res := range resMap {
+		if res.ParentId == 0 {
+			result = append(result, *res)
+		}
+	}
+	return result
+}
+
+// -------------------------- resource end -----------------------------
 
 // system
 func fetchDepartments(c *gin.Context) {

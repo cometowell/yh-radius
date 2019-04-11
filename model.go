@@ -122,6 +122,8 @@ type RadNas struct {
 	Secret        string `json:"secret"`
 	AuthorizePort int    `json:"authorizePort"` //授权端口
 	Description   string `json:"description"`
+
+	Pager `xorm:"-" json:"page"`
 }
 
 type UserOnlineLog struct {
@@ -184,6 +186,9 @@ type SysResource struct {
 	SortOrder         int    `json:"sortOrder"`
 	Description       string `json:"description"`
 	ShouldPermControl int    `json:"shouldPermControl"`
+	Level int `json:"level"`
+
+	Children []*SysResource `xorm:"-" json:"children"`
 }
 
 type SysManagerRoleRel struct {
@@ -230,7 +235,7 @@ func NewPagination(data interface{}, totalCount int64, current, pageSize int) *P
 }
 
 func (p *Pagination) setTotalPage() {
-	if p.TotalCount%int64(p.Size) != 0 {
+	if p.TotalCount % int64(p.Size) != 0 {
 		p.TotalPage = p.TotalCount/int64(p.Size) + 1
 		return
 	}

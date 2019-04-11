@@ -69,7 +69,7 @@ const (
 )
 
 const (
-	Standard = 0
+	Standard = 1
 	Cisco    = 9
 	Huawei   = 2011
 	Zte      = 3902
