@@ -172,6 +172,9 @@ type SysRole struct {
 	CreateTime  Time   `json:"createTime"`
 	UpdateTime  Time   `json:"updateTime"`
 	Description string `json:"description"`
+	Enable int `json:"enable"`
+
+	Pager `xorm:"-" json:"page"`
 }
 
 type SysResource struct {

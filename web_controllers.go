@@ -43,6 +43,13 @@ func loadControllers(router *gin.Engine) {
 
 	router.POST("/resource/list", listRes)
 
+	router.POST("/role/info", getRoleInfo)
+	router.POST("/role/list", listRole)
+	router.POST("/role/add", addRole)
+	router.POST("/role/update", updateRole)
+	router.POST("/role/delete", deleteRole)
+	router.POST("/role/empower", empowerRole)
+
 }
 
 func login(c *gin.Context) {
@@ -482,6 +489,85 @@ func setChildren(r *SysResource, resList []SysResource) {
 }
 
 // -------------------------- resource end -----------------------------
+
+// -------------------------- role start -------------------------------
+
+func getRoleInfo(c *gin.Context) {
+	var role SysRole
+	c.ShouldBindJSON(&role)
+	engine.Id(role.Id).Get(&role)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: role})
+}
+
+func addRole(c *gin.Context) {
+	var role SysRole
+	c.ShouldBindJSON(&role)
+	session := engine.NewSession()
+	defer session.Close()
+
+	count, _ := session.Table("sys_role").Where("code = ?", role.Code).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码已存在，不能重复!"})
+		return
+	}
+	role.CreateTime = NowTime()
+	role.Enable = 1
+	session.InsertOne(&role)
+	session.Commit()
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "添加成功"})
+}
+
+func updateRole(c *gin.Context) {
+	var role SysRole
+	c.ShouldBindJSON(&role)
+	session := engine.NewSession()
+	defer session.Close()
+
+	count, _ := session.Table("sys_role").Where("code = ? and id != ?", role.Code, role.Id).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码重复!"})
+		return
+	}
+	session.ID(role.Id).Update(&role)
+	session.Commit()
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "修改成功"})
+}
+
+func listRole(c *gin.Context) {
+	var role SysRole
+	c.ShouldBindJSON(&role)
+	c.Set("current", role.Page)
+	c.Set("pageSize", role.PageSize)
+	var roleList []SysRole
+
+	whereSql := "1=1 "
+	whereArgs := make([]interface{}, 0)
+	if role.Name != "" {
+		whereSql += "and name like ? "
+		whereArgs = append(whereArgs, "%"+role.Name+"%")
+	}
+
+	if role.Code != "" {
+		whereSql += "and code like ? "
+		whereArgs = append(whereArgs, "%"+role.Code+"%")
+	}
+	pageByWhereSql(c, &roleList, whereSql, whereArgs)
+}
+
+func deleteRole(c *gin.Context) {
+	var role SysRole
+	c.ShouldBindJSON(&role)
+	engine.Id(role.Id).Delete(&role)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "已删除"})
+}
+
+// 角色赋权
+func empowerRole(c *gin.Context) {
+	var role SysRole
+	c.ShouldBindJSON(&role)
+}
+
+// -------------------------- role end ---------------------------------
 
 // system
 func fetchDepartments(c *gin.Context) {
