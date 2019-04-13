@@ -6,7 +6,7 @@ import (
 	"regexp"
 )
 
-var urls = []string{"/login","logout", "/favicon.ico"}
+var urls = []string{"/login", "logout", "/favicon.ico"}
 
 func PermCheck(c *gin.Context) {
 
@@ -24,7 +24,7 @@ func PermCheck(c *gin.Context) {
 	}
 
 	isOkay := isPassableUrl(c)
-	if isOkay  {
+	if isOkay {
 		return
 	}
 
@@ -36,7 +36,36 @@ func PermCheck(c *gin.Context) {
 	}
 
 	c.Set("session", session)
-	// TODO 权限校验
+	// 权限校验
+	resources := session.GetAttr("resources").([]SysResource)
+	canAccess := false
+
+	url := c.Request.URL.Path
+	for _, res := range resources {
+		if res.Url == "" {
+			continue
+		}
+
+		if res.Url == url {
+			canAccess = true
+			break
+		}
+
+		compile, _ := regexp.Compile(res.Url)
+		if compile.Match([]byte(url)) {
+			canAccess = true
+			break
+		}
+	}
+
+	if !canAccess {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+			"code":    1,
+			"message": "权限不足",
+		})
+		return
+	}
+
 	c.Next()
 }
 

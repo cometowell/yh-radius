@@ -59,5 +59,28 @@ func TestJoin1(t *testing.T) {
 	var users RadUser
 	tsEngine.Get(&users)
 
-	fmt.Printf("%#v", users)//, total, err)
+	fmt.Printf("%#v", users) //, total, err)
+}
+
+type Manager struct {
+	SysManager `xorm:"extends"`
+	Roles      []SysRole `xorm:"extends"`
+}
+
+func (Manager) TableName() string {
+	return "sys_manager"
+}
+
+func TestCollection(t *testing.T) {
+	tsEngine, _ := xorm.NewEngine("mysql",
+		"root:root@tcp(127.0.0.1:3306)/radius?charset=utf8")
+
+	tsEngine.ShowSQL(true)
+	var managers []Manager
+	tsEngine.Table("sys_manager").Alias("sm").
+		Join("INNER", []string{"sys_manager_role_rel", "smr"}, "sm.id = smr.manager_id").
+		Join("INNER", []string{"sys_role", "sr"}, "smr.role_id = sr.id").
+		Find(&managers)
+
+	fmt.Printf("%#v", managers)
 }

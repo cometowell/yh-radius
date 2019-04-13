@@ -172,7 +172,7 @@ type SysRole struct {
 	CreateTime  Time   `json:"createTime"`
 	UpdateTime  Time   `json:"updateTime"`
 	Description string `json:"description"`
-	Enable int `json:"enable"`
+	Enable      int    `json:"enable"`
 
 	Pager `xorm:"-" json:"page"`
 }
@@ -190,8 +190,11 @@ type SysResource struct {
 	Description       string `json:"description"`
 	ShouldPermControl int    `json:"shouldPermControl"`
 	Level             int    `json:"level"`
+	FrontRouter       string `json:"frontRouter"`
+	FrontKey          string `json:"frontKey"`
 
 	Children []SysResource `xorm:"-" json:"children"`
+	Selected bool          `xorm:"-" json:"selected"`
 }
 
 type SysManagerRoleRel struct {

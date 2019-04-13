@@ -4,7 +4,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"reflect"
+	"regexp"
 	"testing"
+	"time"
 	"unsafe"
 )
 
@@ -91,4 +93,13 @@ func TestSlice(t *testing.T) {
 		ls = append(ls, &r)
 	}
 	fmt.Println(ls)
+}
+
+func TestTime(t *testing.T) {
+	fmt.Println(time.Now().Unix())
+}
+
+func TestReg(t *testing.T) {
+	compile, _ := regexp.Compile("/a/b")
+	fmt.Println(compile.Match([]byte("")))
 }

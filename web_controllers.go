@@ -42,13 +42,15 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/nas/delete", deleteNas)
 
 	router.POST("/resource/list", listRes)
+	router.POST("/session/resource", getSessionResource)
 
 	router.POST("/role/info", getRoleInfo)
 	router.POST("/role/list", listRole)
 	router.POST("/role/add", addRole)
 	router.POST("/role/update", updateRole)
 	router.POST("/role/delete", deleteRole)
-	router.POST("/role/empower", empowerRole)
+	router.POST("/role/resources", empowerRole)
+	router.POST("/role/empower/:roleId", doEmpowerRole)
 
 }
 
@@ -66,6 +68,17 @@ func login(c *gin.Context) {
 	session := GlobalSessionManager.CreateSession(c)
 	manager.Password = ""
 	session.SetAttr("manager", manager)
+
+	var resources []SysResource
+	engine.Table("sys_resource").Alias("sr").
+		Join("LEFT", []string{"sys_role_resource_rel", "srr"}, "sr.id = srr.resource_id").
+		Join("LEFT", []string{"sys_role", "r"}, "srr.role_id = r.id").
+		Join("LEFT", []string{"sys_manager_role_rel", "smr"}, "smr.role_id = r.id").
+		Join("LEFT", []string{"sys_manager", "m"}, "smr.manager_id = m.id").
+		Where("m.id = ? or sr.should_perm_control = 0", manager.Id).
+		Find(&resources)
+
+	session.SetAttr("resources", resources)
 
 	c.JSON(http.StatusOK, newSuccessJsonResult("success", session.SessionId()))
 }
@@ -119,6 +132,11 @@ func managerById(c *gin.Context) {
 func addManager(c *gin.Context) {
 	var manager SysManager
 	c.ShouldBindJSON(&manager)
+	count, _ := engine.Table("sys_manager").Where("username=?", manager.Username).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "用户名已存在!"})
+		return
+	}
 	manager.Status = 1
 	manager.Password = encrypt(manager.Password)
 	manager.CreateTime = NowTime()
@@ -132,6 +150,13 @@ func updateManager(c *gin.Context) {
 	if manager.Password != "" {
 		manager.Password = encrypt(manager.Password)
 	}
+
+	count, _ := engine.Table("sys_manager").Where("username=? and id != ?", manager.Username, manager.Id).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "用户名已存在!"})
+		return
+	}
+
 	engine.Id(manager.Id).Update(&manager)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "管理员信息更新成功!"})
 }
@@ -201,6 +226,16 @@ func updateUser(c *gin.Context) {
 	c.ShouldBindJSON(&user)
 	session := engine.NewSession()
 	defer session.Close()
+
+	count, _ := session.Table("rad_user").Where("username = ? and id != ?", user.UserName, user.Id).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    1,
+			"message": "用户名重复",
+		})
+		return
+	}
+
 	var oldUser RadUser
 	session.ID(user.Id).Get(&oldUser)
 	// 停机用户重新使用需要顺延过期时间
@@ -221,12 +256,22 @@ func addUser(c *gin.Context) {
 	fmt.Printf("%#v", user)
 	session := engine.NewSession()
 	defer session.Close()
+
+	count, _ := session.Table("rad_user").Where("username = ?", user.UserName).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    1,
+			"message": "用户名重复",
+		})
+		return
+	}
+
 	var product RadProduct
 	session.ID(user.ProductId).Get(&product)
 	if product.Id == 0 {
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"Code":    1,
-			"Message": "产品不存在",
+		c.JSON(http.StatusOK, gin.H{
+			"code":    1,
+			"message": "产品不存在",
 		})
 		return
 	}
@@ -297,9 +342,9 @@ func continueProduct(c *gin.Context) {
 	manager := webSession.GetAttr("manager").(SysManager)
 
 	if newProduct.Id == 0 {
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"Code":    1,
-			"Message": "产品不存在",
+		c.JSON(http.StatusOK, gin.H{
+			"code":    1,
+			"message": "产品不存在",
 		})
 		return
 	}
@@ -462,6 +507,16 @@ func listRes(c *gin.Context) {
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: getResLevel(resList)})
 }
 
+func getSessionResource(c *gin.Context) {
+	c.JSON(http.StatusOK, defaultSuccessJsonResult(getManagerResources(c.GetHeader(SessionName))))
+}
+
+func getManagerResources(sessionId string) []SysResource {
+	session := GlobalSessionManager.Provider.ReadSession(sessionId)
+	resources := session.GetAttr("resources").([]SysResource)
+	return getResLevel(resources)
+}
+
 // 菜单分层展示
 func getResLevel(resList []SysResource) []SysResource {
 	result := make([]SysResource, 0, 20)
@@ -565,6 +620,37 @@ func deleteRole(c *gin.Context) {
 func empowerRole(c *gin.Context) {
 	var role SysRole
 	c.ShouldBindJSON(&role)
+	var selectedResList []SysResource
+	engine.Table("sys_resource").Alias("sr").
+		Join("INNER", []string{"sys_role_resource_rel", "srr"}, "sr.id = srr.resource_id").
+		Join("INNER", []string{"sys_role", "r"}, "srr.role_id = r.id").
+		Where("r.id = ?", role.Id).
+		Find(&selectedResList)
+
+	var resources []SysResource
+	engine.Where("should_perm_control = ?", 1).Find(&resources)
+	for index, item := range resources {
+		for _, r := range selectedResList {
+			if r.Id == item.Id {
+				resources[index].Selected = true
+			}
+		}
+	}
+	c.JSON(http.StatusOK, defaultSuccessJsonResult(getResLevel(resources)))
+}
+
+func doEmpowerRole(c *gin.Context) {
+	roleId := c.Param("roleId")
+	var roleResourceRels []SysRoleResourceRel
+	c.ShouldBindJSON(&roleResourceRels)
+	session := engine.NewSession()
+	defer session.Close()
+	session.Where("role_id = ?", roleId).Delete(&SysRoleResourceRel{})
+	if roleResourceRels != nil && len(roleResourceRels) > 0 {
+		session.Insert(&roleResourceRels)
+	}
+	session.Commit()
+	c.JSON(http.StatusOK, newSuccessJsonResult("赋权成功", nil))
 }
 
 // -------------------------- role end ---------------------------------
