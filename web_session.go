@@ -108,7 +108,7 @@ func (mgr *SessionManager) DestroySession(c *gin.Context) error {
 	return nil
 }
 
-const MaxGcInterval = 5 * 60
+const MaxGcInterval = 2 * 60
 
 func (mgr *SessionManager) Gc() {
 	mgr.Lock.Lock()
