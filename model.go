@@ -162,7 +162,18 @@ type SysDepartment struct {
 	ParentId    int64  `json:"parentId"`
 	CreateTime  Time   `json:"createTime"`
 	UpdateTime  Time   `json:"updateTime"`
+	Status      int    `json:"status"`
 	Description string `json:"description"`
+	Pager       `xorm:"-" json:"page"`
+}
+
+type Department struct {
+	SysDepartment `xorm:"extends" json:"department"`
+	Name          string `json:"name"`
+}
+
+func (Department) TableName() string {
+	return "sys_department"
 }
 
 type SysRole struct {

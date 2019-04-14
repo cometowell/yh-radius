@@ -84,3 +84,19 @@ func TestCollection(t *testing.T) {
 
 	fmt.Printf("%#v", managers)
 }
+
+func TestDepartment(t *testing.T) {
+	tsEngine, _ := xorm.NewEngine("mysql",
+		"root:root@tcp(127.0.0.1:3306)/radius?charset=utf8")
+
+	tsEngine.ShowSQL(true)
+
+	var departments []Department
+	count, _ := tsEngine.Cols("sd.*, d.name").Table("sys_department").Alias("sd").
+		Join("LEFT", []string{"sys_department", "d"}, "sd.parent_id = d.id").
+		Where("sd.status = 1").
+		Limit(10, 0).
+		FindAndCount(&departments)
+
+	fmt.Printf("%d, %#v", count, departments)
+}

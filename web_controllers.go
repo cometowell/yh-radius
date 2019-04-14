@@ -34,6 +34,11 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/user/delete", deleteUser)
 
 	router.POST("/fetch/department", fetchDepartments)
+	router.POST("/department/info", getDepartmentInfo)
+	router.POST("/department/list", listDepartments)
+	router.POST("/department/add", addDepartment)
+	router.POST("/department/update", updateDepartment)
+	router.POST("/department/delete", deleteDepartment)
 
 	router.POST("/nas/info", getNasInfo)
 	router.POST("/nas/list", listNas)
@@ -194,7 +199,7 @@ func listUser(c *gin.Context) {
 	}
 
 	var users []RadUserProduct
-	totalCount, err := engine.Table("rad_user").
+	totalCount, _ := engine.Table("rad_user").
 		Alias("ru").Select(`ru.id,ru.username,ru.real_name,ru.product_id,
 			ru.status,ru.available_time,ru.available_flow,ru.expire_time,
 			ru.concurrent_count,ru.should_bind_mac_addr,ru.should_bind_vlan,ru.mac_addr,ru.vlan_id,
@@ -204,10 +209,6 @@ func listUser(c *gin.Context) {
 		Limit(params.PageSize, (params.Page-1)*params.PageSize).
 		Join("INNER", []string{"rad_product", "sp"}, "ru.product_id = sp.id").
 		FindAndCount(&users)
-
-	if err != nil {
-		panic(err)
-	}
 
 	pagination := NewPagination(users, totalCount, params.Page, params.PageSize)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
@@ -655,9 +656,92 @@ func doEmpowerRole(c *gin.Context) {
 
 // -------------------------- role end ---------------------------------
 
-// system
+// department
 func fetchDepartments(c *gin.Context) {
 	var departments []SysDepartment
 	engine.Find(&departments)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: departments})
+}
+
+func listDepartments(c *gin.Context) {
+	var department SysDepartment
+	c.ShouldBindJSON(&department)
+
+	whereSql := "1=1 "
+	whereArgs := make([]interface{}, 0)
+	if department.Code != "" {
+		whereSql += "and sd.code like ? "
+		whereArgs = append(whereArgs, "%"+department.Code+"%")
+	}
+
+	if department.Name != "" {
+		whereSql += "and sd.name like ? "
+		whereArgs = append(whereArgs, "%"+department.Name+"%")
+	}
+
+	if department.ParentId != 0 {
+		whereSql += "and sd.parent_id = ? "
+		whereArgs = append(whereArgs, department.ParentId)
+	}
+
+	var departments []Department
+	count, _ := engine.Cols("sd.*, d.name").Table("sys_department").Alias("sd").
+		Join("LEFT", []string{"sys_department", "d"}, "sd.parent_id = d.id").
+		Where(whereSql, whereArgs...).
+		Limit(department.PageSize, department.PageSize*(department.Page-1)).
+		FindAndCount(&departments)
+
+	pagination := NewPagination(departments, count, department.Page, department.PageSize)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
+
+}
+
+func getDepartmentInfo(c *gin.Context) {
+	var department SysDepartment
+	c.ShouldBindJSON(&department)
+	engine.Id(department.Id).Get(&department)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: department})
+}
+
+func addDepartment(c *gin.Context) {
+	var department SysDepartment
+	c.ShouldBindJSON(&department)
+	session := engine.NewSession()
+	defer session.Close()
+
+	count, _ := session.Table("sys_department").Where("code = ? or name = ?", department.Code, department.Name).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码或者名称重复"})
+		return
+	}
+	department.Status = 1
+	department.CreateTime = NowTime()
+	session.InsertOne(&department)
+	session.Commit()
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "添加成功"})
+}
+
+func updateDepartment(c *gin.Context) {
+	var department SysDepartment
+	c.ShouldBindJSON(&department)
+	session := engine.NewSession()
+	defer session.Close()
+
+	count, _ := session.Table("sys_department").
+		Where("(code = ? or name = ?) and id != ?", department.Code, department.Name, department.Id).Count()
+	if count > 0 {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码或者名称重复"})
+		return
+	}
+	session.AllCols().ID(department.Id).Update(&department)
+	session.Commit()
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "修改成功"})
+}
+
+func deleteDepartment(c *gin.Context) {
+	var department SysDepartment
+	c.ShouldBindJSON(&department)
+	department.Status = 2 // 标记为停用
+	engine.Id(department.Id).Cols("status").Update(&department)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "已停用!"})
 }
