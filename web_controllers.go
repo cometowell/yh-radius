@@ -234,6 +234,7 @@ func updateUser(c *gin.Context) {
 			"code":    1,
 			"message": "用户名重复",
 		})
+		session.Rollback()
 		return
 	}
 
@@ -264,6 +265,7 @@ func addUser(c *gin.Context) {
 			"code":    1,
 			"message": "用户名重复",
 		})
+		session.Rollback()
 		return
 	}
 
@@ -274,6 +276,7 @@ func addUser(c *gin.Context) {
 			"code":    1,
 			"message": "产品不存在",
 		})
+		session.Rollback()
 		return
 	}
 	user.Password = encrypt(user.Password)
@@ -323,11 +326,12 @@ func continueProduct(c *gin.Context) {
 	bookOrderCount, e := session.Table("user_order_record").Where("user_id = ? and status = ?", user.Id, OrderBookStatus).Count()
 
 	if e != nil {
-		panic(e)
+		session.Rollback()
 	}
 
 	if bookOrderCount > 0 {
 		c.JSON(http.StatusOK, newErrorJsonResult("用户已经预定了套餐暂未生效，不允许再次预定"))
+		session.Rollback()
 		return
 	}
 
@@ -347,6 +351,7 @@ func continueProduct(c *gin.Context) {
 			"code":    1,
 			"message": "产品不存在",
 		})
+		session.Rollback()
 		return
 	}
 	if isExpire(oldUser.ExpireTime) { // 产品到期, 直接更新产品信息
@@ -459,6 +464,7 @@ func addNas(c *gin.Context) {
 	count, _ := session.Table("rad_nas").Where("ip_addr = ?", nas.IpAddr).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：IP地址重复"})
+		session.Rollback()
 		return
 	}
 	session.InsertOne(&nas)
@@ -475,6 +481,7 @@ func updateNas(c *gin.Context) {
 	count, _ := session.Table("rad_nas").Where("ip_addr = ? and id != ?", nas.IpAddr, nas.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：IP地址重复"})
+		session.Rollback()
 		return
 	}
 	session.ID(nas.Id).Update(&nas)
@@ -564,6 +571,7 @@ func addRole(c *gin.Context) {
 	count, _ := session.Table("sys_role").Where("code = ?", role.Code).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码已存在，不能重复!"})
+		session.Rollback()
 		return
 	}
 	role.CreateTime = NowTime()
@@ -582,6 +590,7 @@ func updateRole(c *gin.Context) {
 	count, _ := session.Table("sys_role").Where("code = ? and id != ?", role.Code, role.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码重复!"})
+		session.Rollback()
 		return
 	}
 	session.ID(role.Id).Update(&role)
@@ -712,6 +721,7 @@ func addDepartment(c *gin.Context) {
 	count, _ := session.Table("sys_department").Where("code = ? or name = ?", department.Code, department.Name).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码或者名称重复"})
+		session.Rollback()
 		return
 	}
 	department.Status = 1
@@ -731,6 +741,7 @@ func updateDepartment(c *gin.Context) {
 		Where("(code = ? or name = ?) and id != ?", department.Code, department.Name, department.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码或者名称重复"})
+		session.Rollback()
 		return
 	}
 	session.AllCols().ID(department.Id).Update(&department)

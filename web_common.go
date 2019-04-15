@@ -16,10 +16,10 @@ const (
 )
 
 const (
-	DefaultFlowClearCycle     = 0
-	DayFlowClearCycle         = 1
-	MonthFlowClearCycle       = 2
-	FixedPeriodFlowClearCycle = 3
+	DefaultFlowClearCycle     = 1
+	DayFlowClearCycle         = 2
+	MonthFlowClearCycle       = 3
+	FixedPeriodFlowClearCycle = 4
 )
 
 type JsonResult struct {
