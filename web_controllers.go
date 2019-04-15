@@ -20,6 +20,7 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/manager/delete", delManager)
 
 	router.POST("/product/add", addProduct)
+	router.POST("/product/list", listProduct)
 	router.POST("/product/update", updateProduct)
 	router.POST("/fetch/product", fetchProductList)
 	router.POST("/product/info", getProductInfo)
@@ -61,7 +62,11 @@ func loadControllers(router *gin.Engine) {
 
 func login(c *gin.Context) {
 	var manager SysManager
-	c.ShouldBindJSON(&manager)
+	err := c.ShouldBindJSON(&manager)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	manager.Password = encrypt(manager.Password)
 	ok, _ := engine.Get(&manager)
 
@@ -102,7 +107,11 @@ func sessionManagerInfo(c *gin.Context) {
 
 func managerList(c *gin.Context) {
 	var params SysManager
-	c.ShouldBindJSON(&params)
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	c.Set("current", params.Page)
 	c.Set("pageSize", params.PageSize)
 	var managers []SysManager
@@ -128,7 +137,11 @@ func managerList(c *gin.Context) {
 
 func managerById(c *gin.Context) {
 	var manager SysManager
-	c.ShouldBindJSON(&manager)
+	err := c.ShouldBindJSON(&manager)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	engine.Id(manager.Id).Get(&manager)
 	manager.Password = ""
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: manager})
@@ -136,7 +149,11 @@ func managerById(c *gin.Context) {
 
 func addManager(c *gin.Context) {
 	var manager SysManager
-	c.ShouldBindJSON(&manager)
+	err := c.ShouldBindJSON(&manager)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	count, _ := engine.Table("sys_manager").Where("username=?", manager.Username).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "用户名已存在!"})
@@ -151,7 +168,11 @@ func addManager(c *gin.Context) {
 
 func updateManager(c *gin.Context) {
 	var manager SysManager
-	c.ShouldBindJSON(&manager)
+	err := c.ShouldBindJSON(&manager)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	if manager.Password != "" {
 		manager.Password = encrypt(manager.Password)
 	}
@@ -168,7 +189,11 @@ func updateManager(c *gin.Context) {
 
 func delManager(c *gin.Context) {
 	var manager SysManager
-	c.ShouldBindJSON(&manager)
+	err := c.ShouldBindJSON(&manager)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	manager.Status = 3 // 标记为已删除
 	engine.Id(manager.Id).Cols("status").Update(&manager)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "删除成功!"})
@@ -179,7 +204,11 @@ func delManager(c *gin.Context) {
 // -------------------------- user start -----------------------------
 func listUser(c *gin.Context) {
 	var params RadUser
-	c.ShouldBindJSON(&params)
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 
 	whereSql := "1=1 "
 	whereArgs := make([]interface{}, 0)
@@ -216,7 +245,11 @@ func listUser(c *gin.Context) {
 
 func fetchUserOrderRecord(c *gin.Context) {
 	var user RadUser
-	c.ShouldBindJSON(&user)
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	var records []UserOrderRecordProduct
 	engine.Join("INNER", "rad_product", "rad_product.id = user_order_record.product_id").Where("user_id = ?", user.Id).Asc("user_order_record.status").Find(&records)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: records})
@@ -224,7 +257,11 @@ func fetchUserOrderRecord(c *gin.Context) {
 
 func updateUser(c *gin.Context) {
 	var user RadUser
-	c.ShouldBindJSON(&user)
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	session := engine.NewSession()
 	defer session.Close()
 
@@ -252,7 +289,11 @@ func updateUser(c *gin.Context) {
 
 func addUser(c *gin.Context) {
 	var user RadUser
-	c.ShouldBindJSON(&user)
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	user.Status = UserAvailableStatus
 	user.CreateTime = NowTime()
 	fmt.Printf("%#v", user)
@@ -302,7 +343,11 @@ func addUser(c *gin.Context) {
 
 func deleteUser(c *gin.Context) {
 	var user RadUser
-	c.ShouldBindJSON(&user)
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	user.Status = UserDeletedStatus
 	engine.Id(user.Id).Update(&user)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "删除成功!"})
@@ -311,7 +356,11 @@ func deleteUser(c *gin.Context) {
 // get user info by id
 func fetchUser(c *gin.Context) {
 	var user RadUser
-	c.ShouldBindJSON(&user)
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	engine.Id(user.Id).Get(&user)
 	user.Password = ""
 	c.JSON(http.StatusOK, defaultSuccessJsonResult(user))
@@ -319,7 +368,11 @@ func fetchUser(c *gin.Context) {
 
 func continueProduct(c *gin.Context) {
 	var user RadUser
-	c.ShouldBindJSON(&user)
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	session := engine.NewSession()
 	defer session.Close()
 
@@ -419,11 +472,28 @@ func purchaseProduct(user *RadUser, product *RadProduct, c *gin.Context, session
 // -------------------------- product start -----------------------------
 
 func addProduct(c *gin.Context) {
-
+	var product RadProduct
+	err := c.ShouldBindJSON(&product)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
+	product.Status = 1
+	product.CreateTime = NowTime()
+	engine.InsertOne(&product)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "套餐添加成功!"})
 }
 
 func updateProduct(c *gin.Context) {
-
+	var product RadProduct
+	err := c.ShouldBindJSON(&product)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
+	product.UpdateTime = NowTime()
+	engine.Id(product.Id).Update(&product)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "修改成功!"})
 }
 
 func fetchProductList(c *gin.Context) {
@@ -433,15 +503,60 @@ func fetchProductList(c *gin.Context) {
 }
 
 func listProduct(c *gin.Context) {
+	var product RadProduct
+	err := c.ShouldBindJSON(&product)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
+	whereSql := "1=1 "
+	whereArgs := make([]interface{}, 0)
+	if product.Name != "" {
+		whereSql += "and name like ? "
+		whereArgs = append(whereArgs, "%"+product.Name+"%")
+	}
 
+	if product.Status != 0 {
+		whereSql += "and status = ? "
+		whereArgs = append(whereArgs, product.Status)
+	}
+
+	if product.Type != 0 {
+		whereSql += "and type = ?"
+		whereArgs = append(whereArgs, product.Type)
+	}
+
+	var products []RadProduct
+	totalCount, _ := engine.Table("rad_product").Where(whereSql, whereArgs...).
+		Limit(product.PageSize, (product.Page-1)*product.PageSize).
+		FindAndCount(&products)
+
+	pagination := NewPagination(products, totalCount, product.Page, product.PageSize)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
 }
 
 func deleteProduct(c *gin.Context) {
-
+	var product RadProduct
+	err := c.ShouldBindJSON(&product)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
+	product.UpdateTime = NowTime()
+	product.Status = 2
+	engine.Cols("status, update_time").ID(product.Id).Update(&product)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "停用成功!"})
 }
 
 func getProductInfo(c *gin.Context) {
-
+	var product RadProduct
+	err := c.ShouldBindJSON(&product)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
+	engine.Id(product.Id).Get(&product)
+	c.JSON(http.StatusOK, defaultSuccessJsonResult(product))
 }
 
 // -------------------------- product end -----------------------------
@@ -450,14 +565,22 @@ func getProductInfo(c *gin.Context) {
 
 func getNasInfo(c *gin.Context) {
 	var nas RadNas
-	c.ShouldBindJSON(&nas)
+	err := c.ShouldBindJSON(&nas)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	engine.Id(nas.Id).Get(&nas)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: nas})
 }
 
 func addNas(c *gin.Context) {
 	var nas RadNas
-	c.ShouldBindJSON(&nas)
+	err := c.ShouldBindJSON(&nas)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	session := engine.NewSession()
 	defer session.Close()
 
@@ -474,7 +597,11 @@ func addNas(c *gin.Context) {
 
 func updateNas(c *gin.Context) {
 	var nas RadNas
-	c.ShouldBindJSON(&nas)
+	err := c.ShouldBindJSON(&nas)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	session := engine.NewSession()
 	defer session.Close()
 
@@ -491,7 +618,11 @@ func updateNas(c *gin.Context) {
 
 func listNas(c *gin.Context) {
 	var nas RadNas
-	c.ShouldBindJSON(&nas)
+	err := c.ShouldBindJSON(&nas)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	c.Set("current", nas.Page)
 	c.Set("pageSize", nas.PageSize)
 	var nasList []RadNas
@@ -500,7 +631,11 @@ func listNas(c *gin.Context) {
 
 func deleteNas(c *gin.Context) {
 	var nas RadNas
-	c.ShouldBindJSON(&nas)
+	err := c.ShouldBindJSON(&nas)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	engine.Id(nas.Id).Delete(&nas)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "已删除"})
 }
@@ -557,14 +692,22 @@ func setChildren(r *SysResource, resList []SysResource) {
 
 func getRoleInfo(c *gin.Context) {
 	var role SysRole
-	c.ShouldBindJSON(&role)
+	err := c.ShouldBindJSON(&role)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	engine.Id(role.Id).Get(&role)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: role})
 }
 
 func addRole(c *gin.Context) {
 	var role SysRole
-	c.ShouldBindJSON(&role)
+	err := c.ShouldBindJSON(&role)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	session := engine.NewSession()
 	defer session.Close()
 
@@ -583,7 +726,11 @@ func addRole(c *gin.Context) {
 
 func updateRole(c *gin.Context) {
 	var role SysRole
-	c.ShouldBindJSON(&role)
+	err := c.ShouldBindJSON(&role)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	session := engine.NewSession()
 	defer session.Close()
 
@@ -600,7 +747,11 @@ func updateRole(c *gin.Context) {
 
 func listRole(c *gin.Context) {
 	var role SysRole
-	c.ShouldBindJSON(&role)
+	err := c.ShouldBindJSON(&role)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	c.Set("current", role.Page)
 	c.Set("pageSize", role.PageSize)
 	var roleList []SysRole
@@ -621,7 +772,11 @@ func listRole(c *gin.Context) {
 
 func deleteRole(c *gin.Context) {
 	var role SysRole
-	c.ShouldBindJSON(&role)
+	err := c.ShouldBindJSON(&role)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	engine.Id(role.Id).Delete(&role)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "已删除"})
 }
@@ -629,7 +784,11 @@ func deleteRole(c *gin.Context) {
 // 角色赋权
 func empowerRole(c *gin.Context) {
 	var role SysRole
-	c.ShouldBindJSON(&role)
+	err := c.ShouldBindJSON(&role)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	var selectedResList []SysResource
 	engine.Table("sys_resource").Alias("sr").
 		Join("INNER", []string{"sys_role_resource_rel", "srr"}, "sr.id = srr.resource_id").
@@ -652,7 +811,11 @@ func empowerRole(c *gin.Context) {
 func doEmpowerRole(c *gin.Context) {
 	roleId := c.Param("roleId")
 	var roleResourceRels []SysRoleResourceRel
-	c.ShouldBindJSON(&roleResourceRels)
+	err := c.ShouldBindJSON(&roleResourceRels)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	session := engine.NewSession()
 	defer session.Close()
 	session.Where("role_id = ?", roleId).Delete(&SysRoleResourceRel{})
@@ -674,7 +837,11 @@ func fetchDepartments(c *gin.Context) {
 
 func listDepartments(c *gin.Context) {
 	var department SysDepartment
-	c.ShouldBindJSON(&department)
+	err := c.ShouldBindJSON(&department)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 
 	whereSql := "1=1 "
 	whereArgs := make([]interface{}, 0)
@@ -707,14 +874,22 @@ func listDepartments(c *gin.Context) {
 
 func getDepartmentInfo(c *gin.Context) {
 	var department SysDepartment
-	c.ShouldBindJSON(&department)
+	err := c.ShouldBindJSON(&department)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	engine.Id(department.Id).Get(&department)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: department})
 }
 
 func addDepartment(c *gin.Context) {
 	var department SysDepartment
-	c.ShouldBindJSON(&department)
+	err := c.ShouldBindJSON(&department)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	session := engine.NewSession()
 	defer session.Close()
 
@@ -733,7 +908,11 @@ func addDepartment(c *gin.Context) {
 
 func updateDepartment(c *gin.Context) {
 	var department SysDepartment
-	c.ShouldBindJSON(&department)
+	err := c.ShouldBindJSON(&department)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	session := engine.NewSession()
 	defer session.Close()
 
@@ -751,7 +930,11 @@ func updateDepartment(c *gin.Context) {
 
 func deleteDepartment(c *gin.Context) {
 	var department SysDepartment
-	c.ShouldBindJSON(&department)
+	err := c.ShouldBindJSON(&department)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
 	department.Status = 2 // 标记为停用
 	engine.Id(department.Id).Cols("status").Update(&department)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "已停用!"})

@@ -64,7 +64,13 @@ const SessionName = "rad_access_token"
 type Time time.Time
 
 func (t *Time) UnmarshalJSON(data []byte) (err error) {
-	now, err := time.ParseInLocation(`"`+TimeFormat+`"`, string(data), time.Local)
+	s := string(data)
+	if s == "" || s == "null" {
+		// return zero value
+		*t = Time(time.Date(0, 0, 0, 0, 0, 0, 0, time.Local))
+		return
+	}
+	now, err := time.ParseInLocation(`"`+TimeFormat+`"`, s, time.Local)
 	*t = Time(now)
 	return
 }
