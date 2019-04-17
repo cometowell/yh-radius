@@ -21,8 +21,8 @@ func HuaweiResponse(cxt *Context) {
 	product := user.Product
 	// Huawei-Input-Burst-Size, Huawei-Input-Average-Rate
 	// Huawei-Output-Burst-Size, Huawei-Output-Average-Rate 单位 bit/s
-	upStreamLimit := product.UpStreamLimit * 1024
-	downStreamLimit := product.DownStreamLimit * 1024
+	upStreamLimit := product.UpStreamLimit * 1024 * 1024
+	downStreamLimit := product.DownStreamLimit * 1024 * 1024
 	specAttr := &RadiusAttr{
 		AttrType: VendorSpecificType,
 		VendorId: Huawei,
@@ -84,8 +84,8 @@ func HuaweiResponse(cxt *Context) {
 // 思科
 func CiscoResponse(cxt *Context) {
 	product := cxt.User.Product
-	upStreamLimit := product.UpStreamLimit * 1024
-	downStreamLimit := product.DownStreamLimit * 1024
+	upStreamLimit := product.UpStreamLimit * 1024 * 1024
+	downStreamLimit := product.DownStreamLimit * 1024 * 1024
 
 	specAttr := &RadiusAttr{
 		AttrType: VendorSpecificType,
@@ -132,8 +132,8 @@ func StandardResponse(cxt *Context) {
 func MikroTikResponse(cxt *Context) {
 	// Mikrotik-Rate-Limit	8
 	product := cxt.User.Product
-	upStreamLimit := product.UpStreamLimit
-	downStreamLimit := product.DownStreamLimit
+	upStreamLimit := product.UpStreamLimit * 1024
+	downStreamLimit := product.DownStreamLimit * 1024
 
 	specAttr := &RadiusAttr{
 		AttrType: VendorSpecificType,

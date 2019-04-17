@@ -90,7 +90,17 @@ func login(c *gin.Context) {
 
 	session.SetAttr("resources", resources)
 
-	c.JSON(http.StatusOK, newSuccessJsonResult("success", session.SessionId()))
+	buttons := make([]int64, 0)
+	for _, res := range resources {
+		if res.Level == 3 {
+			buttons = append(buttons, res.Id)
+		}
+	}
+
+	c.JSON(http.StatusOK, newSuccessJsonResult("success", gin.H{
+		"sessionId": session.SessionId(),
+		"buttons": buttons,
+	}))
 }
 
 func logout(c *gin.Context) {
@@ -102,7 +112,22 @@ func logout(c *gin.Context) {
 func sessionManagerInfo(c *gin.Context) {
 	token := c.GetHeader(SessionName)
 	session := GlobalSessionManager.GetSession(token)
-	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: session.GetAttr("manager")})
+
+	managerInfo := session.GetAttr("manager")
+	resources := session.GetAttr("resources").([]SysResource)
+
+
+	buttons := make([]int64, 0)
+	for _, res := range resources {
+		if res.Level == 3 {
+			buttons = append(buttons, res.Id)
+		}
+	}
+
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: gin.H{
+		"manager": managerInfo,
+		"buttons": buttons,
+	}})
 }
 
 func managerList(c *gin.Context) {
@@ -264,7 +289,7 @@ func updateUser(c *gin.Context) {
 	}
 	session := engine.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	count, _ := session.Table("rad_user").Where("username = ? and id != ?", user.UserName, user.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, gin.H{
@@ -299,7 +324,7 @@ func addUser(c *gin.Context) {
 	fmt.Printf("%#v", user)
 	session := engine.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	count, _ := session.Table("rad_user").Where("username = ?", user.UserName).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, gin.H{
@@ -375,7 +400,7 @@ func continueProduct(c *gin.Context) {
 	}
 	session := engine.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	bookOrderCount, e := session.Table("user_order_record").Where("user_id = ? and status = ?", user.Id, OrderBookStatus).Count()
 
 	if e != nil {
@@ -492,7 +517,11 @@ func updateProduct(c *gin.Context) {
 		return
 	}
 	product.UpdateTime = NowTime()
+	session := engine.NewSession()
+	session.Begin()
 	engine.Id(product.Id).Update(&product)
+	engine.Cols("concurrent_count").ID(product.Id).Update(&product)
+	session.Commit()
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "修改成功!"})
 }
 
@@ -583,7 +612,7 @@ func addNas(c *gin.Context) {
 	}
 	session := engine.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	count, _ := session.Table("rad_nas").Where("ip_addr = ?", nas.IpAddr).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：IP地址重复"})
@@ -604,7 +633,7 @@ func updateNas(c *gin.Context) {
 	}
 	session := engine.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	count, _ := session.Table("rad_nas").Where("ip_addr = ? and id != ?", nas.IpAddr, nas.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：IP地址重复"})
@@ -710,7 +739,7 @@ func addRole(c *gin.Context) {
 	}
 	session := engine.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	count, _ := session.Table("sys_role").Where("code = ?", role.Code).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码已存在，不能重复!"})
@@ -733,7 +762,7 @@ func updateRole(c *gin.Context) {
 	}
 	session := engine.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	count, _ := session.Table("sys_role").Where("code = ? and id != ?", role.Code, role.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码重复!"})
@@ -818,6 +847,7 @@ func doEmpowerRole(c *gin.Context) {
 	}
 	session := engine.NewSession()
 	defer session.Close()
+	session.Begin()
 	session.Where("role_id = ?", roleId).Delete(&SysRoleResourceRel{})
 	if roleResourceRels != nil && len(roleResourceRels) > 0 {
 		session.Insert(&roleResourceRels)
@@ -892,7 +922,7 @@ func addDepartment(c *gin.Context) {
 	}
 	session := engine.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	count, _ := session.Table("sys_department").Where("code = ? or name = ?", department.Code, department.Name).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "错误：编码或者名称重复"})
@@ -915,7 +945,7 @@ func updateDepartment(c *gin.Context) {
 	}
 	session := engine.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	count, _ := session.Table("sys_department").
 		Where("(code = ? or name = ?) and id != ?", department.Code, department.Name, department.Id).Count()
 	if count > 0 {
