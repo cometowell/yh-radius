@@ -69,6 +69,18 @@ type OnlineUser struct {
 	NasPortId       string `json:"nasPortId"` // vlanid, vlanid2
 	TotalUpStream   int64  `json:"totalUpStream"`
 	TotalDownStream int64  `json:"totalDownStream"`
+
+	Pager          `xorm:"-" json:"page"`
+	RealName string `xorm:"-" json:"realName"`
+}
+
+type Online struct {
+	OnlineUser `xorm:"extends" json:"onlineUser"`
+	RadUser `xorm:"extends" json:"radUser"`
+}
+
+func (Online) TableName() string {
+	return "online_user"
 }
 
 type RadProduct struct {

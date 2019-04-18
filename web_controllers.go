@@ -58,6 +58,9 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/role/resources", empowerRole)
 	router.POST("/role/empower/:roleId", doEmpowerRole)
 
+	router.POST("/online/list", listOnline)
+	router.POST("/online/off", offOnline)
+
 }
 
 func login(c *gin.Context) {
@@ -968,4 +971,46 @@ func deleteDepartment(c *gin.Context) {
 	department.Status = 2 // 标记为停用
 	engine.Id(department.Id).Cols("status").Update(&department)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "已停用!"})
+}
+
+// -------------------------- online --------------------------------
+func listOnline(c *gin.Context) {
+	var online OnlineUser
+	c.ShouldBindJSON(&online)
+
+	whereSql := "1=1 "
+	whereArgs := make([]interface{}, 0)
+	if online.UserName != "" {
+		whereSql += "and ol.username like ? "
+		whereArgs = append(whereArgs, "%"+online.UserName+"%")
+	}
+
+	if online.IpAddr != "" {
+		whereSql += "and ol.ip_addr = ? "
+		whereArgs = append(whereArgs, online.IpAddr)
+	}
+
+	if online.RealName != "" {
+		whereSql += "and ru.real_name like ? "
+		whereArgs = append(whereArgs, "%" + online.RealName + "%")
+	}
+
+	var onlines []Online
+	count, _ := engine.Table("online_user").Alias("ol").
+		Join("INNER", []string{"rad_user", "ru"}, "ol.username = ru.username").
+		Where(whereSql, whereArgs...).
+		Limit(online.PageSize, online.PageSize*(online.Page-1)).
+		FindAndCount(&onlines)
+
+	pagination := NewPagination(onlines, count, online.Page, online.PageSize)
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
+}
+
+func offOnline(c *gin.Context) {
+	var online OnlineUser
+	c.ShouldBindJSON(online)
+
+	// TODO 下线用户
+
+	c.JSON(http.StatusOK, newSuccessJsonResult("下线成功", nil))
 }
