@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"math/rand"
+	"net"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -260,4 +262,70 @@ func buildWhereSql(params map[string]interface{}, limitConditions map[string]str
 
 func isExpire(t Time) bool {
 	return time.Time(t).Sub(time.Now()) >= 0
+}
+
+// offline user
+// request Authenticator define
+// The NAS and RADIUS accounting server share a secret.  The Request
+// Authenticator field in Accounting-Request packets contains a one-
+// way MD5 hash calculated over a stream of octets consisting of the
+// Code + Identifier + Length + 16 zero octets + request attributes +
+// shared secret (where + indicates concatenation).  The 16 octet MD5
+// hash value is stored in the Authenticator field of the
+// Accounting-Request packet.
+
+// now, only send the dm request don't handler the response from nas
+// when user offline, nas will send stop accounting package to radius server
+// then radius handler the stop accounting package
+// maybe After sometime, add return response package processing
+func offlineUser(online OnlineUser) error {
+	rp := RadiusPackage{}
+	rp.Authenticator = [16]byte{}
+	rp.Code = DisconnectRequest
+	rp.Identifier = byte(rand.Intn(256))
+
+	attrs := make([]*RadiusAttr, 3)
+	acctSessionIdAttr := RadiusAttr{
+		AttrType: 44,
+		AttrValue: []byte(online.AcctSessionId),
+	}
+	acctSessionIdAttr.Length()
+	attrs = append(attrs, &acctSessionIdAttr)
+
+	nasIpAddrAttr := RadiusAttr{
+		AttrType: 4,
+		AttrValue: []byte(online.NasIpAddr),
+	}
+	nasIpAddrAttr.Length()
+	attrs = append(attrs, &nasIpAddrAttr)
+
+	if online.UserName != "" {
+		usernameAttr := RadiusAttr{
+			AttrType: 1,
+			AttrValue: []byte(online.UserName),
+		}
+		usernameAttr.Length()
+		attrs = append(attrs, &usernameAttr)
+	}
+
+	rp.RadiusAttrs = attrs
+	rp.PackageLength()
+
+	var nas RadNas
+	ok, _ := engine.Where("ip_addr = ?", online.NasIpAddr).Get(&nas)
+	if !ok {
+		return errors.New("nas ip address can not be null")
+	}
+
+	conn, err := net.Dial("udp", fmt.Sprintf("%s:%d", online.NasIpAddr, nas.AuthorizePort))
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	_, err = conn.Write(rp.ToByte())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

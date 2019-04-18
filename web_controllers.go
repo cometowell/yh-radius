@@ -60,6 +60,7 @@ func loadControllers(router *gin.Engine) {
 
 	router.POST("/online/list", listOnline)
 	router.POST("/online/off", offOnline)
+	router.POST("/online/delete", deleteOnline)
 
 }
 
@@ -1010,7 +1011,30 @@ func offOnline(c *gin.Context) {
 	var online OnlineUser
 	c.ShouldBindJSON(online)
 
-	// TODO 下线用户
+	var dst OnlineUser
+	engine.ID(online.Id).Get(&dst)
 
+	if dst.Id == 0 {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "no records were found", Data: nil})
+		return
+	}
+
+	//下线用户
+	err := offlineUser(dst)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error(), Data: nil})
+		return
+	}
+	c.JSON(http.StatusOK, newSuccessJsonResult("下线成功", nil))
+}
+
+func deleteOnline(c *gin.Context) {
+	var online OnlineUser
+	c.ShouldBindJSON(online)
+	count, e := engine.ID(online.Id).Delete(&online)
+	if e != nil || count == 0 {
+		c.JSON(http.StatusOK, newErrorJsonResult("删除失败"))
+		return
+	}
 	c.JSON(http.StatusOK, newSuccessJsonResult("下线成功", nil))
 }
