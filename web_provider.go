@@ -25,7 +25,7 @@ type MemoryProvider struct {
 }
 
 func (r *MemoryProvider) GetActiveSessions() (s []ISession) {
-	s = make([]ISession, r.SesList.Len())
+	s = make([]ISession, 0, r.SesList.Len())
 	sesList := r.SesList
 	for e := sesList.Front(); e != nil; e = e.Next() {
 		session := e.Value.(*Session)

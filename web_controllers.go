@@ -18,6 +18,7 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/manager/add", addManager)
 	router.POST("/manager/update", updateManager)
 	router.POST("/manager/delete", delManager)
+	router.POST("/manager/change/password", changeManagerPassword)
 
 	router.POST("/product/add", addProduct)
 	router.POST("/product/list", listProduct)
@@ -211,7 +212,7 @@ func updateManager(c *gin.Context) {
 		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: "用户名已存在!"})
 		return
 	}
-
+	manager.UpdateTime = NowTime()
 	engine.Id(manager.Id).Update(&manager)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "管理员信息更新成功!"})
 }
@@ -224,8 +225,27 @@ func delManager(c *gin.Context) {
 		return
 	}
 	manager.Status = 3 // 标记为已删除
+	manager.UpdateTime = NowTime()
 	engine.Id(manager.Id).Cols("status").Update(&manager)
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "删除成功!"})
+}
+
+func changeManagerPassword(c *gin.Context) {
+	var managerPassword ManagerPassword
+	err := c.ShouldBindJSON(&managerPassword)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
+
+	var manager SysManager
+	manager.Password = encrypt(managerPassword.NewPassword)
+	_, err = engine.ID(managerPassword.Id).Cols("password").Update(&manager)
+	if err != nil {
+		c.JSON(http.StatusOK, JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "密码修改成功!"})
 }
 
 // -------------------------- manager end ----------------------------
@@ -1009,7 +1029,7 @@ func listOnline(c *gin.Context) {
 
 func offOnline(c *gin.Context) {
 	var online OnlineUser
-	c.ShouldBindJSON(online)
+	c.ShouldBindJSON(&online)
 
 	var dst OnlineUser
 	engine.ID(online.Id).Get(&dst)
@@ -1030,11 +1050,11 @@ func offOnline(c *gin.Context) {
 
 func deleteOnline(c *gin.Context) {
 	var online OnlineUser
-	c.ShouldBindJSON(online)
+	c.ShouldBindJSON(&online)
 	count, e := engine.ID(online.Id).Delete(&online)
 	if e != nil || count == 0 {
-		c.JSON(http.StatusOK, newErrorJsonResult("删除失败"))
+		c.JSON(http.StatusOK, newErrorJsonResult("清理在线用户失败"))
 		return
 	}
-	c.JSON(http.StatusOK, newSuccessJsonResult("下线成功", nil))
+	c.JSON(http.StatusOK, newSuccessJsonResult("清理在线用户成功", nil))
 }

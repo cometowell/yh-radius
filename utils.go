@@ -279,24 +279,31 @@ func isExpire(t Time) bool {
 // then radius handler the stop accounting package
 // maybe After sometime, add return response package processing
 func offlineUser(online OnlineUser) error {
+
+	var nas RadNas
+	ok, _ := engine.Where("ip_addr = ?", online.NasIpAddr).Get(&nas)
+	if !ok {
+		return errors.New("nas can not be found")
+	}
+
 	rp := RadiusPackage{}
 	rp.Authenticator = [16]byte{}
 	rp.Code = DisconnectRequest
 	rp.Identifier = byte(rand.Intn(256))
 
-	attrs := make([]*RadiusAttr, 3)
+	attrs := make([]*RadiusAttr, 0, 3)
 	acctSessionIdAttr := RadiusAttr{
 		AttrType: 44,
 		AttrValue: []byte(online.AcctSessionId),
 	}
 	acctSessionIdAttr.Length()
 	attrs = append(attrs, &acctSessionIdAttr)
-
+	ipArrBytes, _ := IpAddrToBytes(online.NasIpAddr)
 	nasIpAddrAttr := RadiusAttr{
 		AttrType: 4,
-		AttrValue: []byte(online.NasIpAddr),
+		AttrLength: 6,
+		AttrValue: ipArrBytes,
 	}
-	nasIpAddrAttr.Length()
 	attrs = append(attrs, &nasIpAddrAttr)
 
 	if online.UserName != "" {
@@ -309,13 +316,8 @@ func offlineUser(online OnlineUser) error {
 	}
 
 	rp.RadiusAttrs = attrs
+	replyAuthenticator(rp.Authenticator, &rp, nas.Secret)
 	rp.PackageLength()
-
-	var nas RadNas
-	ok, _ := engine.Where("ip_addr = ?", online.NasIpAddr).Get(&nas)
-	if !ok {
-		return errors.New("nas ip address can not be null")
-	}
 
 	conn, err := net.Dial("udp", fmt.Sprintf("%s:%d", online.NasIpAddr, nas.AuthorizePort))
 	if err != nil {

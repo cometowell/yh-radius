@@ -167,6 +167,12 @@ type SysManager struct {
 	Pager `xorm:"-" json:"page"`
 }
 
+type ManagerPassword struct {
+	Id int64 `json:"id"`
+	NewPassword string `json:"newPassword"`
+	ComfirmPassword string `json:"comfirmPassword"`
+}
+
 type SysDepartment struct {
 	Id          int64  `xorm:"pk autoincr" json:"id"`
 	Code        string `json:"code"`
