@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
+	"github.com/robfig/cron"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/time/rate"
 	"io/ioutil"
@@ -18,9 +19,9 @@ import (
 )
 
 var (
-	engine *xorm.Engine
-	logger *logrus.Logger
-	config map[string]interface{}
+	engine  *xorm.Engine
+	logger  *logrus.Logger
+	config  map[string]interface{}
 	limiter *rate.Limiter
 )
 
@@ -60,7 +61,7 @@ func (r *radEngine) handlePackage(cxt context.Context) {
 	for {
 		select {
 		case <-cxt.Done():
-				return
+			return
 		default:
 		}
 
@@ -84,7 +85,7 @@ func (r *radEngine) handlePackage(cxt context.Context) {
 				Dst:      dst,
 				Handlers: r.radMiddleWares,
 				index:    -1,
-				Session: engine.NewSession(),
+				Session:  engine.NewSession(),
 			}
 
 			cxt.Response = &RadiusPackage{
@@ -146,6 +147,14 @@ func main() {
 
 	go webServer()
 	logger.Info("已启动web服务")
+
+	var scheduler = cron.New()
+	err = scheduler.AddFunc(config["task.user.order.cron"].(string), userExpireTask)
+	if err != nil {
+		panic(err)
+	}
+	scheduler.Start()
+	logger.Info("定时任务启动")
 
 	pid := syscall.Getpid()
 	pidStr := strconv.Itoa(pid)

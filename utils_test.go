@@ -103,3 +103,8 @@ func TestReg(t *testing.T) {
 	compile, _ := regexp.Compile("/a/b")
 	fmt.Println(compile.Match([]byte("")))
 }
+
+func TestSlice2(t *testing.T) {
+	var users []RadUser
+	fmt.Println(len(users))
+}

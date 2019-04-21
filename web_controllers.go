@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/go-xorm/xorm"
 	"net/http"
 	"time"
 )
@@ -104,7 +103,7 @@ func login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, newSuccessJsonResult("success", gin.H{
 		"sessionId": session.SessionId(),
-		"buttons": buttons,
+		"buttons":   buttons,
 	}))
 }
 
@@ -120,7 +119,6 @@ func sessionManagerInfo(c *gin.Context) {
 
 	managerInfo := session.GetAttr("manager")
 	resources := session.GetAttr("resources").([]SysResource)
-
 
 	buttons := make([]int64, 0)
 	for _, res := range resources {
@@ -370,7 +368,7 @@ func addUser(c *gin.Context) {
 		return
 	}
 	user.Password = encrypt(user.Password)
-	purchaseProduct(&user, &product, c, session)
+	purchaseProduct(&user, &product)
 	session.InsertOne(&user)
 	// 订购信息
 	webSession := GlobalSessionManager.GetSessionByGinContext(c)
@@ -457,7 +455,7 @@ func continueProduct(c *gin.Context) {
 		return
 	}
 	if isExpire(oldUser.ExpireTime) { // 产品到期, 直接更新产品信息
-		purchaseProduct(&oldUser, &newProduct, c, session)
+		purchaseProduct(&oldUser, &newProduct)
 	} else {
 		// 产品未到期续订同一产品，修改过期时间
 		if oldUser.ProductId == user.ProductId {
@@ -482,7 +480,7 @@ func continueProduct(c *gin.Context) {
 	session.Commit()
 }
 
-func purchaseProduct(user *RadUser, product *RadProduct, c *gin.Context, session *xorm.Session) {
+func purchaseProduct(user *RadUser, product *RadProduct) {
 	user.ShouldBindMacAddr = product.ShouldBindMacAddr
 	user.ShouldBindVlan = product.ShouldBindVlan
 	user.ConcurrentCount = product.ConcurrentCount
@@ -1013,7 +1011,7 @@ func listOnline(c *gin.Context) {
 
 	if online.RealName != "" {
 		whereSql += "and ru.real_name like ? "
-		whereArgs = append(whereArgs, "%" + online.RealName + "%")
+		whereArgs = append(whereArgs, "%"+online.RealName+"%")
 	}
 
 	var onlines []Online
