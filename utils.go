@@ -18,13 +18,12 @@ import (
 	"time"
 )
 
-
 func LeftPadChar(source string, padChar byte, size int) string {
 	sourceLength := len(source)
 	if sourceLength >= size {
 		return source
 	}
-	return strings.Repeat(string(padChar), size - sourceLength) + source
+	return strings.Repeat(string(padChar), size-sourceLength) + source
 }
 
 func RightPadChar(source string, padChar byte, size int) string {
@@ -32,7 +31,7 @@ func RightPadChar(source string, padChar byte, size int) string {
 	if sourceLength >= size {
 		return source
 	}
-	return source + strings.Repeat(string(padChar), size - sourceLength)
+	return source + strings.Repeat(string(padChar), size-sourceLength)
 }
 
 func IpAddrToBytes(ipAddr string) (ipArr []byte, err error) {
@@ -141,10 +140,10 @@ func getVendorMacAddr(vendorId int, cxt *Context) string {
 			if ok {
 				avPairVal := ciscoAVPair.VendorValueString
 				matchs := avPairParttern.FindStringSubmatch(avPairVal)
-				ciscoMacAddr := strings.Replace(matchs[1],".","", -1)
+				ciscoMacAddr := strings.Replace(matchs[1], ".", "", -1)
 				return strings.ToUpper(fmt.Sprintf("%s:%s:%s:%s:%s:%s",
-					ciscoMacAddr[0:2],ciscoMacAddr[2:4],ciscoMacAddr[4:6],
-					ciscoMacAddr[6:8],ciscoMacAddr[8:10],ciscoMacAddr[10:12]),
+					ciscoMacAddr[0:2], ciscoMacAddr[2:4], ciscoMacAddr[4:6],
+					ciscoMacAddr[6:8], ciscoMacAddr[8:10], ciscoMacAddr[10:12]),
 				)
 			}
 		}
@@ -191,12 +190,12 @@ func buildUrlParamsFromMap(params map[string]interface{}) string {
 
 func buildUrlParams(params ...interface{}) string {
 
-	if len(params) % 2 != 0 {
+	if len(params)%2 != 0 {
 		return ""
 	}
 
 	var result string = "?"
-	for i:=0; i<len(params); i += 2 {
+	for i := 0; i < len(params); i += 2 {
 		result += fmt.Sprintf("%s=%s&", params[i], params[i+1])
 	}
 
@@ -211,7 +210,7 @@ func buildUrlParams(params ...interface{}) string {
 func pageByWhereSql(c *gin.Context, result interface{}, whereSql string, whereArgs []interface{}) {
 	pageSize, _ := c.Get("pageSize")
 	current, _ := c.Get("current")
-	totalCount, _ := engine.Omit("password").Where(whereSql, whereArgs...).Limit(pageSize.(int) , (current.(int) - 1) * pageSize.(int)).FindAndCount(result)
+	totalCount, _ := engine.Omit("password").Where(whereSql, whereArgs...).Limit(pageSize.(int), (current.(int)-1)*pageSize.(int)).FindAndCount(result)
 	pagination := NewPagination(result, totalCount, current.(int), pageSize.(int))
 	c.JSON(http.StatusOK, JsonResult{Code: 0, Message: "success", Data: pagination})
 }
@@ -221,8 +220,8 @@ func pageByWhereSql(c *gin.Context, result interface{}, whereSql string, whereAr
 func pageByConditions(c *gin.Context, result interface{}, conditions interface{}) {
 	pageSize, _ := c.Get("pageSize")
 	current, _ := c.Get("current")
-	totalCount, err := engine.Limit(pageSize.(int) , (current.(int) - 1) * pageSize.(int)).FindAndCount(result, conditions)
-	if err != nil  {
+	totalCount, err := engine.Limit(pageSize.(int), (current.(int)-1)*pageSize.(int)).FindAndCount(result, conditions)
+	if err != nil {
 		panic(err)
 	}
 	pagination := NewPagination(result, totalCount, current.(int), pageSize.(int))
@@ -234,7 +233,7 @@ func structToMap(data interface{}) (dst map[string]interface{}) {
 	dst = make(map[string]interface{})
 	dataType := reflect.TypeOf(data)
 	dataValue := reflect.ValueOf(data)
-	for i:=0; i<dataType.NumField(); i++ {
+	for i := 0; i < dataType.NumField(); i++ {
 		field := dataType.Field(i)
 		val := dataValue.FieldByName(field.Name)
 		if val.IsValid() { // filter zero value
@@ -261,7 +260,7 @@ func buildWhereSql(params map[string]interface{}, limitConditions map[string]str
 }
 
 func isExpire(t Time) bool {
-	return time.Time(t).Sub(time.Now()) >= 0
+	return time.Time(t).Sub(time.Now()) <= 0
 }
 
 // offline user
@@ -293,22 +292,22 @@ func offlineUser(online OnlineUser) error {
 
 	attrs := make([]*RadiusAttr, 0, 3)
 	acctSessionIdAttr := RadiusAttr{
-		AttrType: 44,
+		AttrType:  44,
 		AttrValue: []byte(online.AcctSessionId),
 	}
 	acctSessionIdAttr.Length()
 	attrs = append(attrs, &acctSessionIdAttr)
 	ipArrBytes, _ := IpAddrToBytes(online.NasIpAddr)
 	nasIpAddrAttr := RadiusAttr{
-		AttrType: 4,
+		AttrType:   4,
 		AttrLength: 6,
-		AttrValue: ipArrBytes,
+		AttrValue:  ipArrBytes,
 	}
 	attrs = append(attrs, &nasIpAddrAttr)
 
 	if online.UserName != "" {
 		usernameAttr := RadiusAttr{
-			AttrType: 1,
+			AttrType:  1,
 			AttrValue: []byte(online.UserName),
 		}
 		usernameAttr.Length()

@@ -368,7 +368,7 @@ func addUser(c *gin.Context) {
 		return
 	}
 	user.Password = encrypt(user.Password)
-	purchaseProduct(&user, &product)
+	purchaseProduct(&user, &product, user.BeContinue)
 	session.InsertOne(&user)
 	// 订购信息
 	webSession := GlobalSessionManager.GetSessionByGinContext(c)
@@ -427,11 +427,13 @@ func continueProduct(c *gin.Context) {
 
 	if e != nil {
 		session.Rollback()
+		c.JSON(http.StatusOK, newErrorJsonResult("用户已经预定了套餐暂未生效，不允许再次预定"))
+		return
 	}
 
 	if bookOrderCount > 0 {
-		c.JSON(http.StatusOK, newErrorJsonResult("用户已经预定了套餐暂未生效，不允许再次预定"))
 		session.Rollback()
+		c.JSON(http.StatusOK, newErrorJsonResult("用户已经预定了套餐暂未生效，不允许再次预定"))
 		return
 	}
 
@@ -447,40 +449,50 @@ func continueProduct(c *gin.Context) {
 	manager := webSession.GetAttr("manager").(SysManager)
 
 	if newProduct.Id == 0 {
+		session.Rollback()
 		c.JSON(http.StatusOK, gin.H{
 			"code":    1,
 			"message": "产品不存在",
 		})
-		session.Rollback()
 		return
 	}
+
+	var expireDate Time
+	var orderStatus int
 	if isExpire(oldUser.ExpireTime) { // 产品到期, 直接更新产品信息
-		purchaseProduct(&oldUser, &newProduct)
+		purchaseProduct(&oldUser, &newProduct, user.BeContinue)
+		expireDate = oldUser.ExpireTime
+		orderStatus = OrderUsingStatus
 	} else {
 		// 产品未到期续订同一产品，修改过期时间
 		if oldUser.ProductId == user.ProductId {
 			oldUser.ExpireTime = Time(time.Time(oldUser.ExpireTime).AddDate(0, newProduct.ServiceMonth*user.Count, 0))
+			expireDate = Time(oldUser.ExpireTime)
+			orderStatus = OrderUsingStatus
 		} else {
 			// 产品未到期续订不同产品，作为预定订单，当产品到期定时任务更换为预定产品
-			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
-			orderRecord := UserOrderRecord{
-				UserId:    user.Id,
-				ProductId: newProduct.Id,
-				Price:     user.Price,
-				ManagerId: manager.Id,
-				OrderTime: NowTime(),
-				Status:    OrderBookStatus,
-				EndDate:   Time(expireTime),
-			}
-			session.InsertOne(&orderRecord)
+			expire, _ := getStdTimeFromString("2099-12-31 23:59:59")
+			expireDate = Time(expire)
+			orderStatus = OrderBookStatus
 		}
 	}
 
+	orderRecord := UserOrderRecord{
+		UserId:    user.Id,
+		ProductId: newProduct.Id,
+		Price:     user.Price,
+		ManagerId: manager.Id,
+		OrderTime: NowTime(),
+		Status:    orderStatus,
+		EndDate:   expireDate,
+	}
+	session.InsertOne(&orderRecord)
 	session.ID(oldUser.Id).Update(&oldUser)
 	session.Commit()
+	c.JSON(http.StatusOK, newSuccessJsonResult("续订成功!", nil))
 }
 
-func purchaseProduct(user *RadUser, product *RadProduct) {
+func purchaseProduct(user *RadUser, product *RadProduct, beContinue bool) {
 	user.ShouldBindMacAddr = product.ShouldBindMacAddr
 	user.ShouldBindVlan = product.ShouldBindVlan
 	user.ConcurrentCount = product.ConcurrentCount
@@ -488,13 +500,13 @@ func purchaseProduct(user *RadUser, product *RadProduct) {
 	user.AvailableFlow = product.ProductFlow
 	if product.Type == MonthlyProduct {
 		expire := time.Time(user.ExpireTime)
-		if time.Time(expire).IsZero() {
+		if time.Time(expire).IsZero() || beContinue {
 			expire = time.Now()
 		}
 		expire = time.Time(time.Date(expire.Year(), expire.Month()+time.Month(product.ServiceMonth), expire.Day(), 23, 59, 59, 0, expire.Location()))
 		user.ExpireTime = Time(expire)
 	} else if product.Type == TimeProduct {
-		if time.Time(user.ExpireTime).IsZero() {
+		if time.Time(user.ExpireTime).IsZero() || beContinue {
 			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
 			user.ExpireTime = Time(expireTime)
 		}
@@ -507,7 +519,7 @@ func purchaseProduct(user *RadUser, product *RadProduct) {
 		} else if product.FlowClearCycle == MonthFlowClearCycle {
 			user.ExpireTime = Time(getMonthLastTime())
 		} else if product.FlowClearCycle == FixedPeriodFlowClearCycle {
-			if time.Time(user.ExpireTime).IsZero() {
+			if time.Time(user.ExpireTime).IsZero() || beContinue {
 				user.ExpireTime = Time(getDayLastTimeAfterAYear())
 			}
 		}

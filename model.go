@@ -37,8 +37,9 @@ type RadUser struct {
 	Product        RadProduct `xorm:"-" json:"product"`
 	sessionTimeout int        `xorm:"-"`
 	Pager          `xorm:"-" json:"page"`
-	Count          int `xorm:"-" json:"count"`
-	Price          int `xorm:"-" json:"price"`
+	Count          int  `xorm:"-" json:"count"`
+	Price          int  `xorm:"-" json:"price"`
+	BeContinue     bool `json:"beContinue"` // 标记为续费
 }
 
 type RadUserWallet struct {
@@ -70,13 +71,13 @@ type OnlineUser struct {
 	TotalUpStream   int64  `json:"totalUpStream"`
 	TotalDownStream int64  `json:"totalDownStream"`
 
-	Pager          `xorm:"-" json:"page"`
+	Pager    `xorm:"-" json:"page"`
 	RealName string `xorm:"-" json:"realName"`
 }
 
 type Online struct {
 	OnlineUser `xorm:"extends" json:"onlineUser"`
-	RadUser `xorm:"extends" json:"radUser"`
+	RadUser    `xorm:"extends" json:"radUser"`
 }
 
 func (Online) TableName() string {
@@ -168,8 +169,8 @@ type SysManager struct {
 }
 
 type ManagerPassword struct {
-	Id int64 `json:"id"`
-	NewPassword string `json:"newPassword"`
+	Id              int64  `json:"id"`
+	NewPassword     string `json:"newPassword"`
 	ComfirmPassword string `json:"comfirmPassword"`
 }
 
