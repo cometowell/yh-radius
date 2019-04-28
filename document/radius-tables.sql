@@ -1,3 +1,20 @@
+/*
+Navicat MySQL Data Transfer
+
+Source Server         : localhost
+Source Server Version : 50721
+Source Host           : localhost:3306
+Source Database       : radius
+
+Target Server Type    : MYSQL
+Target Server Version : 50721
+File Encoding         : 65001
+
+Date: 2019-04-28 18:59:23
+*/
+
+SET FOREIGN_KEY_CHECKS=0;
+
 -- ----------------------------
 -- Table structure for online_user
 -- ----------------------------
@@ -12,15 +29,10 @@ CREATE TABLE `online_user` (
   `ip_addr` varchar(15) NOT NULL COMMENT '用户IP地址',
   `mac_addr` varchar(19) NOT NULL COMMENT '用户MAC地址',
   `nas_port_id` varchar(128) DEFAULT NULL COMMENT '标识用户认证端口',
-  `total_up_stream` bigint(20) NOT NULL DEFAULT '0' COMMENT '上行总流量',
-  `total_down_stream` bigint(20) NOT NULL DEFAULT '0' COMMENT '下行总流量',
+  `total_up_stream` bigint(20) NOT NULL DEFAULT '0' COMMENT '上行总流量 KB',
+  `total_down_stream` bigint(20) NOT NULL DEFAULT '0' COMMENT '下行总流量，KB',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8 COMMENT='在线用户表';
-
--- ----------------------------
--- Records of online_user
--- ----------------------------
-INSERT INTO `online_user` VALUES ('36', 'test1', '192.168.10.236', '0001', '2019-03-08 12:20:48', '0', '192.168.10.235', '5C:FF:35:0E:58:A5', 'sdafsadfasdfasfasfdas', '0', '0');
 
 -- ----------------------------
 -- Table structure for rad_nas
@@ -36,14 +48,7 @@ CREATE TABLE `rad_nas` (
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_nas_ip` (`ip_addr`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8 COMMENT='NAS网络接入设备表';
-
--- ----------------------------
--- Records of rad_nas
--- ----------------------------
-INSERT INTO `rad_nas` VALUES ('1', '9', '1', '192.168.10.236', '123456', '3799', '测试');
-INSERT INTO `rad_nas` VALUES ('2', '0', 'test', '127.0.0.1', '123456', '3699', 'test');
-INSERT INTO `rad_nas` VALUES ('99', '99', 'test', '192.168.10.233', '123456', '3799', 'mycat test');
+) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8 COMMENT='NAS网络接入设备表';
 
 -- ----------------------------
 -- Table structure for rad_product
@@ -60,21 +65,16 @@ CREATE TABLE `rad_product` (
   `product_duration` bigint(20) NOT NULL DEFAULT '0' COMMENT '时长,单位秒',
   `service_month` int(11) NOT NULL DEFAULT '0' COMMENT '套餐购买月数',
   `product_flow` bigint(20) NOT NULL DEFAULT '0' COMMENT '流量，单位KB',
-  `flow_clear_cycle` tinyint(1) NOT NULL COMMENT '计费周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）',
+  `flow_clear_cycle` tinyint(1) NOT NULL COMMENT '计费周期；1：默认， 2：日，3：月：4：固定（开通至使用时长截止[用户套餐过期时间]）',
   `price` int(11) NOT NULL DEFAULT '0' COMMENT '产品价格，单位分',
-  `up_stream_limit` bigint(20) NOT NULL COMMENT '上行流量限制，单位Kbps',
-  `down_stream_limit` bigint(20) NOT NULL COMMENT '下行流量限制,单位Kbps',
+  `up_stream_limit` bigint(20) NOT NULL COMMENT '上行流量限制，单位Mbps',
+  `down_stream_limit` bigint(20) NOT NULL COMMENT '下行流量限制,单位Mbps',
   `domain_name` varchar(200) DEFAULT NULL COMMENT '用户域',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '创建时间',
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='产品表';
-
--- ----------------------------
--- Records of rad_product
--- ----------------------------
-INSERT INTO `rad_product` VALUES ('1', '测试', '1', '1', '0', '0', '0', '0', '0', '0', '12', '0', '9000', '8000', 'aaa', '2019-03-04 17:06:51', null, null);
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COMMENT='产品表';
 
 -- ----------------------------
 -- Table structure for rad_user
@@ -86,30 +86,27 @@ CREATE TABLE `rad_user` (
   `real_name` varchar(128) DEFAULT NULL COMMENT '姓名',
   `password` varchar(256) NOT NULL COMMENT '密码',
   `product_id` bigint(20) DEFAULT NULL COMMENT '产品ID',
-  `status` int(11) NOT NULL COMMENT '状态，1：正常，2：停机，3：销户，4：禁用',
+  `status` int(11) NOT NULL COMMENT '状态，1：正常，2：停机，3：禁用，4：销户',
   `available_time` bigint(20) NOT NULL DEFAULT '0' COMMENT '可用时长，单位：秒',
   `available_flow` bigint(20) NOT NULL DEFAULT '0' COMMENT '可用流量，单位KB',
-  `expire_time` datetime DEFAULT NULL COMMENT '到期时间',
+  `expire_time` date DEFAULT NULL COMMENT '到期时间',
   `concurrent_count` int(11) NOT NULL DEFAULT '0' COMMENT '并发数',
-  `should_bind_mac_addr` tinyint(1) NOT NULL DEFAULT '0' COMMENT '需要绑定MAC地址，0：N，1：Y',
-  `should_bind_vlan` tinyint(1) NOT NULL DEFAULT '0' COMMENT '需要绑定虚拟局域网，0：N，1：Y',
+  `should_bind_mac_addr` tinyint(1) NOT NULL DEFAULT '0' COMMENT '需要绑定MAC地址，1：Y，2：N',
+  `should_bind_vlan` tinyint(1) NOT NULL DEFAULT '0' COMMENT '需要绑定虚拟局域网，1：Y，2：N',
   `mac_addr` varchar(19) DEFAULT NULL COMMENT 'MAC地址',
   `vlan_id` int(11) DEFAULT '0' COMMENT 'vlanId1',
   `vlan_id2` int(11) DEFAULT '0' COMMENT 'vlanId2',
   `framed_ip_addr` varchar(15) DEFAULT NULL COMMENT '用户绑定的静态IP地址',
   `installed_addr` varchar(256) DEFAULT NULL COMMENT '装机地址',
+  `mobile` varchar(12) DEFAULT NULL COMMENT '手机号码',
+  `email` varchar(200) DEFAULT NULL COMMENT '电子邮件',
   `pause_time` datetime DEFAULT NULL COMMENT '最近停机时间',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_name` (`username`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='用户表';
-
--- ----------------------------
--- Records of rad_user
--- ----------------------------
-INSERT INTO `rad_user` VALUES ('1', 'test', '测试', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '6768', '56756756', '2019-03-15 16:40:55', '1', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', null, '打的费撒发送发送发大水发大厦发送', null, '2019-02-28 16:42:39', null, null);
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- ----------------------------
 -- Table structure for rad_user_balance
@@ -127,10 +124,6 @@ CREATE TABLE `rad_user_balance` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户余额表';
 
 -- ----------------------------
--- Records of rad_user_balance
--- ----------------------------
-
--- ----------------------------
 -- Table structure for rad_user_special_balance
 -- ----------------------------
 DROP TABLE IF EXISTS `rad_user_special_balance`;
@@ -146,10 +139,6 @@ CREATE TABLE `rad_user_special_balance` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Records of rad_user_special_balance
--- ----------------------------
-
--- ----------------------------
 -- Table structure for rad_user_wallet
 -- ----------------------------
 DROP TABLE IF EXISTS `rad_user_wallet`;
@@ -160,10 +149,6 @@ CREATE TABLE `rad_user_wallet` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户钱包表';
-
--- ----------------------------
--- Records of rad_user_wallet
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for sys_department
@@ -177,13 +162,10 @@ CREATE TABLE `sys_department` (
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
+  `status` int(1) NOT NULL DEFAULT '1' COMMENT '1：正常，2：停用',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_code` (`code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='部门表';
-
--- ----------------------------
--- Records of sys_department
--- ----------------------------
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='部门表';
 
 -- ----------------------------
 -- Table structure for sys_manager
@@ -203,11 +185,8 @@ CREATE TABLE `sys_manager` (
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_name` (`username`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统管理用户表';
-
--- ----------------------------
--- Records of sys_manager
--- ----------------------------
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='系统管理用户表';
+INSERT INTO `radius`.`sys_manager` (`id`, `department_id`, `username`, `real_name`, `password`, `status`, `mobile`, `email`, `create_time`, `update_time`, `description`) VALUES ('1', '1', 'admin', '超级管理员', 'oD2Ou3h126sv7bje58Z+fA==', '1', '186989878678', 'test@163.com', '2019-03-27 21:25:07', NULL, '测试');
 
 -- ----------------------------
 -- Table structure for sys_manager_role_rel
@@ -220,10 +199,6 @@ CREATE TABLE `sys_manager_role_rel` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='管理员与角色关联表';
 
 -- ----------------------------
--- Records of sys_manager_role_rel
--- ----------------------------
-
--- ----------------------------
 -- Table structure for sys_resource
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_resource`;
@@ -233,18 +208,17 @@ CREATE TABLE `sys_resource` (
   `name` varchar(255) NOT NULL COMMENT '菜单名称',
   `icon` varchar(255) DEFAULT NULL COMMENT '图标',
   `url` varchar(256) DEFAULT NULL COMMENT 'URL地址',
-  `type` tinyint(1) NOT NULL COMMENT '菜单类型，0：模块，1：栏目，2：按钮',
+  `type` tinyint(1) NOT NULL COMMENT '菜单类型，1：模块，2：栏目，3：按钮',
   `enable` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否启用，1：启用，0：关闭',
   `perm_mark` varchar(255) DEFAULT NULL COMMENT '权限标志，可用于shiro注解',
   `sort_order` int(11) NOT NULL DEFAULT '1' COMMENT '排序顺序',
-  `remark` varchar(512) DEFAULT NULL COMMENT '描述',
-  `need_prem` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否需要权限控制,1：需要，0：不需要',
+  `description` varchar(512) DEFAULT NULL COMMENT '描述',
+  `should_perm_control` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否需要权限控制,1：需要，0：不需要',
+  `level` tinyint(1) NOT NULL COMMENT '层次',
+  `front_router` varchar(200) DEFAULT NULL COMMENT '前端路由',
+  `front_key` varchar(255) DEFAULT NULL COMMENT '前端路由key',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='菜单表';
-
--- ----------------------------
--- Records of sys_resource
--- ----------------------------
+) ENGINE=InnoDB AUTO_INCREMENT=451 DEFAULT CHARSET=utf8 COMMENT='菜单表';
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -254,16 +228,12 @@ CREATE TABLE `sys_role` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `name` varchar(255) NOT NULL COMMENT '角色名',
   `code` varchar(255) NOT NULL COMMENT '角色编码',
-  `enable` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否启用角色，1：启用，0：关闭',
-  `remark` varchar(512) DEFAULT NULL COMMENT '描述',
+  `enable` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否启用角色，1：启用，2：关闭',
+  `description` varchar(512) DEFAULT NULL COMMENT '描述',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '最近更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色表';
-
--- ----------------------------
--- Records of sys_role
--- ----------------------------
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='角色表';
 
 -- ----------------------------
 -- Table structure for sys_role_resource_rel
@@ -274,10 +244,6 @@ CREATE TABLE `sys_role_resource_rel` (
   `role_id` bigint(20) NOT NULL COMMENT '角色id',
   PRIMARY KEY (`resource_id`,`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色与菜单关联关系表';
-
--- ----------------------------
--- Records of sys_role_resource_rel
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for user_online_log
@@ -298,6 +264,18 @@ CREATE TABLE `user_online_log` (
 ) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8 COMMENT='用户上网记录';
 
 -- ----------------------------
--- Records of user_online_log
+-- Table structure for user_order_record
 -- ----------------------------
-INSERT INTO `user_online_log` VALUES ('24', 'test1', '2019-03-07 16:40:40', '2019-03-07 16:40:49', '9', '0', '0', '192.168.10.235', '5C:FF:35:0E:58:A5', '192.168.10.236');
+DROP TABLE IF EXISTS `user_order_record`;
+CREATE TABLE `user_order_record` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL COMMENT '用户id',
+  `product_id` bigint(20) NOT NULL COMMENT '产品id',
+  `price` int(11) NOT NULL COMMENT '价格，单位：分',
+  `manager_id` bigint(20) NOT NULL COMMENT '操作管理员',
+  `order_time` datetime NOT NULL COMMENT '订单时间',
+  `status` tinyint(1) NOT NULL DEFAULT '2' COMMENT '1:预定，2: 已生效，3：已取消',
+  `end_date` date NOT NULL COMMENT '订单截止日期',
+  `count` int(11) NOT NULL DEFAULT '1' COMMENT '套餐倍数',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8 COMMENT='用户订单表';
