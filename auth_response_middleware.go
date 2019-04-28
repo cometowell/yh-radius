@@ -37,7 +37,6 @@ func HuaweiResponse(cxt *Context) {
 	setVendorStringValue(Huawei, &inputAvgRateVendorAttr)
 	specAttr.addSpecRadiusAttr(inputAvgRateVendorAttr)
 
-
 	// 上行平均速率
 	inputPeakRateVendorAttr := VendorAttr{
 		VendorType:   3,
@@ -80,7 +79,6 @@ func HuaweiResponse(cxt *Context) {
 	cxt.Response.AddRadiusAttr(*specAttr)
 }
 
-
 // 思科
 func CiscoResponse(cxt *Context) {
 	product := cxt.User.Product
@@ -94,7 +92,7 @@ func CiscoResponse(cxt *Context) {
 	}
 
 	qosIn := VendorAttr{
-		VendorType: 1,
+		VendorType:  1,
 		VendorValue: []byte(fmt.Sprintf("sub-qos-policy-in=%d", upStreamLimit)),
 	}
 	qosIn.Length()
@@ -102,7 +100,7 @@ func CiscoResponse(cxt *Context) {
 	specAttr.addSpecRadiusAttr(qosIn)
 
 	qosOut := VendorAttr{
-		VendorType: 1,
+		VendorType:  1,
 		VendorValue: []byte(fmt.Sprintf("sub-qos-policy-out=%d", downStreamLimit)),
 	}
 	qosOut.Length()
@@ -111,8 +109,8 @@ func CiscoResponse(cxt *Context) {
 
 	if product.DomainName != "" {
 		domainNameVendorAttr := VendorAttr{
-			VendorType:   1,
-			VendorValue:  []byte(fmt.Sprintf("addr-pool=%s", product.DomainName)),
+			VendorType:  1,
+			VendorValue: []byte(fmt.Sprintf("addr-pool=%s", product.DomainName)),
 		}
 		domainNameVendorAttr.Length()
 		setVendorStringValue(Cisco, &domainNameVendorAttr)
@@ -142,7 +140,7 @@ func MikroTikResponse(cxt *Context) {
 	}
 
 	rateLimitAttr := VendorAttr{
-		VendorType: 8,
+		VendorType:  8,
 		VendorValue: []byte(fmt.Sprintf("%dk/%dk", upStreamLimit, downStreamLimit)),
 	}
 	rateLimitAttr.Length()
@@ -168,17 +166,17 @@ func ZteResponse(cxt *Context) {
 	}
 
 	upRateAttr := VendorAttr{
-		VendorType: 89,
+		VendorType:   89,
 		VendorLength: 6,
-		VendorValue: getIntegerBytes(uint32(upStreamLimit)),
+		VendorValue:  getIntegerBytes(uint32(upStreamLimit)),
 	}
 	setVendorStringValue(Zte, &upRateAttr)
 	specAttr.addSpecRadiusAttr(upRateAttr)
 
 	downRateAttr := VendorAttr{
-		VendorType: 83,
+		VendorType:   83,
 		VendorLength: 6,
-		VendorValue: getIntegerBytes(uint32(downStreamLimit)),
+		VendorValue:  getIntegerBytes(uint32(downStreamLimit)),
 	}
 	setVendorStringValue(Zte, &downRateAttr)
 	specAttr.addSpecRadiusAttr(downRateAttr)
@@ -197,6 +195,7 @@ func AuthSpecAndCommonAttrSetter(cxt *Context) {
 
 	// session timeout
 	sessionTimeoutAttr := RadiusAttr{
+		VendorId: Standard,
 		AttrType: 27,
 		// 默认会话时长一星期
 		AttrValue: getIntegerBytes(uint32(cxt.User.sessionTimeout)),
@@ -208,4 +207,3 @@ func AuthSpecAndCommonAttrSetter(cxt *Context) {
 	cxt.Response.AddRadiusAttr(sessionTimeoutAttr)
 	cxt.Next()
 }
-

@@ -15,20 +15,19 @@ func parsePkg(pkg []byte) RadiusPackage {
 	rp.AuthenticatorString = strings.ToUpper(hex.EncodeToString(rp.Authenticator[:]))
 	// 解析radius属性
 	attrs := make([]*RadiusAttr, 0, 50)
-	rp.RadiusAttrMap = make(map[AttrKey] *RadiusAttr)
-	rp.RadiusAttrStringKeyMap = make(map[string] *RadiusAttr)
+	rp.RadiusAttrMap = make(map[AttrKey]*RadiusAttr)
+	rp.RadiusAttrStringKeyMap = make(map[string]*RadiusAttr)
 	attrs = parseRadiusAttr(pkg[20:], attrs, &rp)
 	rp.RadiusAttrs = attrs
 	return rp
 }
 
 // 解析radius属性: type(1) + length(1) + value
-func parseRadiusAttr(attrBytes []byte, attrs []*RadiusAttr, rp *RadiusPackage)  []*RadiusAttr {
+func parseRadiusAttr(attrBytes []byte, attrs []*RadiusAttr, rp *RadiusPackage) []*RadiusAttr {
 	length := len(attrBytes)
 	if length == 0 {
 		return attrs
 	}
-
 
 	attrType := attrBytes[0]
 	attrLength := attrBytes[1]
@@ -39,7 +38,7 @@ func parseRadiusAttr(attrBytes []byte, attrs []*RadiusAttr, rp *RadiusPackage)  
 
 	// 26号私有属性特殊处理
 	if attrType == VendorSpecificType {
-		attr.VendorId = binary.BigEndian.Uint32(attrBytes[AttrHeaderLength : AttrHeaderLength+ 4])
+		attr.VendorId = binary.BigEndian.Uint32(attrBytes[AttrHeaderLength : AttrHeaderLength+4])
 		attr.VendorAttrMap = make(map[AttrKey]VendorAttr)
 		attr.VendorAttrStringKeyMap = make(map[string]VendorAttr)
 		attribute, ok := ATTRITUBES[AttrKey{Standard, int(attrType)}]
@@ -51,8 +50,9 @@ func parseRadiusAttr(attrBytes []byte, attrs []*RadiusAttr, rp *RadiusPackage)  
 		parseSpecRadiusAttr(attrBytes[VendorHeaderLength:attrLength], &attr, rp)
 	} else {
 		attr.AttrValue = attrBytes[AttrHeaderLength:attrLength]
+		attr.VendorId = Standard
 		// 设置属性值的字符串形式值
-		attribute, ok := ATTRITUBES[AttrKey{0, int(attrType)}]
+		attribute, ok := ATTRITUBES[AttrKey{Standard, int(attrType)}]
 		if ok {
 			attr.AttrName = attribute.Name
 			attr.setStandardAttrStringVal()
@@ -84,10 +84,10 @@ func parseSpecRadiusAttr(specAttrBytes []byte, attr *RadiusAttr, rp *RadiusPacka
 	vendorLength := specAttrBytes[1]
 
 	vendorAttr := VendorAttr{
-		VendorId: attr.VendorId,
-		VendorType: vendorType,
+		VendorId:     attr.VendorId,
+		VendorType:   vendorType,
 		VendorLength: vendorLength,
-		VendorValue: specAttrBytes[AttrHeaderLength: vendorLength],
+		VendorValue:  specAttrBytes[AttrHeaderLength:vendorLength],
 	}
 	// 设置属性值的字符串形式值
 	vendorAttr.setVendorAttrStringValue()

@@ -22,7 +22,7 @@ type AttrKey struct {
 }
 
 var (
-	ATTRITUBES = map[AttrKey] *Attribute{}
+	ATTRITUBES = map[AttrKey]*Attribute{}
 )
 
 // 属性值类型
@@ -40,7 +40,7 @@ func getAttrValue(attributeType AttributeValueType, value []byte) string {
 	var ret string
 	switch attributeType {
 	case INTEGE:
-		val:= binary.BigEndian.Uint32(value)
+		val := binary.BigEndian.Uint32(value)
 		ret = strconv.FormatUint(uint64(val), 10)
 	case STRING:
 		ret = string(value)
@@ -56,15 +56,15 @@ func IPString(source []byte) string {
 	if len(source) != 4 {
 		return ""
 	}
-	return fmt.Sprintf("%d.%d.%d.%d", source[0] & 0xFF, source[1] & 0xFF, source[2] & 0xFF, source[3] & 0xFF)
+	return fmt.Sprintf("%d.%d.%d.%d", source[0]&0xFF, source[1]&0xFF, source[2]&0xFF, source[3]&0xFF)
 }
 
 // 属性结构体
 type Attribute struct {
-	VendorId uint32
+	VendorId   uint32
 	VendorName string
-	Type int
-	Name string
+	Type       int
+	Name       string
 	// 枚举
 	ValueType AttributeValueType
 	// 属性值，可选的属性值
@@ -73,9 +73,9 @@ type Attribute struct {
 
 // 属性值结构体
 type AttributeValue struct {
-	Name string
+	Name      string
 	ValueName string
-	Value int
+	Value     int
 }
 
 func readAttributeFiles() {
@@ -100,12 +100,12 @@ func parseAttributes(file os.FileInfo) {
 	splitPattern, _ := regexp.Compile("\\s+")
 	buffer := bytes.NewBuffer(bs)
 
-	var vendorId uint32 = 0
+	var vendorId uint32 = 1
 	vendorName := ""
 
 	_attrNameType := make(map[string]int)
 
-	for  {
+	for {
 		line, err := buffer.ReadString('\n')
 		if err == io.EOF {
 			break
@@ -116,6 +116,7 @@ func parseAttributes(file os.FileInfo) {
 		}
 
 		line = strings.TrimSuffix(line, "\r\n")
+		line = strings.TrimSuffix(line, "\n")
 		if pattern.MatchString(line) || line == "" {
 			continue
 		}
@@ -138,13 +139,13 @@ func parseAttributes(file os.FileInfo) {
 			}
 
 			attr := Attribute{
-				VendorId: vendorId,
+				VendorId:   vendorId,
 				VendorName: vendorName,
-				Type: typeVal,
-				Name: typeName,
-				ValueType: valueType,
+				Type:       typeVal,
+				Name:       typeName,
+				ValueType:  valueType,
 			}
-			ATTRITUBES[AttrKey{vendorId: vendorId, attrType:typeVal}] = &attr
+			ATTRITUBES[AttrKey{vendorId: vendorId, attrType: typeVal}] = &attr
 
 			_attrNameType[typeName] = typeVal
 
@@ -163,9 +164,9 @@ func parseAttributes(file os.FileInfo) {
 			}
 
 			attrVal := AttributeValue{
-				Name: belongAttrName,
+				Name:      belongAttrName,
 				ValueName: items[1],
-				Value: val,
+				Value:     val,
 			}
 			values := attribute.AttributeValues
 			if values == nil {

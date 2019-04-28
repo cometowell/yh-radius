@@ -94,7 +94,7 @@ func MacAddrVerify(cxt *Context) {
 		macAddr := getMacAddr(cxt)
 		if user.MacAddr == "" {
 			user.MacAddr = macAddr
-			cxt.Session.Id(user.Id).Cols("mac_addr").Update(user)
+			cxt.Session.ID(user.Id).Cols("mac_addr").Update(user)
 		}
 
 		if macAddr != user.MacAddr {
@@ -144,6 +144,7 @@ func authReply(cxt *Context, replyCode byte, msg string) {
 	replyMessage := RadiusAttr{
 		AttrType:  18,
 		AttrValue: []byte(msg),
+		VendorId:  Standard,
 	}
 	replyMessage.Length()
 	replyMessage.setStandardAttrStringVal()
