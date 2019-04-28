@@ -134,8 +134,6 @@ func accounting(online OnlineUser, totalUpStream int, totalDownStream int, cxt *
 		panic("data access error")
 	}
 
-	panic("test transaction")
-
 	// 扣除用户流量，时长
 	user := RadUser{UserName: online.UserName}
 	cxt.Session.Get(&user)
@@ -165,11 +163,6 @@ func acctInterimUpdateHandler(acctSessionId string, cxt *Context) {
 	online := OnlineUser{AcctSessionId: acctSessionId}
 	cxt.Session.Get(&online)
 
-	if online.Id == 0 {
-		cxt.throwPackage = true
-		panic("in online records can not find this accountId: " + acctSessionId)
-	}
-
 	// 单位KB
 	var totalUpStream, totalDownStream int
 	attr, ok := cxt.Request.RadiusAttrStringKeyMap["Acct-Input-Octets"]
@@ -196,7 +189,43 @@ func acctInterimUpdateHandler(acctSessionId string, cxt *Context) {
 
 	online.TotalUpStream += int64(totalUpStream)
 	online.TotalUpStream += int64(totalUpStream)
-	cxt.Session.Id(online.Id).Cols("total_up_stream", "total_down_stream").Update(&online)
+
+	if online.Id == 0 {
+		attr, ok := cxt.Request.RadiusAttrStringKeyMap["User-Name"]
+		if !ok {
+			cxt.throwPackage = true
+			panic("Interim update: in online records can not find this account: " + acctSessionId)
+		}
+		online.UserName = attr.AttrStringValue
+		var user RadUser
+		cxt.Session.Where("username = ?", attr.AttrStringValue).Get(&user)
+		if user.Id != 0 {
+			online := OnlineUser{
+				AcctSessionId: acctSessionId,
+				NasIpAddr:     cxt.RadNas.IpAddr,
+				StartTime:     NowTime(),
+			}
+			attr, ok = cxt.Request.RadiusAttrStringKeyMap["Framed-IP-Address"]
+			if ok {
+				online.IpAddr = attr.AttrStringValue
+			}
+
+			attr, ok = cxt.Request.RadiusAttrStringKeyMap["NAS-Port-Id"]
+			if ok {
+				online.NasPortId = attr.AttrStringValue
+			}
+
+			online.MacAddr = getMacAddr(cxt)
+			_, err := cxt.Session.InsertOne(&online)
+			if err != nil {
+				cxt.throwPackage = true
+				panic("Interim update: insert online user info failure" + err.Error())
+			}
+			return
+		}
+	}
+
+	cxt.Session.ID(online.Id).Cols("total_up_stream", "total_down_stream").Update(&online)
 }
 
 // It may also be used to mark the start of accounting (for example, upon booting)
