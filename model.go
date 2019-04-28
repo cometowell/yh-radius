@@ -39,7 +39,7 @@ type RadUser struct {
 	Pager          `xorm:"-" json:"page"`
 	Count          int  `xorm:"-" json:"count"`
 	Price          int  `xorm:"-" json:"price"`
-	BeContinue     bool `json:"beContinue"` // 标记为续费
+	BeContinue     bool `xorm:"-" json:"beContinue"` // 标记为续费
 }
 
 type RadUserWallet struct {
@@ -115,6 +115,7 @@ type UserOrderRecord struct {
 	ManagerId int64 `json:"managerId"` // 操作人
 	OrderTime Time  `json:"orderTime"`
 	Status    int   `json:"status"`
+	Count     int   `json:"count"`
 	EndDate   Time  `json:"endDate"`
 }
 

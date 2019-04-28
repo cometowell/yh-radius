@@ -259,8 +259,17 @@ func buildWhereSql(params map[string]interface{}, limitConditions map[string]str
 	return
 }
 
-func isExpire(t Time) bool {
-	return time.Time(t).Sub(time.Now()) <= 0
+func isExpire(user *RadUser, product *RadProduct) bool {
+	duration := time.Time(user.ExpireTime).Sub(time.Now())
+	if duration <= 0 {
+		return true
+	} else if product.Type == TimeProduct {
+		return user.AvailableTime <= 0
+	} else if product.Type == FlowProduct {
+		return user.AvailableFlow <= 0
+	}
+
+	return false
 }
 
 // offline user

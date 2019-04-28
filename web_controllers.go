@@ -368,7 +368,7 @@ func addUser(c *gin.Context) {
 		return
 	}
 	user.Password = encrypt(user.Password)
-	purchaseProduct(&user, &product, user.BeContinue)
+	purchaseProduct(&user, &product, &RadUser{})
 	session.InsertOne(&user)
 	// 订购信息
 	webSession := GlobalSessionManager.GetSessionByGinContext(c)
@@ -427,7 +427,7 @@ func continueProduct(c *gin.Context) {
 
 	if e != nil {
 		session.Rollback()
-		c.JSON(http.StatusOK, newErrorJsonResult("用户已经预定了套餐暂未生效，不允许再次预定"))
+		c.JSON(http.StatusOK, newErrorJsonResult("用户预定了套餐失败"+err.Error()))
 		return
 	}
 
@@ -459,8 +459,8 @@ func continueProduct(c *gin.Context) {
 
 	var expireDate Time
 	var orderStatus int
-	if isExpire(oldUser.ExpireTime) { // 产品到期, 直接更新产品信息
-		purchaseProduct(&oldUser, &newProduct, user.BeContinue)
+	if isExpire(&oldUser, &oldProduct) { // 产品到期, 直接更新产品信息
+		purchaseProduct(&oldUser, &newProduct, &user)
 		expireDate = oldUser.ExpireTime
 		orderStatus = OrderUsingStatus
 	} else {
@@ -484,29 +484,38 @@ func continueProduct(c *gin.Context) {
 		ManagerId: manager.Id,
 		OrderTime: NowTime(),
 		Status:    orderStatus,
+		Count:     user.Count,
 		EndDate:   expireDate,
 	}
+
 	session.InsertOne(&orderRecord)
-	session.ID(oldUser.Id).Update(&oldUser)
+	session.AllCols().ID(oldUser.Id).Update(&oldUser)
 	session.Commit()
 	c.JSON(http.StatusOK, newSuccessJsonResult("续订成功!", nil))
 }
 
-func purchaseProduct(user *RadUser, product *RadProduct, beContinue bool) {
+func purchaseProduct(user *RadUser, product *RadProduct, continueUser *RadUser) {
 	user.ShouldBindMacAddr = product.ShouldBindMacAddr
+	user.ProductId = product.Id
 	user.ShouldBindVlan = product.ShouldBindVlan
 	user.ConcurrentCount = product.ConcurrentCount
 	user.AvailableTime = product.ProductDuration
 	user.AvailableFlow = product.ProductFlow
 	if product.Type == MonthlyProduct {
 		expire := time.Time(user.ExpireTime)
-		if time.Time(expire).IsZero() || beContinue {
+		if time.Time(expire).IsZero() || continueUser.BeContinue {
 			expire = time.Now()
 		}
-		expire = time.Time(time.Date(expire.Year(), expire.Month()+time.Month(product.ServiceMonth), expire.Day(), 23, 59, 59, 0, expire.Location()))
+
+		month := product.ServiceMonth
+		if continueUser.BeContinue {
+			month *= continueUser.Count
+		}
+
+		expire = time.Time(time.Date(expire.Year(), expire.Month()+time.Month(month), expire.Day(), 23, 59, 59, 0, expire.Location()))
 		user.ExpireTime = Time(expire)
 	} else if product.Type == TimeProduct {
-		if time.Time(user.ExpireTime).IsZero() || beContinue {
+		if time.Time(user.ExpireTime).IsZero() || continueUser.BeContinue {
 			expireTime, _ := getStdTimeFromString("2099-12-31 23:59:59")
 			user.ExpireTime = Time(expireTime)
 		}
@@ -519,7 +528,7 @@ func purchaseProduct(user *RadUser, product *RadProduct, beContinue bool) {
 		} else if product.FlowClearCycle == MonthFlowClearCycle {
 			user.ExpireTime = Time(getMonthLastTime())
 		} else if product.FlowClearCycle == FixedPeriodFlowClearCycle {
-			if time.Time(user.ExpireTime).IsZero() || beContinue {
+			if time.Time(user.ExpireTime).IsZero() || continueUser.BeContinue {
 				user.ExpireTime = Time(getDayLastTimeAfterAYear())
 			}
 		}
