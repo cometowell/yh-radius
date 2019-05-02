@@ -63,12 +63,12 @@ go-rad 是一个使用golang语言开发的radius协议实现，支持华为，�
 这里有一个可用的radius管理平台，实现了用户管理，套餐管理，nas管理，在线用户管理，管理员管理，角色管理等[RADIUD-WEB](https://github.com/cometowell/radius-web.git)
 web平台默认的登陆用户: admin/123456
 
-![首页](https://github.com/cometowell/go-rad/tree/master/document/index.png)
-![用户管理](https://github.com/cometowell/go-rad/tree/master/document/user.png)
-![用户续费](https://github.com/cometowell/go-rad/tree/master/document/continue.png)
-![套餐管理](https://github.com/cometowell/go-rad/tree/master/document/product.png)
-![在线用户](https://github.com/cometowell/go-rad/tree/master/document/online.png)
-![NAS管理](https://github.com/cometowell/go-rad/tree/master/document/nas.png)
+![image](https://github.com/cometowell/go-rad/tree/master/document/index.png)
+![image](https://github.com/cometowell/go-rad/tree/master/document/user.png)
+![image](https://github.com/cometowell/go-rad/tree/master/document/continue.png)
+![image](https://github.com/cometowell/go-rad/tree/master/document/product.png)
+![image](https://github.com/cometowell/go-rad/tree/master/document/online.png)
+![image](https://github.com/cometowell/go-rad/tree/master/document/nas.png)
 
 
 ## 许可协议
