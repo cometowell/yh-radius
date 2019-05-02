@@ -17,6 +17,17 @@ go-rad 是一个使用golang语言开发的radius协议实现，支持华为，�
     go build
 ```
 
+### dist目录文件:
+
+> Linux发布版：
+go-rad-linux.zip
+
+> windows发布版：
+go-rad-windows.zip
+
+> VUE版本的web管理系统：
+radius-web-dist.zip
+
 ## 运行系统
 
 你需要复制这些目录或者文件至你的目标目录: go-rad, attributes, config, startup.sh, shutdown.sh
