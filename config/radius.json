@@ -10,5 +10,5 @@
   "max.procs": 3,
   "web.server.url": "0.0.0.0:8099",
   "web.session.timeout": 3600,
-  "task.user.order.cron" : "0 */2 * * * ?"
+  "task.user.order.cron" : "0 10 1 * * ?"
 }
