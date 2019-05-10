@@ -60,10 +60,10 @@ radius-web-dist.zip
 
 | 字段名 | 默认值 | 类型 | 描述 |
 | ------| ------ | ------ | ----- |
-| 认证端口 | 1812 | int |  radius认证端口  |
-| 计费端口 | 1813 | int |  radius计费端口  |
-| 密码加密秘钥 | 支持16,24,32长度的十六进制字符串 | string |  用于加密用户密码  |
-| 默认的下发会话时长 | 604800 | int | 一周的秒数  |
+| authPort | 1812 | int |  radius认证端口  |
+| acctPort | 1813 | int |  radius计费端口  |
+| encrypt.key | 支持16,24,32长度的十六进制字符串 | string |  用于加密用户密码  |
+| radius.session.timeout | 604800 | int | 默认一周的秒数  |
 | limiter.limit | 100 | int | 用于限制每次添加到令牌桶中的token数量，间接控制go协程并发数量 |
 | limiter.burst | 1000 | int | 用于限制最多的可用token数量,间接控制go协程并发数量  |
 | product.stage | debug | string | 控制gin日志，sql显示；可选值：test,debug,release 发布生产环境时请修改此配置为：release  |
