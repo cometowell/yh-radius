@@ -66,6 +66,7 @@ radius-web-dist.zip
 | 默认的下发会话时长 | 604800 | int | 一周的秒数  |
 | limiter.limit | 100 | int | 用于限制每次添加到令牌桶中的token数量，间接控制go协程并发数量 |
 | limiter.burst | 1000 | int | 用于限制最多的可用token数量,间接控制go协程并发数量  |
+| product.stage | debug | string | 控制gin日志，sql显示；可选值：test,debug,release 发布生产环境时请修改此配置为：release  |
 
 ## 数据库表结构
 数据库表定义在radius-tables.sql中

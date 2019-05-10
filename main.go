@@ -121,7 +121,12 @@ func main() {
 	// 初始化数据库连接
 	var err error
 	engine, err = xorm.NewEngine(config["database.type"].(string), config["database.url"].(string))
-	engine.ShowSQL(true)
+	productStage := config["product.stage"].(string)
+
+	if productStage != gin.ReleaseMode {
+		engine.ShowSQL(true)
+	}
+
 	if err != nil {
 		logger.Fatalf("连接数据库发生错误：%v", err)
 	}
@@ -174,7 +179,7 @@ func main() {
 
 func webServer() {
 	initWeb()
-	gin.SetMode(gin.DebugMode)
+	gin.SetMode(config["product.stage"].(string))
 	r := gin.Default()
 	r.Use(PermCheck)
 	loadControllers(r)
