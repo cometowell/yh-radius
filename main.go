@@ -132,7 +132,7 @@ func main() {
 	}
 
 	// 认证服务
-	authServer := Default(int(config["authPort"].(float64)))
+	authServer := Default(int(config["auth.port"].(float64)))
 	authServer.Use(UserVerify)
 	authServer.Use(VlanVerify)
 	authServer.Use(MacAddrVerify)
@@ -143,7 +143,7 @@ func main() {
 	logger.Info("已经启动Radius认证监听...")
 
 	// 计费服务
-	accountServer := Default(int(config["acctPort"].(float64)))
+	accountServer := Default(int(config["acct.port"].(float64)))
 	accountServer.Use(AcctRecord)
 	accountServer.Use(AcctReply)
 	accountServer.Use(TransactionCommitFunc)
