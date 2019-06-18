@@ -2,12 +2,11 @@ package radius
 
 import (
 	"fmt"
-	"go-rad/common"
 	"testing"
 )
 
 func TestGetVlan(t *testing.T) {
-	fmt.Println(common.getVlanIds(0,"vlanid=1;vlanid2=6"))
+	fmt.Println(getVlanIds(0, "vlanid=1;vlanid2=6"))
 }
 
 func TestUnknowLengthParam(t *testing.T) {

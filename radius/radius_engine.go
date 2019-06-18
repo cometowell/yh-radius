@@ -14,7 +14,7 @@ type radEngine struct {
 	radMiddleWares []RadMiddleWare
 	port           int
 	listener       *net.UDPConn
-	limiter *rate.Limiter
+	limiter        *rate.Limiter
 }
 
 func Default(port int) (r *radEngine) {
@@ -62,7 +62,7 @@ func (r *radEngine) HandlePackage(cxt context.Context) {
 		}
 
 		if !r.limiter.Allow() {
-			logger.Logger.Warn("服务器处理能力到底最高点：报文被丢弃", "消息来自 <<< ", dst.String())
+			logger.Logger.Warn("服务器处理能力达到最高点：报文被丢弃", "消息来自 <<< ", dst.String())
 			continue
 		}
 
