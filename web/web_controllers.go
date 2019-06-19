@@ -98,6 +98,11 @@ func login(c *gin.Context) {
 		return
 	}
 
+	if resources != nil || len(resources) == 0 {
+		c.JSON(http.StatusForbidden, common.NewErrorJsonResult("user's permission is poor"))
+		return
+	}
+
 	session.SetAttr("resources", resources)
 
 	buttons := make([]int64, 0)
