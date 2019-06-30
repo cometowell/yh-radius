@@ -16,21 +16,21 @@ func sessionManagerInfo(c *gin.Context) {
 	managerInfo := session.GetAttr("manager")
 	resources := session.GetAttr("resources").([]model.SysResource)
 
-	buttons := make([]int64, 0)
+	buttonPermissions := make([]int64, 0)
 	for _, res := range resources {
 		if res.Level == 3 {
-			buttons = append(buttons, res.Id)
+			buttonPermissions = append(buttonPermissions, res.Id)
 		}
 	}
 
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: gin.H{
-		"manager": managerInfo,
-		"buttons": buttons,
+		"manager":           managerInfo,
+		"buttonPermissions": buttonPermissions,
 	}})
 }
 
 func managerList(c *gin.Context) {
-	var params model.SysManager
+	var params model.SysUser
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
@@ -38,7 +38,7 @@ func managerList(c *gin.Context) {
 	}
 	c.Set("current", params.Page)
 	c.Set("pageSize", params.PageSize)
-	var managers []model.SysManager
+	var managers []model.SysUser
 	whereSql := "1=1 "
 	whereArgs := make([]interface{}, 0)
 	if params.Username != "" {
@@ -60,7 +60,7 @@ func managerList(c *gin.Context) {
 }
 
 func managerById(c *gin.Context) {
-	var manager model.SysManager
+	var manager model.SysUser
 	err := c.ShouldBindJSON(&manager)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
@@ -72,7 +72,7 @@ func managerById(c *gin.Context) {
 }
 
 func addManager(c *gin.Context) {
-	var manager model.SysManager
+	var manager model.SysUser
 	err := c.ShouldBindJSON(&manager)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
@@ -91,7 +91,7 @@ func addManager(c *gin.Context) {
 }
 
 func updateManager(c *gin.Context) {
-	var manager model.SysManager
+	var manager model.SysUser
 	err := c.ShouldBindJSON(&manager)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
@@ -112,7 +112,7 @@ func updateManager(c *gin.Context) {
 }
 
 func delManager(c *gin.Context) {
-	var manager model.SysManager
+	var manager model.SysUser
 	err := c.ShouldBindJSON(&manager)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
@@ -125,14 +125,14 @@ func delManager(c *gin.Context) {
 }
 
 func changeManagerPassword(c *gin.Context) {
-	var managerPassword model.ManagerPassword
+	var managerPassword model.SysUserPassword
 	err := c.ShouldBindJSON(&managerPassword)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
 		return
 	}
 
-	var manager model.SysManager
+	var manager model.SysUser
 	manager.Password = common.Encrypt(managerPassword.NewPassword)
 	_, err = database.DataBaseEngine.ID(managerPassword.Id).Cols("password").Update(&manager)
 	if err != nil {

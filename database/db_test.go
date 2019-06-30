@@ -64,8 +64,8 @@ func TestJoin1(t *testing.T) {
 }
 
 type Manager struct {
-	model.SysManager `xorm:"extends"`
-	Roles            []model.SysRole `xorm:"extends"`
+	model.SysUser `xorm:"extends"`
+	Roles         []model.SysRole `xorm:"extends"`
 }
 
 func (Manager) TableName() string {

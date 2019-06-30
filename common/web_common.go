@@ -64,7 +64,7 @@ func NewErrorJsonResult(message string) JsonResult {
 	}
 }
 
-const SessionName = "rad_access_token"
+const SessionName = "Authorization"
 
 func GetStdTimeFromString(value string) (time.Time, error) {
 	return time.ParseInLocation(TimeFormat, value, time.Local)

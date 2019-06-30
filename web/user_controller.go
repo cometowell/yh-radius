@@ -135,12 +135,12 @@ func addUser(c *gin.Context) {
 	session.InsertOne(&user)
 	// 订购信息
 	webSession := GlobalSessionManager.GetSessionByGinContext(c)
-	manager := webSession.GetAttr("manager").(model.SysManager)
+	manager := webSession.GetAttr("manager").(model.SysUser)
 	orderRecord := model.UserOrderRecord{
 		UserId:    user.Id,
 		ProductId: product.Id,
 		Price:     user.Price,
-		ManagerId: manager.Id,
+		SysUserId: manager.Id,
 		OrderTime: model.NowTime(),
 		Status:    radius.OrderUsingStatus,
 		EndDate:   user.ExpireTime,
@@ -209,7 +209,7 @@ func continueProduct(c *gin.Context) {
 	session.ID(oldUser.ProductId).Get(&oldProduct)
 
 	webSession := GlobalSessionManager.GetSessionByGinContext(c)
-	manager := webSession.GetAttr("manager").(model.SysManager)
+	manager := webSession.GetAttr("manager").(model.SysUser)
 
 	if newProduct.Id == 0 {
 		session.Rollback()
@@ -244,7 +244,7 @@ func continueProduct(c *gin.Context) {
 		UserId:    user.Id,
 		ProductId: newProduct.Id,
 		Price:     user.Price,
-		ManagerId: manager.Id,
+		SysUserId: manager.Id,
 		OrderTime: model.NowTime(),
 		Status:    orderStatus,
 		Count:     user.Count,
