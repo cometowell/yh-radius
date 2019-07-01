@@ -15,29 +15,29 @@ func (RadUserProduct) TableName() string {
 }
 
 type RadUser struct {
-	Id                int64       `xorm:"pk autoincr" json:"id"`
-	UserName          string      `xorm:"unique 'username'" json:"username"`
-	RealName          string      `json:"realName"`
-	Password          string      `json:"password"`
-	ProductId         int64       `json:"productId"`
-	Status            int         `json:"status"`
-	AvailableTime     int64       `json:"availableTime"` // sec
-	AvailableFlow     int64       `json:"availableFlow"` // KB
-	ExpireTime        Time `json:"expireTime"`
-	ConcurrentCount   int         `json:"concurrentCount"` // 并发数
-	ShouldBindMacAddr int         `json:"shouldBindMacAddr"`
-	ShouldBindVlan    int         `json:"shouldBindVlan"`
-	MacAddr           string      `json:"macAddr"`
-	VlanId            int         `json:"vlanId"`
-	VlanId2           int         `json:"vlanId2"`
-	FramedIpAddr      string      `json:"framedIpAddr"` // 静态IP
-	InstalledAddr     string      `json:"installedAddr"`
-	PauseTime         Time `json:"pauseTime"` // 停机时间
-	CreateTime        Time `json:"createTime"`
-	UpdateTime        Time `json:"updateTime"`
-	Mobile            string      `json:"mobile"`
-	Email             string      `json:"email"`
-	Description       string      `json:"description"`
+	Id                int64  `xorm:"pk autoincr" json:"id"`
+	UserName          string `xorm:"unique 'username'" json:"username"`
+	RealName          string `json:"realName"`
+	Password          string `json:"password"`
+	ProductId         int64  `json:"productId"`
+	Status            int    `json:"status"`
+	AvailableTime     int64  `json:"availableTime"` // sec
+	AvailableFlow     int64  `json:"availableFlow"` // KB
+	ExpireTime        Time   `json:"expireTime"`
+	ConcurrentCount   int    `json:"concurrentCount"` // 并发数
+	ShouldBindMacAddr int    `json:"shouldBindMacAddr"`
+	ShouldBindVlan    int    `json:"shouldBindVlan"`
+	MacAddr           string `json:"macAddr"`
+	VlanId            int    `json:"vlanId"`
+	VlanId2           int    `json:"vlanId2"`
+	FramedIpAddr      string `json:"framedIpAddr"` // 静态IP
+	InstalledAddr     string `json:"installedAddr"`
+	PauseTime         Time   `json:"pauseTime"` // 停机时间
+	CreateTime        Time   `json:"createTime"`
+	UpdateTime        Time   `json:"updateTime"`
+	Mobile            string `json:"mobile"`
+	Email             string `json:"email"`
+	Description       string `json:"description"`
 
 	Product        RadProduct `xorm:"-" json:"product"`
 	SessionTimeout int        `xorm:"-"`
@@ -55,26 +55,26 @@ type RadUserWallet struct {
 }
 
 type RadUserSpecialBalance struct {
-	Id           int64       `xorm:"pk autoincr" json:"id"`
-	UserWalletId int64       `json:"userWalletId"`
-	Type         int         `json:"type"` // 1: 专项套餐，2：无限使用
-	ProductId    int64       `json:"productId"`
-	Balance      int         `json:"balance"`
-	ExpireTime   Time `json:"expireTime"`
+	Id           int64 `xorm:"pk autoincr" json:"id"`
+	UserWalletId int64 `json:"userWalletId"`
+	Type         int   `json:"type"` // 1: 专项套餐，2：无限使用
+	ProductId    int64 `json:"productId"`
+	Balance      int   `json:"balance"`
+	ExpireTime   Time  `json:"expireTime"`
 }
 
 type OnlineUser struct {
-	Id              int64       `xorm:"pk autoincr" json:"id"`
-	UserName        string      `xorm:"'username'" json:"username"`
-	NasIpAddr       string      `json:"nasIpAddr"`
-	AcctSessionId   string      `json:"acctSessionId"`
-	StartTime       Time `json:"startTime"`
-	UsedDuration    int         `json:"usedDuration"` //已记账时长:sec
-	IpAddr          string      `json:"ipAddr"`
-	MacAddr         string      `json:"macAddr"`
-	NasPortId       string      `json:"nasPortId"` // vlanid, vlanid2
-	TotalUpStream   int64       `json:"totalUpStream"`
-	TotalDownStream int64       `json:"totalDownStream"`
+	Id              int64  `xorm:"pk autoincr" json:"id"`
+	UserName        string `xorm:"'username'" json:"username"`
+	NasIpAddr       string `json:"nasIpAddr"`
+	AcctSessionId   string `json:"acctSessionId"`
+	StartTime       Time   `json:"startTime"`
+	UsedDuration    int    `json:"usedDuration"` //已记账时长:sec
+	IpAddr          string `json:"ipAddr"`
+	MacAddr         string `json:"macAddr"`
+	NasPortId       string `json:"nasPortId"` // vlanid, vlanid2
+	TotalUpStream   int64  `json:"totalUpStream"`
+	TotalDownStream int64  `json:"totalDownStream"`
 
 	Pager    `xorm:"-" json:"page"`
 	RealName string `xorm:"-" json:"realName"`
@@ -98,30 +98,30 @@ type RadProduct struct {
 	ShouldBindVlan    int    `json:"shouldBindVlan"`
 	ConcurrentCount   int    `json:"concurrentCount"`
 	ServiceMonth      int    `json:"serviceMonth"`
-	ProductDuration int64       `json:"productDuration"` // 套餐使用时长：sec
-	ProductFlow     int64       `json:"productFlow"`     // 套餐流量 KB
-	FlowClearCycle  int         `json:"flowClearCycle"`  // 流量清零周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）
-	Price           int         `json:"price"`           //分
-	UpStreamLimit   int         `json:"upStreamLimit"`   // 上行流量，Kb
-	DownStreamLimit int         `json:"downStreamLimit"` // 下行流量，Kb
-	DomainName      string      `json:"domainName"`
-	Description     string      `json:"description"`
-	CreateTime      Time `json:"createTime"`
-	UpdateTime      Time `json:"updateTime"`
+	ProductDuration   int64  `json:"productDuration"` // 套餐使用时长：sec
+	ProductFlow       int64  `json:"productFlow"`     // 套餐流量 KB
+	FlowClearCycle    int    `json:"flowClearCycle"`  // 流量清零周期；0：无限时长， 1：日，2：月：3：固定（开通至使用时长截止[用户套餐过期时间]）
+	Price             int    `json:"price"`           //分
+	UpStreamLimit     int    `json:"upStreamLimit"`   // 上行流量，Kb
+	DownStreamLimit   int    `json:"downStreamLimit"` // 下行流量，Kb
+	DomainName        string `json:"domainName"`
+	Description       string `json:"description"`
+	CreateTime        Time   `json:"createTime"`
+	UpdateTime        Time   `json:"updateTime"`
 
 	Pager `xorm:"-" json:"page"`
 }
 
 type UserOrderRecord struct {
-	Id        int64       `xorm:"pk autoincr" json:"id"`
-	UserId    int64       `json:"userId"`
-	ProductId int64       `json:"productId"`
-	Price     int         `json:"price"`
-	ManagerId int64       `json:"managerId"` // 操作人
-	OrderTime Time `json:"orderTime"`
-	Status    int         `json:"status"`
-	Count     int         `json:"count"`
-	EndDate   Time `json:"endDate"`
+	Id        int64 `xorm:"pk autoincr" json:"id"`
+	UserId    int64 `json:"userId"`
+	ProductId int64 `json:"productId"`
+	Price     int   `json:"price"`
+	SysUserId int64 `json:"sysUserId"` // 操作人
+	OrderTime Time  `json:"orderTime"`
+	Status    int   `json:"status"`
+	Count     int   `json:"count"`
+	EndDate   Time  `json:"endDate"`
 }
 
 type UserOrderRecordProduct struct {
@@ -146,49 +146,49 @@ type RadNas struct {
 }
 
 type UserOnlineLog struct {
-	Id              int64       `xorm:"pk autoincr" json:"id"`
-	UserName        string      `xorm:"'username'" json:"username"`
-	StartTime       Time `json:"startTime"`
-	StopTime        Time `json:"stopTime"`
-	UsedDuration    int         `json:"usedDuration"`
-	TotalUpStream   int         `json:"totalUpStream"`
-	TotalDownStream int         `json:"totalDownStream"`
-	NasIpAddr       string      `json:"nasIpAddr"`
-	IpAddr          string      `json:"ipAddr"`
-	MacAddr         string      `json:"macAddr"`
+	Id              int64  `xorm:"pk autoincr" json:"id"`
+	UserName        string `xorm:"'username'" json:"username"`
+	StartTime       Time   `json:"startTime"`
+	StopTime        Time   `json:"stopTime"`
+	UsedDuration    int    `json:"usedDuration"`
+	TotalUpStream   int    `json:"totalUpStream"`
+	TotalDownStream int    `json:"totalDownStream"`
+	NasIpAddr       string `json:"nasIpAddr"`
+	IpAddr          string `json:"ipAddr"`
+	MacAddr         string `json:"macAddr"`
 }
 
-type SysManager struct {
-	Id           int64       `xorm:"pk autoincr" json:"id"`
-	DepartmentId int64       `json:"departmentId"`
-	Username     string      `json:"username"`
-	Password     string      `json:"password"`
-	RealName     string      `json:"realName"`
-	Status       int8        `json:"status"`
-	Mobile       string      `json:"mobile"`
-	Email        string      `json:"email"`
-	CreateTime   Time `json:"createTime"`
-	UpdateTime   Time `json:"updateTime"`
-	Description  string      `json:"description"`
+type SysUser struct {
+	Id           int64  `xorm:"pk autoincr" json:"id"`
+	DepartmentId int64  `json:"departmentId"`
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+	RealName     string `json:"realName"`
+	Status       int8   `json:"status"`
+	Mobile       string `json:"mobile"`
+	Email        string `json:"email"`
+	CreateTime   Time   `json:"createTime"`
+	UpdateTime   Time   `json:"updateTime"`
+	Description  string `json:"description"`
 
 	Pager `xorm:"-" json:"page"`
 }
 
-type ManagerPassword struct {
+type SysUserPassword struct {
 	Id              int64  `json:"id"`
 	NewPassword     string `json:"newPassword"`
 	ComfirmPassword string `json:"comfirmPassword"`
 }
 
 type SysDepartment struct {
-	Id          int64       `xorm:"pk autoincr" json:"id"`
-	Code        string      `json:"code"`
-	Name        string      `json:"name"`
-	ParentId    int64       `json:"parentId"`
-	CreateTime  Time `json:"createTime"`
-	UpdateTime  Time `json:"updateTime"`
-	Status      int         `json:"status"`
-	Description string      `json:"description"`
+	Id          int64  `xorm:"pk autoincr" json:"id"`
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	ParentId    int64  `json:"parentId"`
+	CreateTime  Time   `json:"createTime"`
+	UpdateTime  Time   `json:"updateTime"`
+	Status      int    `json:"status"`
+	Description string `json:"description"`
 	Pager       `xorm:"-" json:"page"`
 }
 
@@ -202,13 +202,13 @@ func (Department) TableName() string {
 }
 
 type SysRole struct {
-	Id          int64       `xorm:"pk autoincr" json:"id"`
-	Code        string      `json:"code"`
-	Name        string      `json:"name"`
-	CreateTime  Time `json:"createTime"`
-	UpdateTime  Time `json:"updateTime"`
-	Description string      `json:"description"`
-	Enable      int         `json:"enable"`
+	Id          int64  `xorm:"pk autoincr" json:"id"`
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	CreateTime  Time   `json:"createTime"`
+	UpdateTime  Time   `json:"updateTime"`
+	Description string `json:"description"`
+	Enable      int    `json:"enable"`
 
 	Pager `xorm:"-" json:"page"`
 }
@@ -233,8 +233,8 @@ type SysResource struct {
 	Selected bool          `xorm:"-" json:"selected"`
 }
 
-type SysManagerRoleRel struct {
-	ManagerId int64 `xorm:"pk" json:"managerId"`
+type SysUserRoleRel struct {
+	SysUserId int64 `xorm:"pk" json:"sysUserId"`
 	RoleId    int64 `xorm:"pk" json:"roleId"`
 }
 
@@ -243,16 +243,16 @@ type SysRoleResourceRel struct {
 	RoleId     int64 `xorm:"pk" json:"roleId"`
 }
 
-type SysManagerRole struct {
-	SysManager         `xorm:"extends" json:"sysManager"`
-	SysManagerRoleRel  `xorm:"extends" json:"sysManagerRoleRel"`
+type SysUserRole struct {
+	SysUser            `xorm:"extends" json:"sysUser"`
+	SysUserRoleRel     `xorm:"extends" json:"sysUserRoleRel"`
 	SysRole            `xorm:"extends" json:"sysRole"`
 	SysRoleResourceRel `xorm:"extends" json:"sysRoleResourceRel"`
 	SysResource        `xorm:"extends" json:"sysResource"`
 }
 
-func (SysManagerRole) TableName() string {
-	return "sys_manager"
+func (SysUserRole) TableName() string {
+	return "sys_user"
 }
 
 const PageSize = 10

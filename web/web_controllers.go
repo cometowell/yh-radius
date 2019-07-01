@@ -66,7 +66,7 @@ func loadControllers(router *gin.Engine) {
 }
 
 func login(c *gin.Context) {
-	var manager model.SysManager
+	var manager model.SysUser
 	err := c.ShouldBindJSON(&manager)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
@@ -88,8 +88,8 @@ func login(c *gin.Context) {
 	err = database.DataBaseEngine.Table("sys_resource").Alias("sr").
 		Join("LEFT", []string{"sys_role_resource_rel", "srr"}, "sr.id = srr.resource_id").
 		Join("LEFT", []string{"sys_role", "r"}, "srr.role_id = r.id").
-		Join("LEFT", []string{"sys_manager_role_rel", "smr"}, "smr.role_id = r.id").
-		Join("LEFT", []string{"sys_manager", "m"}, "smr.manager_id = m.id").
+		Join("LEFT", []string{"sys_user_role_rel", "smr"}, "smr.role_id = r.id").
+		Join("LEFT", []string{"sys_user", "m"}, "smr.manager_id = m.id").
 		Where("m.id = ? or sr.should_perm_control = 0", manager.Id).
 		Find(&resources)
 
@@ -105,16 +105,16 @@ func login(c *gin.Context) {
 
 	session.SetAttr("resources", resources)
 
-	buttons := make([]int64, 0)
+	buttonPermissions := make([]int64, 0)
 	for _, res := range resources {
 		if res.Level == 3 {
-			buttons = append(buttons, res.Id)
+			buttonPermissions = append(buttonPermissions, res.Id)
 		}
 	}
 
 	c.JSON(http.StatusOK, common.NewSuccessJsonResult("success", gin.H{
-		"sessionId": session.SessionId(),
-		"buttons":   buttons,
+		"sessionId":         session.SessionId(),
+		"buttonPermissions": buttonPermissions,
 	}))
 }
 

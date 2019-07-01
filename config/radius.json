@@ -2,7 +2,7 @@
   "auth.port": 1812,
   "acct.port": 1813,
   "database.type": "mysql",
-  "database.url": "root:root@tcp(127.0.0.1:3306)/radius?charset=utf8&parseTime=true",
+  "database.url": "root:root@tcp(127.0.0.1:3306)/radius-v2?charset=utf8&parseTime=true",
   "encrypt.key": "vbRIKz90HJ$jjwyzu3BsUdci1600l7rP",
   "radius.session.timeout": 604800,
   "limiter.limit": 100,
