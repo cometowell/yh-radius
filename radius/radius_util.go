@@ -85,7 +85,7 @@ func IsExpire(user *model.RadUser, product *model.RadProduct) bool {
 // when user offline, nas will send stop accounting package to radius server
 // then radius handler the stop accounting package
 // maybe After sometime, add return response package processing
-func OfflineUser(online model.OnlineUser) error {
+func OfflineUser(online model.RadOnlineUser) error {
 
 	var nas model.RadNas
 	ok, _ := database.DataBaseEngine.Where("ip_addr = ?", online.NasIpAddr).Get(&nas)

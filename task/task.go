@@ -31,7 +31,7 @@ func UserExpireTask() {
 	}
 
 	for _, user := range users {
-		var record model.UserOrderRecord
+		var record model.RadUserOrderRecord
 		_, err = session.Where("user_id = ? and status = 1", user.Id).Get(&record)
 		if err != nil {
 			logger.Logger.Warnf("user:%s find order record, %s%s", user.UserName, "user expire task occur error: ", err.Error())

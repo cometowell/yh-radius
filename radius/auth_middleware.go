@@ -45,7 +45,7 @@ func UserVerify(cxt *Context) {
 		}
 	}
 
-	onlineUser := model.OnlineUser{UserName: userName}
+	onlineUser := model.RadOnlineUser{UserName: userName}
 	onlineCount, _ := cxt.Session.Count(onlineUser)
 	userConcurrent := user.ConcurrentCount
 	if userConcurrent != 0 && userConcurrent <= int(onlineCount) {

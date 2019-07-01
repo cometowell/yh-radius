@@ -136,7 +136,7 @@ func addUser(c *gin.Context) {
 	// 订购信息
 	webSession := GlobalSessionManager.GetSessionByGinContext(c)
 	manager := webSession.GetAttr("manager").(model.SysUser)
-	orderRecord := model.UserOrderRecord{
+	orderRecord := model.RadUserOrderRecord{
 		UserId:    user.Id,
 		ProductId: product.Id,
 		Price:     user.Price,
@@ -240,7 +240,7 @@ func continueProduct(c *gin.Context) {
 		}
 	}
 
-	orderRecord := model.UserOrderRecord{
+	orderRecord := model.RadUserOrderRecord{
 		UserId:    user.Id,
 		ProductId: newProduct.Id,
 		Price:     user.Price,

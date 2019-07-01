@@ -11,7 +11,7 @@ import (
 
 // -------------------------- online --------------------------------
 func listOnline(c *gin.Context) {
-	var online model.OnlineUser
+	var online model.RadOnlineUser
 	c.ShouldBindJSON(&online)
 
 	whereSql := "1=1 "
@@ -43,10 +43,10 @@ func listOnline(c *gin.Context) {
 }
 
 func offOnline(c *gin.Context) {
-	var online model.OnlineUser
+	var online model.RadOnlineUser
 	c.ShouldBindJSON(&online)
 
-	var dst model.OnlineUser
+	var dst model.RadOnlineUser
 	database.DataBaseEngine.ID(online.Id).Get(&dst)
 
 	if dst.Id == 0 {
@@ -64,7 +64,7 @@ func offOnline(c *gin.Context) {
 }
 
 func deleteOnline(c *gin.Context) {
-	var online model.OnlineUser
+	var online model.RadOnlineUser
 	c.ShouldBindJSON(&online)
 	count, e := database.DataBaseEngine.ID(online.Id).Delete(&online)
 	if e != nil || count == 0 {

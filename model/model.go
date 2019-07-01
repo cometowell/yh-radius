@@ -63,7 +63,7 @@ type RadUserSpecialBalance struct {
 	ExpireTime   Time  `json:"expireTime"`
 }
 
-type OnlineUser struct {
+type RadOnlineUser struct {
 	Id              int64  `xorm:"pk autoincr" json:"id"`
 	UserName        string `xorm:"'username'" json:"username"`
 	NasIpAddr       string `json:"nasIpAddr"`
@@ -81,8 +81,8 @@ type OnlineUser struct {
 }
 
 type Online struct {
-	OnlineUser `xorm:"extends" json:"onlineUser"`
-	RadUser    `xorm:"extends" json:"radUser"`
+	RadOnlineUser `xorm:"extends" json:"onlineUser"`
+	RadUser       `xorm:"extends" json:"radUser"`
 }
 
 func (Online) TableName() string {
@@ -112,7 +112,7 @@ type RadProduct struct {
 	Pager `xorm:"-" json:"page"`
 }
 
-type UserOrderRecord struct {
+type RadUserOrderRecord struct {
 	Id        int64 `xorm:"pk autoincr" json:"id"`
 	UserId    int64 `json:"userId"`
 	ProductId int64 `json:"productId"`
@@ -125,8 +125,8 @@ type UserOrderRecord struct {
 }
 
 type UserOrderRecordProduct struct {
-	UserOrderRecord `xorm:"extends" json:"userOrderRecord"`
-	RadProduct      `xorm:"extends" json:"radProduct"`
+	RadUserOrderRecord `xorm:"extends" json:"userOrderRecord"`
+	RadProduct         `xorm:"extends" json:"radProduct"`
 }
 
 func (UserOrderRecordProduct) TableName() string {
@@ -145,7 +145,7 @@ type RadNas struct {
 	Pager `xorm:"-" json:"page"`
 }
 
-type UserOnlineLog struct {
+type RadUserOnlineLog struct {
 	Id              int64  `xorm:"pk autoincr" json:"id"`
 	UserName        string `xorm:"'username'" json:"username"`
 	StartTime       Time   `json:"startTime"`
@@ -254,8 +254,6 @@ type SysUserRole struct {
 func (SysUserRole) TableName() string {
 	return "sys_user"
 }
-
-const PageSize = 10
 
 type Pagination struct {
 	Size       int         `json:"size"`

@@ -48,7 +48,7 @@ func setAcctRecord(acctSessionId string, cxt *Context) {
 }
 
 func acctStartHandler(acctSessionId string, cxt *Context) {
-	online := model.OnlineUser{
+	online := model.RadOnlineUser{
 		AcctSessionId: acctSessionId,
 		NasIpAddr:     cxt.RadNas.IpAddr,
 		StartTime:     model.NowTime(),
@@ -80,7 +80,7 @@ func acctStartHandler(acctSessionId string, cxt *Context) {
 
 func acctStopHandler(acctSessionId string, cxt *Context) {
 
-	online := model.OnlineUser{AcctSessionId: acctSessionId}
+	online := model.RadOnlineUser{AcctSessionId: acctSessionId}
 	cxt.Session.Get(&online)
 
 	if online.Id == 0 {
@@ -115,11 +115,11 @@ func acctStopHandler(acctSessionId string, cxt *Context) {
 	accounting(online, totalUpStream, totalDownStream, cxt)
 }
 
-func accounting(online model.OnlineUser, totalUpStream int, totalDownStream int, cxt *Context) {
+func accounting(online model.RadOnlineUser, totalUpStream int, totalDownStream int, cxt *Context) {
 	// 添加online log
 	now := time.Now()
 	usedDuration := int(now.Sub(time.Time(online.StartTime)).Seconds())
-	onlineLog := model.UserOnlineLog{
+	onlineLog := model.RadUserOnlineLog{
 		UserName:        online.UserName,
 		StartTime:       online.StartTime,
 		StopTime:        model.NowTime(),
@@ -153,7 +153,7 @@ func accounting(online model.OnlineUser, totalUpStream int, totalDownStream int,
 		panic("data access error")
 	}
 	// 删除online
-	delOnline := &model.OnlineUser{}
+	delOnline := &model.RadOnlineUser{}
 	_, err = cxt.Session.ID(online.Id).Delete(delOnline)
 	if err != nil {
 		cxt.throwPackage = true
@@ -162,7 +162,7 @@ func accounting(online model.OnlineUser, totalUpStream int, totalDownStream int,
 }
 
 func acctInterimUpdateHandler(acctSessionId string, cxt *Context) {
-	online := model.OnlineUser{AcctSessionId: acctSessionId}
+	online := model.RadOnlineUser{AcctSessionId: acctSessionId}
 	cxt.Session.Get(&online)
 
 	// 单位KB
@@ -202,7 +202,7 @@ func acctInterimUpdateHandler(acctSessionId string, cxt *Context) {
 		var user model.RadUser
 		cxt.Session.Where("username = ?", attr.AttrStringValue).Get(&user)
 		if user.Id != 0 {
-			online := model.OnlineUser{
+			online := model.RadOnlineUser{
 				AcctSessionId: acctSessionId,
 				NasIpAddr:     cxt.RadNas.IpAddr,
 				StartTime:     model.NowTime(),
@@ -236,7 +236,7 @@ func acctInterimUpdateHandler(acctSessionId string, cxt *Context) {
 
 // 计费开始，通常为设备重启后
 func acctAccountingOn(cxt *Context) {
-	onlineList := make([]model.OnlineUser, 0)
+	onlineList := make([]model.RadOnlineUser, 0)
 	cxt.Session.Find(&onlineList)
 	offline(onlineList, cxt)
 }
@@ -246,7 +246,7 @@ func acctAccountingOff(cxt *Context) {
 	acctAccountingOn(cxt)
 }
 
-func offline(onlineList []model.OnlineUser, cxt *Context) {
+func offline(onlineList []model.RadOnlineUser, cxt *Context) {
 	for _, online := range onlineList {
 		accounting(online, int(online.TotalUpStream), int(online.TotalDownStream), cxt)
 	}
