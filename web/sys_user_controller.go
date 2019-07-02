@@ -78,7 +78,7 @@ func addManager(c *gin.Context) {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
 		return
 	}
-	count, _ := database.DataBaseEngine.Table("sys_manager").Where("username=?", manager.Username).Count()
+	count, _ := database.DataBaseEngine.Table("sys_user").Where("username=?", manager.Username).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "用户名已存在!"})
 		return
@@ -101,7 +101,7 @@ func updateManager(c *gin.Context) {
 		manager.Password = common.Encrypt(manager.Password)
 	}
 
-	count, _ := database.DataBaseEngine.Table("sys_manager").Where("username=? and id != ?", manager.Username, manager.Id).Count()
+	count, _ := database.DataBaseEngine.Table("sys_user").Where("username=? and id != ?", manager.Username, manager.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "用户名已存在!"})
 		return
