@@ -8,7 +8,7 @@ import (
 	"regexp"
 )
 
-var urls = []string{"/login", "/favicon.ico"}
+var urls = []string{"/login", "/logout", "/favicon.ico"}
 
 func PermCheck(c *gin.Context) {
 
