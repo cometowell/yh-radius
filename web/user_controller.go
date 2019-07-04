@@ -32,6 +32,16 @@ func listUser(c *gin.Context) {
 		whereArgs = append(whereArgs, "%"+params.RealName+"%")
 	}
 
+	if params.AreaId != 0 {
+		whereSql += "and ra.id = ? "
+		whereArgs = append(whereArgs, params.AreaId)
+	}
+
+	if params.TownId != 0 {
+		whereSql += "and rt.id = ? "
+		whereArgs = append(whereArgs, params.TownId)
+	}
+
 	if params.Status != 0 {
 		whereSql += "and ru.status = ?"
 		whereArgs = append(whereArgs, params.Status)
@@ -43,10 +53,12 @@ func listUser(c *gin.Context) {
 			ru.status,ru.available_time,ru.available_flow,ru.expire_time,
 			ru.concurrent_count,ru.should_bind_mac_addr,ru.should_bind_vlan,ru.mac_addr,ru.vlan_id,
 			ru.vlan_id2,ru.framed_ip_addr,ru.installed_addr,ru.mobile,ru.email,
-			ru.pause_time,ru.create_time,ru.update_time,ru.description, sp.*`).
+			ru.pause_time,ru.create_time,ru.update_time,ru.description, sp.*, rt.id as town_id, rt.name as town_name, ra.id as area_id, ra.name as area_name`).
 		Where(whereSql, whereArgs...).
 		Limit(params.PageSize, (params.Page-1)*params.PageSize).
 		Join("INNER", []string{"rad_product", "sp"}, "ru.product_id = sp.id").
+		Join("INNER", []string{"rad_town", "rt"}, "rt.id = ru.town_id").
+		Join("INNER", []string{"rad_area", "ra"}, "ra.id = rt.area_id").
 		FindAndCount(&users)
 
 	pagination := model.NewPagination(users, totalCount, params.Page, params.PageSize)
@@ -171,7 +183,9 @@ func fetchUser(c *gin.Context) {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
 		return
 	}
-	database.DataBaseEngine.Id(user.Id).Get(&user)
+	database.DataBaseEngine.Table(&model.RadUser{}).Alias("ru").Select("ru.*, rt.id as town_id, rt.name as town_name, ra.id as area_id, ra.name as area_name").
+		Join("INNER", []string{"rad_town", "rt"}, "rt.id = ru.town_id").
+		Join("INNER", []string{"rad_area", "ra"}, "ra.id = rt.area_id").Get(&user)
 	user.Password = ""
 	c.JSON(http.StatusOK, common.DefaultSuccessJsonResult(user))
 }

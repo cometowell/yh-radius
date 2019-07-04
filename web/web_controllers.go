@@ -42,6 +42,20 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/department/update", updateDepartment)
 	router.POST("/department/delete", deleteDepartment)
 
+	router.POST("/fetch/areas", fetchAreas)
+	router.POST("/area/info", getAreaInfo)
+	router.POST("/area/list", listAreas)
+	router.POST("/area/add", addArea)
+	router.POST("/area/update", updateArea)
+	router.POST("/area/delete", deleteArea)
+
+	router.POST("/fetch/towns", fetchTowns)
+	router.POST("/town/info", getTownInfo)
+	router.POST("/town/list", listTowns)
+	router.POST("/town/add", addTown)
+	router.POST("/town/update", updateTown)
+	router.POST("/town/delete", deleteTown)
+
 	router.POST("/nas/info", getNasInfo)
 	router.POST("/nas/list", listNas)
 	router.POST("/nas/add", addNas)
@@ -62,7 +76,6 @@ func loadControllers(router *gin.Engine) {
 	router.POST("/online/list", listOnline)
 	router.POST("/online/off", offOnline)
 	router.POST("/online/delete", deleteOnline)
-
 }
 
 func login(c *gin.Context) {

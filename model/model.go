@@ -5,6 +5,31 @@ import (
 	"time"
 )
 
+type RadArea struct {
+	Id          int64  `xorm:"pk autoincr" json:"id"`
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	Status      int    `json:"status"`
+	CreateTime  Time   `json:"createTime"`
+	UpdateTime  Time   `json:"updateTime"`
+	Description string `json:"description"`
+
+	Pager `xorm:"-" json:"page"`
+}
+
+type RadTown struct {
+	Id          int64  `xorm:"pk autoincr" json:"id"`
+	AreaId      int64  `json:"areaId"`
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	Status      int    `json:"status"`
+	CreateTime  Time   `json:"createTime"`
+	UpdateTime  Time   `json:"updateTime"`
+	Description string `json:"description"`
+
+	Pager `xorm:"-" json:"page"`
+}
+
 type RadUserProduct struct {
 	RadUser    `xorm:"extends" json:"radUser"`
 	RadProduct `xorm:"extends" json:"radProduct"`
@@ -18,6 +43,10 @@ type RadUser struct {
 	Id                int64  `xorm:"pk autoincr" json:"id"`
 	UserName          string `xorm:"unique 'username'" json:"username"`
 	RealName          string `json:"realName"`
+	TownId            int64  `json:"townId"`
+	TownName          string `xorm:"<-" json:"townName"`
+	AreaId            int64  `xorm:"<-" json:"areaId"`
+	AreaName          string `xorm:"<-" json:"areaName"`
 	Password          string `json:"password"`
 	ProductId         int64  `json:"productId"`
 	Status            int    `json:"status"`
