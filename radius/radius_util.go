@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"go-rad/common"
 	"go-rad/database"
+	"go-rad/logger"
 	"go-rad/model"
 	"math/rand"
 	"net"
@@ -86,7 +87,6 @@ func IsExpire(user *model.RadUser, product *model.RadProduct) bool {
 // then radius handler the stop accounting package
 // maybe After sometime, add return response package processing
 func OfflineUser(online model.RadOnlineUser) error {
-
 	var nas model.RadNas
 	ok, _ := database.DataBaseEngine.Where("ip_addr = ?", online.NasIpAddr).Get(&nas)
 	if !ok {
@@ -100,23 +100,29 @@ func OfflineUser(online model.RadOnlineUser) error {
 
 	attrs := make([]*RadiusAttr, 0, 3)
 	acctSessionIdAttr := RadiusAttr{
-		AttrType:  44,
-		AttrValue: []byte(online.AcctSessionId),
+		AttrType:        44,
+		AttrValue:       []byte(online.AcctSessionId),
+		AttrName:        "Acct-Session-Id",
+		AttrStringValue: online.AcctSessionId,
 	}
 	acctSessionIdAttr.Length()
 	attrs = append(attrs, &acctSessionIdAttr)
 	ipArrBytes, _ := common.IpAddrToBytes(online.NasIpAddr)
 	nasIpAddrAttr := RadiusAttr{
-		AttrType:   4,
-		AttrLength: 6,
-		AttrValue:  ipArrBytes,
+		AttrType:        4,
+		AttrLength:      6,
+		AttrValue:       ipArrBytes,
+		AttrName:        "Nas-Ip-Addr",
+		AttrStringValue: online.NasIpAddr,
 	}
 	attrs = append(attrs, &nasIpAddrAttr)
 
 	if online.UserName != "" {
 		usernameAttr := RadiusAttr{
-			AttrType:  1,
-			AttrValue: []byte(online.UserName),
+			AttrType:        1,
+			AttrValue:       []byte(online.UserName),
+			AttrName:        "User-Name",
+			AttrStringValue: online.UserName,
 		}
 		usernameAttr.Length()
 		attrs = append(attrs, &usernameAttr)
@@ -125,7 +131,7 @@ func OfflineUser(online model.RadOnlineUser) error {
 	rp.RadiusAttrs = attrs
 	replyAuthenticator(rp.Authenticator, &rp, nas.Secret)
 	rp.PackageLength()
-
+	logger.Logger.Infof("授权变更 >> 下线保温：%+v\n", rp)
 	conn, err := net.Dial("udp", fmt.Sprintf("%s:%d", online.NasIpAddr, nas.AuthorizePort))
 	if err != nil {
 		return err
