@@ -97,6 +97,13 @@ func deleteRole(c *gin.Context) {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
 		return
 	}
+
+	count, err := database.DataBaseEngine.Table(&model.SysUserRoleRel{}).Where("role_id = ?", role.Id).Count()
+	if count > 0 || err != nil {
+		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "角色已被关联不允许删除"})
+		return
+	}
+
 	database.DataBaseEngine.Id(role.Id).Delete(&role)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "已删除"})
 }

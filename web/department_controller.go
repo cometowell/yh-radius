@@ -103,7 +103,8 @@ func updateDepartment(c *gin.Context) {
 		session.Rollback()
 		return
 	}
-	session.AllCols().ID(department.Id).Update(&department)
+	department.UpdateTime = model.NowTime()
+	session.Cols("name", "update_time", "description", "status").ID(department.Id).Update(&department)
 	session.Commit()
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "修改成功"})
 }

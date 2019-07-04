@@ -89,7 +89,7 @@ func login(c *gin.Context) {
 		Join("LEFT", []string{"sys_role_resource_rel", "srr"}, "sr.id = srr.resource_id").
 		Join("LEFT", []string{"sys_role", "r"}, "srr.role_id = r.id").
 		Join("LEFT", []string{"sys_user_role_rel", "smr"}, "smr.role_id = r.id").
-		Join("LEFT", []string{"sys_user", "m"}, "smr.manager_id = m.id").
+		Join("LEFT", []string{"sys_user", "m"}, "smr.sys_user_id = m.id").
 		Where("m.id = ? or sr.should_perm_control = 0", manager.Id).
 		Find(&resources)
 

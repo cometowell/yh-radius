@@ -16,7 +16,7 @@ func TestJoin(t *testing.T) {
 
 	mr := make([]model.SysResource, 0)
 	tsEngine.Table("sys_user").Alias("sm").
-		Join("INNER", []string{"sys_user_role_rel", "smr"}, "sm.id = smr.manager_id").
+		Join("INNER", []string{"sys_user_role_rel", "smr"}, "sm.id = smr.sys_user_id").
 		Join("INNER", []string{"sys_role", "sr"}, "smr.role_id = sr.id").
 		Join("INNER", []string{"sys_role_resource_rel", "srr"}, "srr.role_id = sr.id").
 		Join("INNER", []string{"sys_resource", "r"}, "srr.role_id = r.id").
@@ -29,7 +29,7 @@ func TestJoin(t *testing.T) {
 
 	smr := []model.SysUserRole{}
 	err := tsEngine.Table("sys_user").Alias("sm").
-		Join("INNER", []string{"sys_user_role_rel", "smr"}, "sm.id = smr.manager_id").
+		Join("INNER", []string{"sys_user_role_rel", "smr"}, "sm.id = smr.sys_user_id").
 		Join("INNER", []string{"sys_role", "sr"}, "smr.role_id = sr.id").
 		Join("INNER", []string{"sys_role_resource_rel", "srr"}, "sr.id = srr.role_id").
 		Join("INNER", []string{"sys_resource", "r"}, "srr.resource_id = r.id").
@@ -79,7 +79,7 @@ func TestCollection(t *testing.T) {
 	tsEngine.ShowSQL(true)
 	var managers []Manager
 	tsEngine.Table("sys_user").Alias("sm").
-		Join("INNER", []string{"sys_user_role_rel", "smr"}, "sm.id = smr.manager_id").
+		Join("INNER", []string{"sys_user_role_rel", "smr"}, "sm.id = smr.sys_user_id").
 		Join("INNER", []string{"sys_role", "sr"}, "smr.role_id = sr.id").
 		Find(&managers)
 
