@@ -45,14 +45,14 @@ func listTowns(c *gin.Context) {
 		whereArgs = append(whereArgs, "%"+town.Name+"%")
 	}
 
-	var departments []model.Department
-	count, _ := database.DataBaseEngine.Cols("t.*, a.name").Table("rad_town").Alias("t").
-		Join("LEFT", []string{"rad-area", "a"}, "t.area_id = a.id").
+	var towns []model.RadTown
+	count, _ := database.DataBaseEngine.Table("rad_town").Alias("t").Select(`t.*, a.id as area_id, a.name as area_name`).
+		Join("LEFT", []string{"rad_area", "a"}, "t.area_id = a.id").
 		Where(whereSql, whereArgs...).
 		Limit(town.PageSize, town.PageSize*(town.Page-1)).
-		FindAndCount(&departments)
+		FindAndCount(&towns)
 
-	pagination := model.NewPagination(departments, count, town.Page, town.PageSize)
+	pagination := model.NewPagination(towns, count, town.Page, town.PageSize)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: pagination})
 
 }
