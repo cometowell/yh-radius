@@ -200,11 +200,11 @@ func continueProduct(c *gin.Context) {
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
-	bookOrderCount, e := session.Table("user_order_record").Where("user_id = ? and status = ?", user.Id, radius.OrderBookStatus).Count()
+	bookOrderCount, e := session.Table(&model.RadUserOrderRecord{}).Where("user_id = ? and status = ?", user.Id, radius.OrderBookStatus).Count()
 
 	if e != nil {
 		session.Rollback()
-		c.JSON(http.StatusOK, common.NewErrorJsonResult("用户预定了套餐失败"+err.Error()))
+		c.JSON(http.StatusOK, common.NewErrorJsonResult("用户预定了套餐失败"+e.Error()))
 		return
 	}
 
