@@ -131,7 +131,7 @@ func OfflineUser(online model.RadOnlineUser) error {
 	rp.RadiusAttrs = attrs
 	replyAuthenticator(rp.Authenticator, &rp, nas.Secret)
 	rp.PackageLength()
-	logger.Logger.Infof("授权变更 >> 下线保温：%+v\n", rp)
+	logger.Logger.Infof("授权变更 >> 下线报文：%+v\n", rp)
 	conn, err := net.Dial("udp", fmt.Sprintf("%s:%d", online.NasIpAddr, nas.AuthorizePort))
 	if err != nil {
 		return err
