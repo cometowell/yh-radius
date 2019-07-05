@@ -33,7 +33,7 @@ func listOnline(c *gin.Context) {
 
 	var onlines []model.Online
 	count, _ := database.DataBaseEngine.Table(&model.RadOnlineUser{}).Alias("ol").
-		Join("INNER", []string{"rad_user", "ru"}, "ol.username = ru.username").
+		Join("INNER", []interface{}{&model.RadUser{}, "ru"}, "ol.username = ru.username").
 		Where(whereSql, whereArgs...).
 		Limit(online.PageSize, online.PageSize*(online.Page-1)).
 		FindAndCount(&onlines)

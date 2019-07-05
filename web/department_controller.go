@@ -41,8 +41,8 @@ func listDepartments(c *gin.Context) {
 	}
 
 	var departments []model.Department
-	count, _ := database.DataBaseEngine.Cols("sd.*, d.name").Table("sys_department").Alias("sd").
-		Join("LEFT", []string{"sys_department", "d"}, "sd.parent_id = d.id").
+	count, _ := database.DataBaseEngine.Cols("sd.*, d.name").Table(&model.SysDepartment{}).Alias("sd").
+		Join("LEFT", []interface{}{&model.SysDepartment{}, "d"}, "sd.parent_id = d.id").
 		Where(whereSql, whereArgs...).
 		Limit(department.PageSize, department.PageSize*(department.Page-1)).
 		FindAndCount(&departments)
@@ -73,7 +73,7 @@ func addDepartment(c *gin.Context) {
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
-	count, _ := session.Table("sys_department").Where("code = ? or name = ?", department.Code, department.Name).Count()
+	count, _ := session.Table(&model.SysDepartment{}).Where("code = ? or name = ?", department.Code, department.Name).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "错误：编码或者名称重复"})
 		session.Rollback()
@@ -96,7 +96,7 @@ func updateDepartment(c *gin.Context) {
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
-	count, _ := session.Table("sys_department").
+	count, _ := session.Table(&model.SysDepartment{}).
 		Where("(code = ? or name = ?) and id != ?", department.Code, department.Name, department.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "错误：编码或者名称重复"})

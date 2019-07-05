@@ -48,7 +48,7 @@ func listUser(c *gin.Context) {
 	}
 
 	var users []model.RadUserProduct
-	totalCount, _ := database.DataBaseEngine.Table("rad_user").
+	totalCount, _ := database.DataBaseEngine.Table(&model.RadUser{}).
 		Alias("ru").Select(`ru.id,ru.username,ru.real_name,ru.product_id,
 			ru.status,ru.available_time,ru.available_flow,ru.expire_time,
 			ru.concurrent_count,ru.should_bind_mac_addr,ru.should_bind_vlan,ru.mac_addr,ru.vlan_id,
@@ -56,9 +56,9 @@ func listUser(c *gin.Context) {
 			ru.pause_time,ru.create_time,ru.update_time,ru.description, sp.*, rt.id as town_id, rt.name as town_name, ra.id as area_id, ra.name as area_name`).
 		Where(whereSql, whereArgs...).
 		Limit(params.PageSize, (params.Page-1)*params.PageSize).
-		Join("INNER", []string{"rad_product", "sp"}, "ru.product_id = sp.id").
-		Join("INNER", []string{"rad_town", "rt"}, "rt.id = ru.town_id").
-		Join("INNER", []string{"rad_area", "ra"}, "ra.id = rt.area_id").
+		Join("INNER", []interface{}{&model.RadProduct{}, "sp"}, "ru.product_id = sp.id").
+		Join("INNER", []interface{}{&model.RadTown{}, "rt"}, "rt.id = ru.town_id").
+		Join("INNER", []interface{}{&model.RadArea{}, "ra"}, "ra.id = rt.area_id").
 		FindAndCount(&users)
 
 	pagination := model.NewPagination(users, totalCount, params.Page, params.PageSize)
@@ -73,7 +73,7 @@ func fetchUserOrderRecord(c *gin.Context) {
 		return
 	}
 	var records []model.UserOrderRecordProduct
-	database.DataBaseEngine.Join("INNER", "rad_product", "rad_product.id = user_order_record.product_id").Where("user_id = ?", user.Id).Asc("user_order_record.status").Find(&records)
+	database.DataBaseEngine.Join("INNER", &model.RadProduct{}, "rad_product.id = user_order_record.product_id").Where("user_id = ?", user.Id).Asc("user_order_record.status").Find(&records)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: records})
 }
 
@@ -87,7 +87,7 @@ func updateUser(c *gin.Context) {
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
-	count, _ := session.Table("rad_user").Where("username = ? and id != ?", user.UserName, user.Id).Count()
+	count, _ := session.Table(&model.RadUser{}).Where("username = ? and id != ?", user.UserName, user.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    1,
@@ -122,7 +122,7 @@ func addUser(c *gin.Context) {
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
-	count, _ := session.Table("rad_user").Where("username = ?", user.UserName).Count()
+	count, _ := session.Table(&model.RadUser{}).Where("username = ?", user.UserName).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    1,
@@ -184,8 +184,8 @@ func fetchUser(c *gin.Context) {
 		return
 	}
 	database.DataBaseEngine.Table(&model.RadUser{}).Alias("ru").Select("ru.*, rt.id as town_id, rt.name as town_name, ra.id as area_id, ra.name as area_name").
-		Join("INNER", []string{"rad_town", "rt"}, "rt.id = ru.town_id").
-		Join("INNER", []string{"rad_area", "ra"}, "ra.id = rt.area_id").Get(&user)
+		Join("INNER", []interface{}{&model.RadTown{}, "rt"}, "rt.id = ru.town_id").
+		Join("INNER", []interface{}{&model.RadArea{}, "ra"}, "ra.id = rt.area_id").Get(&user)
 	user.Password = ""
 	c.JSON(http.StatusOK, common.DefaultSuccessJsonResult(user))
 }

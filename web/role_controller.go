@@ -31,7 +31,7 @@ func addRole(c *gin.Context) {
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
-	count, _ := session.Table("sys_role").Where("code = ?", role.Code).Count()
+	count, _ := session.Table(&model.SysRole{}).Where("code = ?", role.Code).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "错误：编码已存在，不能重复!"})
 		session.Rollback()
@@ -54,7 +54,7 @@ func updateRole(c *gin.Context) {
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
-	count, _ := session.Table("sys_role").Where("code = ? and id != ?", role.Code, role.Id).Count()
+	count, _ := session.Table(&model.SysRole{}).Where("code = ? and id != ?", role.Code, role.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "错误：编码重复!"})
 		session.Rollback()
@@ -117,9 +117,9 @@ func empowerRole(c *gin.Context) {
 		return
 	}
 	var selectedResList []model.SysResource
-	database.DataBaseEngine.Table("sys_resource").Alias("sr").
-		Join("INNER", []string{"sys_role_resource_rel", "srr"}, "sr.id = srr.resource_id").
-		Join("INNER", []string{"sys_role", "r"}, "srr.role_id = r.id").
+	database.DataBaseEngine.Table(&model.SysResource{}).Alias("sr").
+		Join("INNER", []interface{}{&model.SysRoleResourceRel{}, "srr"}, "sr.id = srr.resource_id").
+		Join("INNER", []interface{}{&model.SysRole{}, "r"}, "srr.role_id = r.id").
 		Where("r.id = ?", role.Id).
 		Find(&selectedResList)
 

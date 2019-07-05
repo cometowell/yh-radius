@@ -31,7 +31,7 @@ func addNas(c *gin.Context) {
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
-	count, _ := session.Table("rad_nas").Where("ip_addr = ?", nas.IpAddr).Count()
+	count, _ := session.Table(&model.RadNas{}).Where("ip_addr = ?", nas.IpAddr).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "错误：IP地址重复"})
 		session.Rollback()
@@ -52,7 +52,7 @@ func updateNas(c *gin.Context) {
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
-	count, _ := session.Table("rad_nas").Where("ip_addr = ? and id != ?", nas.IpAddr, nas.Id).Count()
+	count, _ := session.Table(&model.RadNas{}).Where("ip_addr = ? and id != ?", nas.IpAddr, nas.Id).Count()
 	if count > 0 {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "错误：IP地址重复"})
 		session.Rollback()

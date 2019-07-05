@@ -70,7 +70,7 @@ func listProduct(c *gin.Context) {
 	}
 
 	var products []model.RadProduct
-	totalCount, _ := database.DataBaseEngine.Table("rad_product").Where(whereSql, whereArgs...).
+	totalCount, _ := database.DataBaseEngine.Table(&model.RadProduct{}).Where(whereSql, whereArgs...).
 		Limit(product.PageSize, (product.Page-1)*product.PageSize).
 		FindAndCount(&products)
 

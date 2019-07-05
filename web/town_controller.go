@@ -16,8 +16,8 @@ func fetchTowns(c *gin.Context) {
 		return
 	}
 	var towns []model.RadTown
-	database.DataBaseEngine.Table("rad_town").Alias("t").Select(`t.*, a.id as area_id, a.name as area_name`).
-		Join("LEFT", []string{"rad_area", "a"}, "t.area_id = a.id").Where("area_id = ?", town.AreaId).Find(&towns)
+	database.DataBaseEngine.Table(&model.RadTown{}).Alias("t").Select(`t.*, a.id as area_id, a.name as area_name`).
+		Join("LEFT", []interface{}{&model.RadArea{}, "a"}, "t.area_id = a.id").Where("area_id = ?", town.AreaId).Find(&towns)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: towns})
 }
 
@@ -47,8 +47,8 @@ func listTowns(c *gin.Context) {
 	}
 
 	var towns []model.RadTown
-	count, _ := database.DataBaseEngine.Table("rad_town").Alias("t").Select(`t.*, a.id as area_id, a.name as area_name`).
-		Join("LEFT", []string{"rad_area", "a"}, "t.area_id = a.id").
+	count, _ := database.DataBaseEngine.Table(&model.RadTown{}).Alias("t").Select(`t.*, a.id as area_id, a.name as area_name`).
+		Join("LEFT", []interface{}{&model.RadArea{}, "a"}, "t.area_id = a.id").
 		Where(whereSql, whereArgs...).
 		Limit(town.PageSize, town.PageSize*(town.Page-1)).
 		FindAndCount(&towns)
@@ -65,9 +65,9 @@ func getTownInfo(c *gin.Context) {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
 		return
 	}
-	database.DataBaseEngine.Table("rad_town").
+	database.DataBaseEngine.Table(&model.RadTown{}).
 		Alias("t").Select(`t.*, a.id as area_id, a.name as area_name`).
-		Join("LEFT", []string{"rad_area", "a"}, "t.area_id = a.id").
+		Join("LEFT", []interface{}{&model.RadArea{}, "a"}, "t.area_id = a.id").
 		Get(&town)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: town})
 }

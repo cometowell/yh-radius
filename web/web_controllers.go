@@ -98,11 +98,11 @@ func login(c *gin.Context) {
 	session.SetAttr("manager", manager)
 
 	var resources []model.SysResource
-	err = database.DataBaseEngine.Table("sys_resource").Alias("sr").
-		Join("LEFT", []string{"sys_role_resource_rel", "srr"}, "sr.id = srr.resource_id").
-		Join("LEFT", []string{"sys_role", "r"}, "srr.role_id = r.id").
-		Join("LEFT", []string{"sys_user_role_rel", "smr"}, "smr.role_id = r.id").
-		Join("LEFT", []string{"sys_user", "m"}, "smr.sys_user_id = m.id").
+	err = database.DataBaseEngine.Table(&model.SysResource{}).Alias("sr").
+		Join("LEFT", []interface{}{&model.SysRoleResourceRel{}, "srr"}, "sr.id = srr.resource_id").
+		Join("LEFT", []interface{}{&model.SysRole{}, "r"}, "srr.role_id = r.id").
+		Join("LEFT", []interface{}{&model.SysUserRoleRel{}, "smr"}, "smr.role_id = r.id").
+		Join("LEFT", []interface{}{&model.SysUser{}, "m"}, "smr.sys_user_id = m.id").
 		Where("m.id = ? or sr.should_perm_control = 0", manager.Id).
 		Find(&resources)
 
