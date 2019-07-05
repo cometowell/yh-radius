@@ -17,7 +17,7 @@ func fetchTowns(c *gin.Context) {
 	}
 	var towns []model.RadTown
 	database.DataBaseEngine.Table(&model.RadTown{}).Alias("t").Select(`t.*, a.id as area_id, a.name as area_name`).
-		Join("LEFT", []interface{}{&model.RadArea{}, "a"}, "t.area_id = a.id").Where("area_id = ?", town.AreaId).Find(&towns)
+		Join("LEFT", []interface{}{&model.RadArea{}, "a"}, "t.area_id = a.id").Where("area_id = ? and t.status = 1", town.AreaId).Find(&towns)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: towns})
 }
 

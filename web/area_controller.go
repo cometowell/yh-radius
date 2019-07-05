@@ -10,7 +10,7 @@ import (
 
 func fetchAreas(c *gin.Context) {
 	var areas []model.RadArea
-	database.DataBaseEngine.Find(&areas)
+	database.DataBaseEngine.Where("status = 1").Find(&areas)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: areas})
 }
 
