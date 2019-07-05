@@ -16,7 +16,8 @@ func fetchTowns(c *gin.Context) {
 		return
 	}
 	var towns []model.RadTown
-	database.DataBaseEngine.Where("area_id = ?", town.AreaId).Find(&towns)
+	database.DataBaseEngine.Table("rad_town").Alias("t").Select(`t.*, a.id as area_id, a.name as area_name`).
+		Join("LEFT", []string{"rad_area", "a"}, "t.area_id = a.id").Where("area_id = ?", town.AreaId).Find(&towns)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: towns})
 }
 
@@ -64,7 +65,10 @@ func getTownInfo(c *gin.Context) {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
 		return
 	}
-	database.DataBaseEngine.Id(town.Id).Get(&town)
+	database.DataBaseEngine.Table("rad_town").
+		Alias("t").Select(`t.*, a.id as area_id, a.name as area_name`).
+		Join("LEFT", []string{"rad_area", "a"}, "t.area_id = a.id").
+		Get(&town)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: town})
 }
 
@@ -121,7 +125,20 @@ func deleteTown(c *gin.Context) {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
 		return
 	}
-	town.Status = 2 // 标记为停用
-	database.DataBaseEngine.Id(town.Id).Cols("status").Update(&town)
-	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "已停用!"})
+	count, err := database.DataBaseEngine.Table(&model.RadUser{}).Where("town_id = ?", town.Id).Count()
+
+	if err != nil {
+		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
+
+	if count > 0 {
+		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "村镇/街道已经被用户关联，不允许删除，可以修改为停用"})
+		town.Status = 2 // 标记为停用
+		database.DataBaseEngine.Id(town.Id).Cols("status").Update(&town)
+		return
+	}
+	database.DataBaseEngine.Id(town.Id).Delete(&town)
+	c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "删除成功!"})
+
 }

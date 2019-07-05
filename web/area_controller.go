@@ -108,7 +108,18 @@ func deleteArea(c *gin.Context) {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
 		return
 	}
-	area.Status = 2 // 标记为停用
-	database.DataBaseEngine.Id(area.Id).Cols("status").Update(&area)
-	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "已停用!"})
+
+	count, err := database.DataBaseEngine.Table(&model.RadTown{}).Where("area_id = ?", area.Id).Count()
+	if err != nil {
+		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
+		return
+	}
+
+	if count > 0 {
+		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: "片区已经被村镇/街道关联，不允许删除，可以修改为停用"})
+		return
+	}
+
+	database.DataBaseEngine.Id(area.Id).Delete(&area)
+	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "删除成功!"})
 }
