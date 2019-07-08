@@ -10,10 +10,31 @@ Target Server Type    : MYSQL
 Target Server Version : 50721
 File Encoding         : 65001
 
-Date: 2019-07-04 10:55:18
+Date: 2019-07-08 09:41:30
 */
 
 SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for rad_area
+-- ----------------------------
+DROP TABLE IF EXISTS `rad_area`;
+CREATE TABLE `rad_area` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `code` varchar(100) COLLATE utf8mb4_bin NOT NULL COMMENT '编码',
+  `name` varchar(200) COLLATE utf8mb4_bin NOT NULL COMMENT '大区名',
+  `status` int(11) NOT NULL DEFAULT '1' COMMENT '状态,1：正常，2：停用',
+  `create_time` datetime NOT NULL COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `description` varchar(1000) COLLATE utf8mb4_bin DEFAULT '' COMMENT '描述',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户片区划分表';
+
+-- ----------------------------
+-- Records of rad_area
+-- ----------------------------
+INSERT INTO `rad_area` VALUES ('1', 'test', '测试片区', '1', '2019-07-04 15:44:06', '2019-07-05 10:52:56', '测试片区');
+INSERT INTO `rad_area` VALUES ('2', 'test3', '测试片区3', '2', '2019-07-04 15:44:06', '2019-07-05 15:02:12', '测试片区');
 
 -- ----------------------------
 -- Table structure for rad_nas
@@ -29,7 +50,7 @@ CREATE TABLE `rad_nas` (
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_nas_ip` (`ip_addr`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8 COMMENT='NAS网络接入设备表';
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8 COMMENT='NAS网络接入设备表';
 
 -- ----------------------------
 -- Records of rad_nas
@@ -56,7 +77,7 @@ CREATE TABLE `rad_online_user` (
   `total_up_stream` bigint(20) NOT NULL DEFAULT '0' COMMENT '上行总流量 KB',
   `total_down_stream` bigint(20) NOT NULL DEFAULT '0' COMMENT '下行总流量，KB',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8 COMMENT='在线用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8 COMMENT='在线用户表';
 
 -- ----------------------------
 -- Records of rad_online_user
@@ -101,6 +122,28 @@ INSERT INTO `rad_product` VALUES ('8', 'aa', '1', '1', '1', '1', '3', '0', '5', 
 INSERT INTO `rad_product` VALUES ('9', 'aa1fdsfas', '1', '2', '1', '2', '2', '0', '12', '0', '0', '800', '8', '8', 'ccc', '2019-04-17 17:16:13', '2019-07-04 10:00:10', 'fdsdfasafs');
 
 -- ----------------------------
+-- Table structure for rad_town
+-- ----------------------------
+DROP TABLE IF EXISTS `rad_town`;
+CREATE TABLE `rad_town` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `area_id` bigint(20) NOT NULL COMMENT '片区ID',
+  `code` varchar(100) COLLATE utf8mb4_bin NOT NULL COMMENT '编码',
+  `name` varchar(200) COLLATE utf8mb4_bin NOT NULL COMMENT '大区名',
+  `status` int(11) NOT NULL DEFAULT '1' COMMENT '状态,1：正常，2：停用',
+  `create_time` datetime NOT NULL COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  `description` varchar(1000) COLLATE utf8mb4_bin DEFAULT '' COMMENT '描述',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='村镇/街道，片区下级单位表';
+
+-- ----------------------------
+-- Records of rad_town
+-- ----------------------------
+INSERT INTO `rad_town` VALUES ('1', '1', 'test', '测试街道', '1', '2019-07-04 15:43:21', '2019-07-05 15:02:57', '测试街道');
+INSERT INTO `rad_town` VALUES ('4', '2', 'test4', '测试街道4', '1', '2019-07-04 15:43:21', '2019-07-05 15:02:39', '测试街道4');
+
+-- ----------------------------
 -- Table structure for rad_user
 -- ----------------------------
 DROP TABLE IF EXISTS `rad_user`;
@@ -108,6 +151,7 @@ CREATE TABLE `rad_user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `username` varchar(64) NOT NULL COMMENT '账号',
   `real_name` varchar(128) DEFAULT NULL COMMENT '姓名',
+  `town_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '村镇/街道ID',
   `password` varchar(256) NOT NULL COMMENT '密码',
   `product_id` bigint(20) DEFAULT NULL COMMENT '产品ID',
   `status` int(11) NOT NULL COMMENT '状态，1：正常，2：停机，3：禁用，4：销户',
@@ -130,24 +174,25 @@ CREATE TABLE `rad_user` (
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_name` (`username`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- ----------------------------
 -- Records of rad_user
 -- ----------------------------
-INSERT INTO `rad_user` VALUES ('1', 'test', '测试', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
-INSERT INTO `rad_user` VALUES ('2', 'test2', '测试2', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('3', 'test3', '测试3', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
-INSERT INTO `rad_user` VALUES ('4', 'test4', '测试4', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('5', 'test5', '测试5', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
-INSERT INTO `rad_user` VALUES ('6', 'test6', '测试6', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('7', 'test7', '测试7', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('8', 'test8', '测试8', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
-INSERT INTO `rad_user` VALUES ('9', 'test9', '测试9', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('10', 'test11', '测试11', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('11', 'test12', '测试12', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
-INSERT INTO `rad_user` VALUES ('12', 'test13', '测试13', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('13', 'adminfff', 'dasfdasfas', 'Dzssip4Tk1de6y0IUoCjRw==', '9', '1', '0', '0', '2024-07-03', '2', '1', '2', '', '0', '0', '', 'sdfdasfsa', '', '', null, '2019-07-03 19:05:28', null, '');
+INSERT INTO `rad_user` VALUES ('1', 'test', '测试', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
+INSERT INTO `rad_user` VALUES ('2', 'test2', '测试2', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
+INSERT INTO `rad_user` VALUES ('3', 'test3', '测试3', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
+INSERT INTO `rad_user` VALUES ('4', 'test4', '测试4', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
+INSERT INTO `rad_user` VALUES ('5', 'test5', '测试5', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa6');
+INSERT INTO `rad_user` VALUES ('6', 'test6', '测试6', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
+INSERT INTO `rad_user` VALUES ('7', 'test7', '测试7', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '4', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
+INSERT INTO `rad_user` VALUES ('8', 'test8', '测试8', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
+INSERT INTO `rad_user` VALUES ('9', 'test9', '测试9', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
+INSERT INTO `rad_user` VALUES ('10', 'test1', '测试11', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk26');
+INSERT INTO `rad_user` VALUES ('11', 'test12', '测试12', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
+INSERT INTO `rad_user` VALUES ('12', 'test13', '测试13', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
+INSERT INTO `rad_user` VALUES ('13', 'adminfff', 'dasfdasfas', '1', 'Dzssip4Tk1de6y0IUoCjRw==', '9', '1', '0', '0', '2024-07-03', '2', '1', '2', '', '0', '0', '', 'sdfdasfsa', '', '', null, '2019-07-03 19:05:28', null, '');
+INSERT INTO `rad_user` VALUES ('14', 'sd', 'sd', '4', 'IE7uocG1kh0vtOl/Lci13g==', '1', '1', '0', '0', '2020-03-04', '0', '1', '1', '', '0', '0', '', 'sdfdasf', '', '', null, '2019-07-04 17:52:46', null, 'sdfdasdfas');
 
 -- ----------------------------
 -- Table structure for rad_user_balance
@@ -206,7 +251,7 @@ CREATE TABLE `rad_user_order_record` (
   `end_date` date NOT NULL COMMENT '订单截止日期',
   `count` int(11) NOT NULL DEFAULT '1' COMMENT '套餐倍数',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8 COMMENT='用户订单表';
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8 COMMENT='用户订单表';
 
 -- ----------------------------
 -- Records of rad_user_order_record
@@ -218,6 +263,9 @@ INSERT INTO `rad_user_order_record` VALUES ('38', '2', '1', '0', '1', '2019-04-2
 INSERT INTO `rad_user_order_record` VALUES ('39', '2', '1', '0', '1', '2019-04-28 18:29:51', '2', '2020-12-28', '9');
 INSERT INTO `rad_user_order_record` VALUES ('40', '2', '2', '0', '1', '2019-04-28 18:30:23', '2', '2099-12-31', '1');
 INSERT INTO `rad_user_order_record` VALUES ('41', '1', '1', '0', '1', '2019-06-26 14:35:59', '2', '2020-06-26', '6');
+INSERT INTO `rad_user_order_record` VALUES ('42', '0', '1', '2', '1', '2019-07-04 17:49:49', '2', '2020-01-04', '0');
+INSERT INTO `rad_user_order_record` VALUES ('43', '14', '1', '3', '1', '2019-07-04 17:52:46', '2', '2020-03-04', '0');
+INSERT INTO `rad_user_order_record` VALUES ('44', '5', '1', '0', '1', '2019-07-04 18:27:10', '2', '2020-01-04', '3');
 
 -- ----------------------------
 -- Table structure for rad_user_special_balance
@@ -302,7 +350,7 @@ CREATE TABLE `sys_resource` (
   `front_router` varchar(200) DEFAULT NULL COMMENT '前端路由',
   `front_key` varchar(255) DEFAULT NULL COMMENT '前端路由key',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=451 DEFAULT CHARSET=utf8 COMMENT='菜单表';
+) ENGINE=InnoDB AUTO_INCREMENT=476 DEFAULT CHARSET=utf8 COMMENT='菜单表';
 
 -- ----------------------------
 -- Records of sys_resource
@@ -351,6 +399,18 @@ INSERT INTO `sys_resource` VALUES ('445', '440', '角色赋权', null, '/role/em
 INSERT INTO `sys_resource` VALUES ('446', '440', '获取角色权限', null, '/role/resources', '3', '1', 'role::resource', '440', '获取角色权限', '0', '3', null, null);
 INSERT INTO `sys_resource` VALUES ('447', '440', '构建菜单', null, '/session/resource', '3', '1', 'session::resource', '440', '构建菜单', '0', '3', null, null);
 INSERT INTO `sys_resource` VALUES ('450', '400', '菜单管理', 'profile', '/resource/list', '2', '1', 'resource::list', '450', '菜单管理', '1', '2', '/resource', 'resource');
+INSERT INTO `sys_resource` VALUES ('460', '400', '片区管理', null, '/area/list', '2', '1', 'area::list', '460', '部门管理', '1', '2', '/area', 'area');
+INSERT INTO `sys_resource` VALUES ('461', '460', '添加片区', null, '/area/add', '3', '1', 'area::add', '461', '添加片区', '1', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('462', '460', '修改片区', null, '/area/update', '3', '1', 'area::update', '462', '修改片区', '1', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('463', '460', '删除片区', null, '/area/delete', '3', '1', 'area::delete', '463', '删除片区', '1', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('464', '460', '获取片区列表', null, '/fetch/areas', '3', '1', 'area::fetch', '464', '获取片区列表', '0', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('465', '460', '片区信息', null, '/area/info', '2', '1', 'area::info', '465', '片区信息', '0', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('470', '400', '村镇街道管理', null, '/town/list', '2', '1', 'town::list', '470', '村镇街道管理', '1', '2', '/town', 'town');
+INSERT INTO `sys_resource` VALUES ('471', '470', '添加村镇街道', null, '/town/add', '3', '1', 'town::add', '471', '添加村镇街道', '1', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('472', '470', '修改村镇街道', null, '/town/update', '3', '1', 'town::update', '472', '修改村镇街道', '1', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('473', '470', '删除村镇街道', null, '/town/delete', '3', '1', 'town::delete', '473', '删除村镇街道', '1', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('474', '470', '获取村镇街道列表', null, '/fetch/towns', '3', '1', 'town::fetch', '474', '获取村镇街道列表', '0', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('475', '470', '村镇街道信息', null, '/town/info', '2', '1', 'town::info', '475', '村镇街道信息', '0', '3', null, null);
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -365,7 +425,7 @@ CREATE TABLE `sys_role` (
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '最近更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='角色表';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='角色表';
 
 -- ----------------------------
 -- Records of sys_role
@@ -428,6 +488,18 @@ INSERT INTO `sys_role_resource_rel` VALUES ('443', '1');
 INSERT INTO `sys_role_resource_rel` VALUES ('444', '1');
 INSERT INTO `sys_role_resource_rel` VALUES ('445', '1');
 INSERT INTO `sys_role_resource_rel` VALUES ('450', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('460', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('461', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('462', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('463', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('464', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('465', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('470', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('471', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('472', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('473', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('474', '1');
+INSERT INTO `sys_role_resource_rel` VALUES ('475', '1');
 
 -- ----------------------------
 -- Table structure for sys_user
