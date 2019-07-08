@@ -74,7 +74,7 @@ type RadUser struct {
 	Pager          `xorm:"-" json:"page"`
 	Count          int  `xorm:"-" json:"count"`
 	Price          int  `xorm:"-" json:"price"`
-	BeContinue     bool `xorm:"-" json:"beContinue"` // 标记为续费
+	BeContinue     bool `xorm:"-"` // 标记为续费
 }
 
 type RadUserWallet struct {
@@ -154,13 +154,13 @@ type RadUserOrderRecord struct {
 	EndDate   Time  `json:"endDate"`
 }
 
-type UserOrderRecordProduct struct {
+type RadUserOrderRecordProduct struct {
 	RadUserOrderRecord `xorm:"extends" json:"userOrderRecord"`
 	RadProduct         `xorm:"extends" json:"radProduct"`
 }
 
-func (UserOrderRecordProduct) TableName() string {
-	return "user_order_record"
+func (RadUserOrderRecordProduct) TableName() string {
+	return "rad_user_order_record"
 }
 
 type RadNas struct {

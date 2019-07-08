@@ -72,8 +72,8 @@ func fetchUserOrderRecord(c *gin.Context) {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
 		return
 	}
-	var records []model.UserOrderRecordProduct
-	database.DataBaseEngine.Join("INNER", &model.RadProduct{}, "rad_product.id = user_order_record.product_id").Where("user_id = ?", user.Id).Asc("user_order_record.status").Find(&records)
+	var records []model.RadUserOrderRecordProduct
+	database.DataBaseEngine.Table(&model.RadUserOrderRecordProduct{}).Alias("rop").Join("INNER", []interface{}{&model.RadProduct{}, "rp"}, "rp.id = rop.product_id").Where("rop.user_id = ?", user.Id).Asc("rop.status").Find(&records)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: records})
 }
 
@@ -151,11 +151,12 @@ func addUser(c *gin.Context) {
 	orderRecord := model.RadUserOrderRecord{
 		UserId:    user.Id,
 		ProductId: product.Id,
-		Price:     user.Price,
+		Price:     user.Price * 100,
 		SysUserId: manager.Id,
 		OrderTime: model.NowTime(),
 		Status:    radius.OrderUsingStatus,
 		EndDate:   user.ExpireTime,
+		Count:     user.Count,
 	}
 	session.InsertOne(&orderRecord)
 
@@ -215,7 +216,8 @@ func continueProduct(c *gin.Context) {
 	}
 
 	var oldUser model.RadUser
-	session.ID(user.Id).Get(&oldUser)
+	session.Table(&model.RadUser{}).Select("*").Get(&oldUser)
+	user.BeContinue = true
 	var newProduct model.RadProduct
 	session.ID(user.ProductId).Get(&newProduct)
 
@@ -257,7 +259,7 @@ func continueProduct(c *gin.Context) {
 	orderRecord := model.RadUserOrderRecord{
 		UserId:    user.Id,
 		ProductId: newProduct.Id,
-		Price:     user.Price,
+		Price:     newProduct.Price,
 		SysUserId: manager.Id,
 		OrderTime: model.NowTime(),
 		Status:    orderStatus,
@@ -280,16 +282,12 @@ func PurchaseProduct(user *model.RadUser, product *model.RadProduct, continueUse
 	user.AvailableFlow = product.ProductFlow
 	if product.Type == common.MonthlyProduct {
 		expire := time.Time(user.ExpireTime)
-		if time.Time(expire).IsZero() || continueUser.BeContinue {
-			expire = time.Now()
-		}
-
-		month := product.ServiceMonth
 		if continueUser.BeContinue {
+			expire = time.Now()
+			month := product.ServiceMonth
 			month *= continueUser.Count
+			expire = time.Time(time.Date(expire.Year(), expire.Month()+time.Month(month), expire.Day(), 23, 59, 59, 0, expire.Location()))
 		}
-
-		expire = time.Time(time.Date(expire.Year(), expire.Month()+time.Month(month), expire.Day(), 23, 59, 59, 0, expire.Location()))
 		user.ExpireTime = model.Time(expire)
 	} else if product.Type == common.TimeProduct {
 		if time.Time(user.ExpireTime).IsZero() || continueUser.BeContinue {

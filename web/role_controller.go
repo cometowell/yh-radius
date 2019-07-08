@@ -60,6 +60,7 @@ func updateRole(c *gin.Context) {
 		session.Rollback()
 		return
 	}
+	role.UpdateTime = model.NowTime()
 	session.ID(role.Id).Update(&role)
 	session.Commit()
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "修改成功"})

@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50721
 File Encoding         : 65001
 
-Date: 2019-07-08 09:41:30
+Date: 2019-07-08 15:20:45
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -34,7 +34,6 @@ CREATE TABLE `rad_area` (
 -- Records of rad_area
 -- ----------------------------
 INSERT INTO `rad_area` VALUES ('1', 'test', '测试片区', '1', '2019-07-04 15:44:06', '2019-07-05 10:52:56', '测试片区');
-INSERT INTO `rad_area` VALUES ('2', 'test3', '测试片区3', '2', '2019-07-04 15:44:06', '2019-07-05 15:02:12', '测试片区');
 
 -- ----------------------------
 -- Table structure for rad_nas
@@ -57,8 +56,6 @@ CREATE TABLE `rad_nas` (
 -- ----------------------------
 INSERT INTO `rad_nas` VALUES ('2', '9', 'test', '127.0.0.1', '123456', '3699', 'test');
 INSERT INTO `rad_nas` VALUES ('99', '2011', 'test2', '10.18.10.68', '123456', '3799', 'mycat test');
-INSERT INTO `rad_nas` VALUES ('100', '3902', '确实2', '192.168.11.236', '111111', '3799', 'ces22');
-INSERT INTO `rad_nas` VALUES ('101', '1', '确实2333', '192.168.10.236', '111111', '3799', 'sdafasdf');
 
 -- ----------------------------
 -- Table structure for rad_online_user
@@ -112,14 +109,6 @@ CREATE TABLE `rad_product` (
 -- ----------------------------
 -- Records of rad_product
 -- ----------------------------
-INSERT INTO `rad_product` VALUES ('1', '测试包月', '1', '1', '1', '1', '0', '0', '2', '0', '0', '100', '9000', '8000', 'aaabc', '2019-03-04 17:06:51', '2019-07-04 09:57:06', 'dsfasfs');
-INSERT INTO `rad_product` VALUES ('2', '测试2时长', '2', '1', '1', '1', '0', '3600', '0', '0', '0', '200', '9000', '8000', 'bbb', '2019-03-04 17:06:51', null, '');
-INSERT INTO `rad_product` VALUES ('3', '测试流量', '3', '1', '1', '1', '0', '0', '0', '900000', '1', '300', '9000', '8000', 'ccc', '2019-04-25 17:06:51', null, '');
-INSERT INTO `rad_product` VALUES ('4', '测试流量2', '3', '1', '1', '1', '0', '0', '0', '900000', '1', '400', '9000', '8000', 'ccc', '2019-04-25 17:06:51', null, '');
-INSERT INTO `rad_product` VALUES ('5', '测试流量3', '3', '2', '1', '1', '0', '0', '0', '900000', '2', '500', '9000', '8000', 'ccc', '2019-04-25 17:06:51', '2019-04-17 17:47:24', '');
-INSERT INTO `rad_product` VALUES ('6', '测试流量4', '3', '1', '1', '1', '0', '0', '0', '900000', '3', '600', '9000', '8000', 'ccc', '2019-04-25 17:06:51', null, '');
-INSERT INTO `rad_product` VALUES ('8', 'aa', '1', '1', '1', '1', '3', '0', '5', '0', '0', '700', '6', '9', '', '2019-04-17 17:14:20', '2019-04-17 17:51:36', '');
-INSERT INTO `rad_product` VALUES ('9', 'aa1fdsfas', '1', '2', '1', '2', '2', '0', '12', '0', '0', '800', '8', '8', 'ccc', '2019-04-17 17:16:13', '2019-07-04 10:00:10', 'fdsdfasafs');
 
 -- ----------------------------
 -- Table structure for rad_town
@@ -141,7 +130,6 @@ CREATE TABLE `rad_town` (
 -- Records of rad_town
 -- ----------------------------
 INSERT INTO `rad_town` VALUES ('1', '1', 'test', '测试街道', '1', '2019-07-04 15:43:21', '2019-07-05 15:02:57', '测试街道');
-INSERT INTO `rad_town` VALUES ('4', '2', 'test4', '测试街道4', '1', '2019-07-04 15:43:21', '2019-07-05 15:02:39', '测试街道4');
 
 -- ----------------------------
 -- Table structure for rad_user
@@ -179,20 +167,6 @@ CREATE TABLE `rad_user` (
 -- ----------------------------
 -- Records of rad_user
 -- ----------------------------
-INSERT INTO `rad_user` VALUES ('1', 'test', '测试', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
-INSERT INTO `rad_user` VALUES ('2', 'test2', '测试2', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('3', 'test3', '测试3', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
-INSERT INTO `rad_user` VALUES ('4', 'test4', '测试4', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('5', 'test5', '测试5', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa6');
-INSERT INTO `rad_user` VALUES ('6', 'test6', '测试6', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('7', 'test7', '测试7', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '4', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('8', 'test8', '测试8', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
-INSERT INTO `rad_user` VALUES ('9', 'test9', '测试9', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('10', 'test1', '测试11', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk26');
-INSERT INTO `rad_user` VALUES ('11', 'test12', '测试12', '1', 'oD2Ou3h126sv7bje58Z+fA==', '1', '1', '0', '0', '2020-06-26', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送打的费撒发送发送发大水发大厦发送', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlkaaaaaa');
-INSERT INTO `rad_user` VALUES ('12', 'test13', '测试13', '1', 'oD2Ou3h126sv7bje58Z+fA==', '2', '1', '3600', '0', '2099-12-31', '0', '1', '1', '5C:FF:35:0E:58:A5', '1', '6', '', '打的费撒发送发送发大水发大厦发送2', '13567890987', 'test@163.com', null, '2019-02-28 16:42:39', null, 'jlskdjfklsajjjlk2');
-INSERT INTO `rad_user` VALUES ('13', 'adminfff', 'dasfdasfas', '1', 'Dzssip4Tk1de6y0IUoCjRw==', '9', '1', '0', '0', '2024-07-03', '2', '1', '2', '', '0', '0', '', 'sdfdasfsa', '', '', null, '2019-07-03 19:05:28', null, '');
-INSERT INTO `rad_user` VALUES ('14', 'sd', 'sd', '4', 'IE7uocG1kh0vtOl/Lci13g==', '1', '1', '0', '0', '2020-03-04', '0', '1', '1', '', '0', '0', '', 'sdfdasf', '', '', null, '2019-07-04 17:52:46', null, 'sdfdasdfas');
 
 -- ----------------------------
 -- Table structure for rad_user_balance
@@ -234,7 +208,6 @@ CREATE TABLE `rad_user_online_log` (
 -- ----------------------------
 -- Records of rad_user_online_log
 -- ----------------------------
-INSERT INTO `rad_user_online_log` VALUES ('24', 'test1', '2019-03-07 16:40:40', '2019-03-07 16:40:49', '9', '0', '0', '192.168.10.235', '5C:FF:35:0E:58:A5', '192.168.10.236');
 
 -- ----------------------------
 -- Table structure for rad_user_order_record
@@ -256,16 +229,6 @@ CREATE TABLE `rad_user_order_record` (
 -- ----------------------------
 -- Records of rad_user_order_record
 -- ----------------------------
-INSERT INTO `rad_user_order_record` VALUES ('35', '2', '1', '0', '1', '2019-04-28 18:12:16', '2', '2099-12-31', '2');
-INSERT INTO `rad_user_order_record` VALUES ('36', '2', '3', '0', '1', '2019-04-28 18:25:25', '2', '2099-12-31', '1');
-INSERT INTO `rad_user_order_record` VALUES ('37', '2', '2', '0', '1', '2019-04-28 18:25:53', '2', '2099-12-31', '1');
-INSERT INTO `rad_user_order_record` VALUES ('38', '2', '1', '0', '1', '2019-04-28 18:28:50', '2', '2020-02-28', '5');
-INSERT INTO `rad_user_order_record` VALUES ('39', '2', '1', '0', '1', '2019-04-28 18:29:51', '2', '2020-12-28', '9');
-INSERT INTO `rad_user_order_record` VALUES ('40', '2', '2', '0', '1', '2019-04-28 18:30:23', '2', '2099-12-31', '1');
-INSERT INTO `rad_user_order_record` VALUES ('41', '1', '1', '0', '1', '2019-06-26 14:35:59', '2', '2020-06-26', '6');
-INSERT INTO `rad_user_order_record` VALUES ('42', '0', '1', '2', '1', '2019-07-04 17:49:49', '2', '2020-01-04', '0');
-INSERT INTO `rad_user_order_record` VALUES ('43', '14', '1', '3', '1', '2019-07-04 17:52:46', '2', '2020-03-04', '0');
-INSERT INTO `rad_user_order_record` VALUES ('44', '5', '1', '0', '1', '2019-07-04 18:27:10', '2', '2020-01-04', '3');
 
 -- ----------------------------
 -- Table structure for rad_user_special_balance
@@ -323,12 +286,6 @@ CREATE TABLE `sys_department` (
 -- Records of sys_department
 -- ----------------------------
 INSERT INTO `sys_department` VALUES ('1', 'test', '测试', '0', '2019-07-03 15:53:29', null, '发发发22', '1');
-INSERT INTO `sys_department` VALUES ('2', 'child', '测试子部门', '3', '2019-07-03 15:53:29', null, '测试子部门', '1');
-INSERT INTO `sys_department` VALUES ('3', 'ts1', '测试部门23', '1', '2019-07-03 15:53:29', null, '测试2', '1');
-INSERT INTO `sys_department` VALUES ('4', 'test12', '确实', '0', '2019-07-03 15:53:29', null, 'sdfasdf', '1');
-INSERT INTO `sys_department` VALUES ('5', 'sdafasf', 'sfsda', '0', '2019-07-03 15:54:47', null, 'dasfdsfadas', '2');
-INSERT INTO `sys_department` VALUES ('6', 'fgsags', '2eefasddf', '0', '2019-07-03 15:55:31', null, 'fdasfdsadfdas', '1');
-INSERT INTO `sys_department` VALUES ('7', 'fsafasf', 'sd', '1', '2019-07-04 10:23:38', '2019-07-04 10:34:17', '22222', '2');
 
 -- ----------------------------
 -- Table structure for sys_resource
@@ -431,7 +388,6 @@ CREATE TABLE `sys_role` (
 -- Records of sys_role
 -- ----------------------------
 INSERT INTO `sys_role` VALUES ('1', '测试', 'test', '1', '测试', '2019-04-12 15:26:46', null);
-INSERT INTO `sys_role` VALUES ('2', '测试25', 'test2', '1', '测试25ggg', '2019-04-12 15:26:46', null);
 
 -- ----------------------------
 -- Table structure for sys_role_resource_rel
@@ -525,7 +481,6 @@ CREATE TABLE `sys_user` (
 -- Records of sys_user
 -- ----------------------------
 INSERT INTO `sys_user` VALUES ('1', '1', 'admin', '超级管理员', 'oD2Ou3h126sv7bje58Z+fA==', '1', '186989878678', 'test@163.com', '2019-03-27 21:25:07', '2019-07-04 10:12:07', '测试');
-INSERT INTO `sys_user` VALUES ('2', '5', 'adminsdfs', 'sdfasdfas', 'YmgsC5D6H2AuNfXQyXvW3g==', '1', '13333333335', 'test133@163.com', '2019-07-04 10:20:28', '2019-07-04 10:20:36', 'sdfasdf');
 
 -- ----------------------------
 -- Table structure for sys_user_role_rel
