@@ -15,11 +15,12 @@ import (
 func UserExpireTask() {
 	logger.Logger.Info("用户到期定时任务执行...")
 	session := database.DataBaseEngine.NewSession()
+	session.Begin()
 	defer session.Close()
 	today := time.Now().Format(common.DateFormat)
 	var users []model.RadUser
-	err := session.Table("rad_user").Alias("ru").
-		Join("INNER", []string{"rad_product", "rp"}, "ru.product_id = rp.id").
+	err := session.Table(&model.RadUser{}).Alias("ru").
+		Join("INNER", []interface{}{model.RadProduct{}, "rp"}, "ru.product_id = rp.id").
 		Where("(ru.expire_time < ?) or (ru.available_time <= 0 and rp.type = 2) or (ru.available_flow <= 0 and rp.type = 3)", today).Find(&users)
 	if err != nil {
 		logger.Logger.Warn("user expire task occur error: " + err.Error())
@@ -51,7 +52,8 @@ func UserExpireTask() {
 		_, err := session.AllCols().ID(user.Id).Update(&user)
 		if err != nil {
 			logger.Logger.Warnf("user:%s update to product: %s, %s%s", user.UserName, product.Name, "user expire task occur error: ", err.Error())
-			continue
+			session.Rollback()
+			break
 		}
 		record.Status = radius.OrderUsingStatus
 		session.Cols("status").ID(record.Id).Update(&record)
