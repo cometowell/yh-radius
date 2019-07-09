@@ -53,7 +53,7 @@ func UserExpireTask() {
 		if err != nil {
 			logger.Logger.Warnf("user:%s update to product: %s, %s%s", user.UserName, product.Name, "user expire task occur error: ", err.Error())
 			session.Rollback()
-			break
+			return
 		}
 		record.Status = radius.OrderUsingStatus
 		session.Cols("status").ID(record.Id).Update(&record)
