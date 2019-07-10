@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50721
 File Encoding         : 65001
 
-Date: 2019-07-08 15:20:45
+Date: 2019-07-10 18:09:01
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -74,11 +74,12 @@ CREATE TABLE `rad_online_user` (
   `total_up_stream` bigint(20) NOT NULL DEFAULT '0' COMMENT '上行总流量 KB',
   `total_down_stream` bigint(20) NOT NULL DEFAULT '0' COMMENT '下行总流量，KB',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8 COMMENT='在线用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8 COMMENT='在线用户表';
 
 -- ----------------------------
 -- Records of rad_online_user
 -- ----------------------------
+INSERT INTO `rad_online_user` VALUES ('39', 'test1', '10.18.10.68', '0001', '2019-07-10 15:30:37', '0', '192.168.10.235', '5C:FF:35:0E:58:A5', 'sdafsadfasdfasfasfdas', '0', '0');
 
 -- ----------------------------
 -- Table structure for rad_product
@@ -104,11 +105,13 @@ CREATE TABLE `rad_product` (
   `update_time` datetime DEFAULT NULL COMMENT '创建时间',
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COMMENT='产品表';
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COMMENT='产品表';
 
 -- ----------------------------
 -- Records of rad_product
 -- ----------------------------
+INSERT INTO `rad_product` VALUES ('10', '测试套餐1', '1', '1', '1', '1', '1', '0', '12', '0', '0', '9000', '8', '8', 'ccc', '2019-07-08 15:26:21', '2019-07-08 15:31:42', '测试描述');
+INSERT INTO `rad_product` VALUES ('11', '流量套餐', '3', '1', '1', '1', '0', '0', '0', '102400000', '1', '1800', '8', '8', '', '2019-07-08 17:40:40', null, '流量套餐');
 
 -- ----------------------------
 -- Table structure for rad_town
@@ -162,11 +165,14 @@ CREATE TABLE `rad_user` (
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_name` (`username`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- ----------------------------
 -- Records of rad_user
 -- ----------------------------
+INSERT INTO `rad_user` VALUES ('20', 'test1', '测试', '1', 'kjjSLcA0XhsYbz6ztm6xaA==', '10', '1', '0', '0', '2022-07-08', '1', '1', '1', '', '0', '0', '', 'test', '', '', null, '2019-07-05 17:28:56', null, '');
+INSERT INTO `rad_user` VALUES ('21', 'test2', '测试2', '1', 'kjjSLcA0XhsYbz6ztm6xaA==', '10', '1', '0', '0', '2020-07-08', '1', '1', '1', '', '0', '0', '', 'ceshi2', '', '', null, '2019-07-08 17:45:47', null, '');
+INSERT INTO `rad_user` VALUES ('22', 'test3', 'ceshi3', '1', 'kjjSLcA0XhsYbz6ztm6xaA==', '11', '1', '0', '102400000', '2099-12-31', '0', '1', '1', '', '0', '0', '', 'sdffsf', '', '', null, '2019-07-10 17:49:04', null, '');
 
 -- ----------------------------
 -- Table structure for rad_user_balance
@@ -224,11 +230,16 @@ CREATE TABLE `rad_user_order_record` (
   `end_date` date NOT NULL COMMENT '订单截止日期',
   `count` int(11) NOT NULL DEFAULT '1' COMMENT '套餐倍数',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8 COMMENT='用户订单表';
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8 COMMENT='用户订单表';
 
 -- ----------------------------
 -- Records of rad_user_order_record
 -- ----------------------------
+INSERT INTO `rad_user_order_record` VALUES ('51', '20', '10', '9000', '1', '2019-07-08 17:28:56', '2', '2020-07-08', '0');
+INSERT INTO `rad_user_order_record` VALUES ('54', '20', '10', '9000', '1', '2019-07-08 17:39:18', '2', '2022-07-08', '1');
+INSERT INTO `rad_user_order_record` VALUES ('55', '20', '11', '1800', '1', '2019-07-08 17:43:52', '1', '2099-12-31', '1');
+INSERT INTO `rad_user_order_record` VALUES ('56', '21', '10', '9000', '1', '2019-07-08 17:45:47', '2', '2020-07-08', '0');
+INSERT INTO `rad_user_order_record` VALUES ('57', '22', '11', '1800', '1', '2019-07-08 17:49:04', '2', '2099-12-31', '1');
 
 -- ----------------------------
 -- Table structure for rad_user_special_balance
@@ -285,7 +296,7 @@ CREATE TABLE `sys_department` (
 -- ----------------------------
 -- Records of sys_department
 -- ----------------------------
-INSERT INTO `sys_department` VALUES ('1', 'test', '测试', '0', '2019-07-03 15:53:29', null, '发发发22', '1');
+INSERT INTO `sys_department` VALUES ('1', 'test', '测试', '0', '2019-07-03 15:53:29', '2019-07-08 15:50:36', '发发发22', '1');
 
 -- ----------------------------
 -- Table structure for sys_resource
@@ -306,68 +317,72 @@ CREATE TABLE `sys_resource` (
   `level` tinyint(1) NOT NULL COMMENT '层次',
   `front_router` varchar(200) DEFAULT NULL COMMENT '前端路由',
   `front_key` varchar(255) DEFAULT NULL COMMENT '前端路由key',
+  `show` int(11) NOT NULL DEFAULT '1' COMMENT '是否展示菜单，1：是， 2：否',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=476 DEFAULT CHARSET=utf8 COMMENT='菜单表';
+) ENGINE=InnoDB AUTO_INCREMENT=503 DEFAULT CHARSET=utf8 COMMENT='菜单表';
 
 -- ----------------------------
 -- Records of sys_resource
 -- ----------------------------
-INSERT INTO `sys_resource` VALUES ('100', '0', '用户管理', 'team', '/user/list', '2', '1', 'user::list', '100', '用户管理', '1', '1', '/user', 'user');
-INSERT INTO `sys_resource` VALUES ('110', '100', '添加用户', '', '/user/add', '3', '1', 'user::add', '110', '添加用户', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('120', '100', '修改用户', '', '/user/update', '3', '1', 'user::list', '120', '修改用户', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('130', '100', '删除用户', null, '/user/delete', '3', '1', 'user::delete', '130', '删除用户', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('140', '100', '获取用户信息', '', '/user/info', '3', '1', 'user::info', '130', '获取用户信息', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('150', '100', '用户续订', null, '/user/continue', '3', '1', 'user::continue', '1', '用户续订', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('160', '100', '获取用户订购记录', null, '/user/order/record', '3', '1', 'user::order::record', '160', '获取用户订购记录', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('200', '0', '套餐管理', 'shopping', '/product/list', '2', '1', 'product::list', '200', '套餐管理', '1', '1', '/product', 'product');
-INSERT INTO `sys_resource` VALUES ('210', '200', '添加套餐', '', '/product/add', '3', '1', 'product::add', '200', '添加套餐', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('220', '200', '套餐信息', '', '/product/info', '3', '1', 'product::add', '200', '添加套餐', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('230', '200', '修改套餐', '', '/product/update', '3', '1', 'product::add', '200', '添加套餐', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('240', '200', '删除套餐', '', '/product/delete', '3', '1', 'product::add', '200', '添加套餐', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('250', '200', '获取套餐列表', '', '/fetch/product', '3', '1', 'product::fetch', '200', '获取套餐列表', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('300', '0', '在线用户', 'global', '/online/list', '2', '1', 'online::list', '300', '在线用户', '1', '1', '/online', 'online');
-INSERT INTO `sys_resource` VALUES ('310', '300', '用户下线', '', '/online/off', '2', '1', 'online::off', '310', '用户下线', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('320', '300', '清理在线用户', null, '/online/delete', '3', '1', 'online::delete', '300', '清理在线用户', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('400', '0', '系统设置', 'setting', '', '1', '1', '', '400', '系统设置', '1', '1', null, 'system');
-INSERT INTO `sys_resource` VALUES ('410', '400', '管理员', 'user', '/system/user/list', '2', '1', 'manager::list', '410', '管理员', '1', '2', '/sysUser', 'manager');
-INSERT INTO `sys_resource` VALUES ('411', '410', '添加管理员', null, '/system/user/add', '3', '1', 'manager::add', '410', '添加管理员', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('412', '410', '修改管理员', null, '/system/user/update', '3', '1', 'manager::update', '410', '修改管理员', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('413', '410', '删除管理员', null, '/system/user/delete', '3', '1', 'manager::delete', '410', '删除管理员', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('414', '410', '获取管理员信息', null, '/system/user/info', '3', '1', 'manager::info', '410', '获取管理员信息', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('415', '410', '修改管理员密码', null, '/system/user/change/password', '3', '1', '/manager::change::password', '410', '修改管理员密码', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('416', '410', '获取会话用户信息', null, '/system/user/session/info', '3', '1', 'system::user::session::info', '416', null, '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('420', '400', 'NAS管理', 'database', '/nas/list', '2', '1', 'nas::list', '420', 'NAS管理', '1', '2', '/nas', 'nas');
-INSERT INTO `sys_resource` VALUES ('421', '420', '添加NAS', null, '/nas/add', '3', '1', 'nas::add', '420', '添加NAS', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('422', '420', '修改NAS', null, '/nas/update', '3', '1', 'nas::update', '420', '修改NAS', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('423', '420', '删除NAS', null, '/nas/delete', '3', '1', 'nas::delete', '420', '删除NAS', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('424', '420', '获取NAS信息', null, '/nas/info', '3', '1', 'nas::info', '420', '获取NAS信息', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('430', '400', '部门管理', 'appstore', '/department/list', '2', '1', 'department::list', '430', '部门管理', '1', '2', '/department', 'department');
-INSERT INTO `sys_resource` VALUES ('431', '430', '添加部门', null, '/department/add', '3', '1', 'department::add', '430', '添加部门', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('432', '430', '修改部门', null, '/department/update', '3', '1', 'department::update', '430', '修改部门', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('433', '430', '删除部门', null, '/department/delete', '3', '1', 'department::delete', '430', '删除部门', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('434', '430', '获取部门列表', null, '/fetch/department', '3', '1', 'department::fetch', '430', '获取部门列表', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('435', '430', '部门信息', null, '/department/info', '2', '1', 'department::info', '430', '部门信息', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('440', '400', '角色管理', 'solution', '/role/list', '2', '1', 'role::list', '440', '角色管理', '1', '2', '/role', 'role');
-INSERT INTO `sys_resource` VALUES ('441', '440', '添加角色', null, '/role/add', '3', '1', 'role::add', '440', '添加角色', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('442', '440', '获取角色信息', null, '/role/info', '3', '1', 'role::info', '440', '获取角色信息', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('443', '440', '修改角色', null, '/role/update', '3', '1', 'role::update', '440', '修改角色', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('444', '440', '删除角色', null, '/role/delete', '3', '1', 'role::delete', '440', '删除角色', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('445', '440', '角色赋权', null, '/role/empower/\\d+', '3', '1', 'role::empower', '440', '角色赋权', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('446', '440', '获取角色权限', null, '/role/resources', '3', '1', 'role::resource', '440', '获取角色权限', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('447', '440', '构建菜单', null, '/session/resource', '3', '1', 'session::resource', '440', '构建菜单', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('450', '400', '菜单管理', 'profile', '/resource/list', '2', '1', 'resource::list', '450', '菜单管理', '1', '2', '/resource', 'resource');
-INSERT INTO `sys_resource` VALUES ('460', '400', '片区管理', null, '/area/list', '2', '1', 'area::list', '460', '部门管理', '1', '2', '/area', 'area');
-INSERT INTO `sys_resource` VALUES ('461', '460', '添加片区', null, '/area/add', '3', '1', 'area::add', '461', '添加片区', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('462', '460', '修改片区', null, '/area/update', '3', '1', 'area::update', '462', '修改片区', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('463', '460', '删除片区', null, '/area/delete', '3', '1', 'area::delete', '463', '删除片区', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('464', '460', '获取片区列表', null, '/fetch/areas', '3', '1', 'area::fetch', '464', '获取片区列表', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('465', '460', '片区信息', null, '/area/info', '2', '1', 'area::info', '465', '片区信息', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('470', '400', '村镇街道管理', null, '/town/list', '2', '1', 'town::list', '470', '村镇街道管理', '1', '2', '/town', 'town');
-INSERT INTO `sys_resource` VALUES ('471', '470', '添加村镇街道', null, '/town/add', '3', '1', 'town::add', '471', '添加村镇街道', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('472', '470', '修改村镇街道', null, '/town/update', '3', '1', 'town::update', '472', '修改村镇街道', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('473', '470', '删除村镇街道', null, '/town/delete', '3', '1', 'town::delete', '473', '删除村镇街道', '1', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('474', '470', '获取村镇街道列表', null, '/fetch/towns', '3', '1', 'town::fetch', '474', '获取村镇街道列表', '0', '3', null, null);
-INSERT INTO `sys_resource` VALUES ('475', '470', '村镇街道信息', null, '/town/info', '2', '1', 'town::info', '475', '村镇街道信息', '0', '3', null, null);
+INSERT INTO `sys_resource` VALUES ('100', '0', '用户管理', 'team', '/user/list', '2', '1', 'user::list', '100', '用户管理', '1', '1', '/user', 'user', '1');
+INSERT INTO `sys_resource` VALUES ('110', '100', '添加用户', '', '/user/add', '3', '1', 'user::add', '110', '添加用户', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('120', '100', '修改用户', '', '/user/update', '3', '1', 'user::list', '120', '修改用户', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('130', '100', '删除用户', null, '/user/delete', '3', '1', 'user::delete', '130', '删除用户', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('140', '100', '获取用户信息', '', '/user/info', '3', '1', 'user::info', '130', '获取用户信息', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('150', '100', '用户续订', null, '/user/continue', '3', '1', 'user::continue', '1', '用户续订', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('160', '100', '获取用户订购记录', null, '/user/order/record', '3', '1', 'user::order::record', '160', '获取用户订购记录', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('200', '0', '套餐管理', 'shopping', '/product/list', '2', '1', 'product::list', '200', '套餐管理', '1', '1', '/product', 'product', '1');
+INSERT INTO `sys_resource` VALUES ('210', '200', '添加套餐', '', '/product/add', '3', '1', 'product::add', '200', '添加套餐', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('220', '200', '套餐信息', '', '/product/info', '3', '1', 'product::add', '200', '添加套餐', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('230', '200', '修改套餐', '', '/product/update', '3', '1', 'product::add', '200', '添加套餐', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('240', '200', '删除套餐', '', '/product/delete', '3', '1', 'product::add', '200', '添加套餐', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('250', '200', '获取套餐列表', '', '/fetch/product', '3', '1', 'product::fetch', '200', '获取套餐列表', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('300', '0', '在线用户', 'global', '/online/list', '2', '1', 'online::list', '300', '在线用户', '1', '1', '/online', 'online', '1');
+INSERT INTO `sys_resource` VALUES ('310', '300', '用户下线', '', '/online/off', '2', '1', 'online::off', '310', '用户下线', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('320', '300', '清理在线用户', null, '/online/delete', '3', '1', 'online::delete', '300', '清理在线用户', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('400', '0', '系统设置', 'setting', '', '1', '1', '', '400', '系统设置', '1', '1', null, 'system', '1');
+INSERT INTO `sys_resource` VALUES ('410', '400', '管理员', 'user', '/system/user/list', '2', '1', 'manager::list', '410', '管理员', '1', '2', '/sysUser', 'manager', '1');
+INSERT INTO `sys_resource` VALUES ('411', '410', '添加管理员', null, '/system/user/add', '3', '1', 'manager::add', '410', '添加管理员', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('412', '410', '修改管理员', null, '/system/user/update', '3', '1', 'manager::update', '410', '修改管理员', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('413', '410', '删除管理员', null, '/system/user/delete', '3', '1', 'manager::delete', '410', '删除管理员', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('414', '410', '获取管理员信息', null, '/system/user/info', '3', '1', 'manager::info', '410', '获取管理员信息', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('415', '410', '修改管理员密码', null, '/system/user/change/password', '3', '1', '/manager::change::password', '410', '修改管理员密码', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('416', '410', '获取会话用户信息', null, '/system/user/session/info', '3', '1', 'system::user::session::info', '416', null, '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('420', '400', 'NAS管理', 'database', '/nas/list', '2', '1', 'nas::list', '420', 'NAS管理', '1', '2', '/nas', 'nas', '1');
+INSERT INTO `sys_resource` VALUES ('421', '420', '添加NAS', null, '/nas/add', '3', '1', 'nas::add', '420', '添加NAS', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('422', '420', '修改NAS', null, '/nas/update', '3', '1', 'nas::update', '420', '修改NAS', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('423', '420', '删除NAS', null, '/nas/delete', '3', '1', 'nas::delete', '420', '删除NAS', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('424', '420', '获取NAS信息', null, '/nas/info', '3', '1', 'nas::info', '420', '获取NAS信息', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('430', '400', '部门管理', 'appstore', '/department/list', '2', '1', 'department::list', '430', '部门管理', '1', '2', '/department', 'department', '1');
+INSERT INTO `sys_resource` VALUES ('431', '430', '添加部门', null, '/department/add', '3', '1', 'department::add', '430', '添加部门', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('432', '430', '修改部门', null, '/department/update', '3', '1', 'department::update', '430', '修改部门', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('433', '430', '删除部门', null, '/department/delete', '3', '1', 'department::delete', '430', '删除部门', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('434', '430', '获取部门列表', null, '/fetch/department', '3', '1', 'department::fetch', '430', '获取部门列表', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('435', '430', '部门信息', null, '/department/info', '2', '1', 'department::info', '430', '部门信息', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('440', '400', '角色管理', 'solution', '/role/list', '2', '1', 'role::list', '440', '角色管理', '1', '2', '/role', 'role', '1');
+INSERT INTO `sys_resource` VALUES ('441', '440', '添加角色', null, '/role/add', '3', '1', 'role::add', '440', '添加角色', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('442', '440', '获取角色信息', null, '/role/info', '3', '1', 'role::info', '440', '获取角色信息', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('443', '440', '修改角色', null, '/role/update', '3', '1', 'role::update', '440', '修改角色', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('444', '440', '删除角色', null, '/role/delete', '3', '1', 'role::delete', '440', '删除角色', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('445', '440', '角色赋权', null, '/role/empower/\\d+', '3', '1', 'role::empower', '440', '角色赋权', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('446', '440', '获取角色权限', null, '/role/resources', '3', '1', 'role::resource', '440', '获取角色权限', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('447', '440', '构建菜单', null, '/session/resource', '3', '1', 'session::resource', '440', '构建菜单', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('450', '400', '菜单管理', 'profile', '/resource/list', '2', '1', 'resource::list', '450', '菜单管理', '1', '2', '/resource', 'resource', '1');
+INSERT INTO `sys_resource` VALUES ('460', '400', '片区管理', null, '/area/list', '2', '1', 'area::list', '460', '部门管理', '1', '2', '/area', 'area', '1');
+INSERT INTO `sys_resource` VALUES ('461', '460', '添加片区', null, '/area/add', '3', '1', 'area::add', '461', '添加片区', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('462', '460', '修改片区', null, '/area/update', '3', '1', 'area::update', '462', '修改片区', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('463', '460', '删除片区', null, '/area/delete', '3', '1', 'area::delete', '463', '删除片区', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('464', '460', '获取片区列表', null, '/fetch/areas', '3', '1', 'area::fetch', '464', '获取片区列表', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('465', '460', '片区信息', null, '/area/info', '2', '1', 'area::info', '465', '片区信息', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('470', '400', '村镇街道管理', null, '/town/list', '2', '1', 'town::list', '470', '村镇街道管理', '1', '2', '/town', 'town', '1');
+INSERT INTO `sys_resource` VALUES ('471', '470', '添加村镇街道', null, '/town/add', '3', '1', 'town::add', '471', '添加村镇街道', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('472', '470', '修改村镇街道', null, '/town/update', '3', '1', 'town::update', '472', '修改村镇街道', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('473', '470', '删除村镇街道', null, '/town/delete', '3', '1', 'town::delete', '473', '删除村镇街道', '1', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('474', '470', '获取村镇街道列表', null, '/fetch/towns', '3', '1', 'town::fetch', '474', '获取村镇街道列表', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('475', '470', '村镇街道信息', null, '/town/info', '2', '1', 'town::info', '475', '村镇街道信息', '0', '3', null, null, '1');
+INSERT INTO `sys_resource` VALUES ('500', '0', '首页', null, '/index', '1', '1', 'index', '500', '首页', '0', '1', '/index', 'index', '0');
+INSERT INTO `sys_resource` VALUES ('501', '500', '统计新用户数据', null, '/statistic/new/user', '3', '1', 'statistic::new::user', '501', '统计新用户数据', '0', '3', null, null, '0');
+INSERT INTO `sys_resource` VALUES ('502', '500', '统计在线用户数据', '', '/statistic/online/user', '3', '1', 'statistic::online::user', '502', '统计在线用户数据', '0', '3', '', '', '0');
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -387,7 +402,7 @@ CREATE TABLE `sys_role` (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES ('1', '测试', 'test', '1', '测试', '2019-04-12 15:26:46', null);
+INSERT INTO `sys_role` VALUES ('1', '测试', 'test', '1', '测试2', '2019-04-12 15:26:46', '2019-07-08 15:51:51');
 
 -- ----------------------------
 -- Table structure for sys_role_resource_rel

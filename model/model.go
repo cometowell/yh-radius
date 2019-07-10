@@ -258,6 +258,7 @@ type SysResource struct {
 	Level             int    `json:"level"`
 	FrontRouter       string `json:"frontRouter"`
 	FrontKey          string `json:"frontKey"`
+	Show              int    `json:"show"`
 
 	Children []SysResource `xorm:"-" json:"children"`
 	Selected bool          `xorm:"-" json:"selected"`
