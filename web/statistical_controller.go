@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-rad/database"
 	"net/http"
@@ -114,7 +115,7 @@ func statisticOnlineAndFlowTrend(c *gin.Context) {
 	var onlineAndFlowTrendStatistics []OnlineAndFlowTrendStatistic
 	database.DataBaseEngine.SQL(sql).Find(&onlineAndFlowTrendStatistics)
 	now := time.Now()
-	xAxis := [7]int{}
+	xAxis := [7]string{}
 	totalFlow := [7]interface{}{}
 	input := [7]interface{}{}
 	output := [7]interface{}{}
@@ -123,7 +124,7 @@ func statisticOnlineAndFlowTrend(c *gin.Context) {
 		var find = false
 		date := now.Add(-time.Duration(i) * time.Hour)
 		hour := date.Hour()
-		xAxis[i] = hour
+		xAxis[i] = fmt.Sprintf("%d时", hour)
 		for _, item := range onlineAndFlowTrendStatistics {
 			if item.StartHour == hour {
 				input[i] = item.TotalUpStream

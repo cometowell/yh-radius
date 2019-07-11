@@ -1,13 +1,10 @@
-#GO-RAD系统
-go-rad 是一个使用golang语言开发的radius协议实现，支持华为，思科，中心，RouterOS(MikroTik)以及标准协议
+#yh-RADIUS系统
+yh-radius 是一个使用golang语言开发的radius协议实现，目前已适配华为，思科，中心，RouterOS(MikroTik)以及标准协议
 ## 编译安装
 
-如若想自行编译系统，可以到这个网址下载golang语言安装包: https://golang.google.cn/.
+可以使用github上已经发布的release版本
 
-你需要下载golang1.11以上版本，并设置好相应的环境变量(如果想直接使用可以下载dist目录下的相应安装包).
-
-如果你对golang开发或者radius系统打包感兴趣的话，可以自行编译相应平台的安装包。
-
+也可以自行编译相应平台的安装包：
 例如在windows平台下:
 ```  
     cd source_code_dir
@@ -17,32 +14,28 @@ go-rad 是一个使用golang语言开发的radius协议实现，支持华为，�
     go build
 ```
 
-### dist目录文件:
+### release版本:
 
-> Linux发布版：
-go-rad-linux.zip
+系统采用前后端分离的方式开发： radius server后端 + 管理系统前端
 
-> windows发布版：
-go-rad-windows.zip
+管理系统前端需要运行在web服务器环境(nginx, tomcat等)，radius server后端是编译后的二进制版本可按照下述方式运行
 
-> VUE版本的web管理系统：
-radius-web-dist.zip
+## yh-radius系统介绍
 
-## 运行系统
+编译完成，复制以下目录或者文件至你的运行目录: yh-radius, attributes, config, startup.sh, shutdown.sh
 
-你需要复制这些目录或者文件至你的目标目录: go-rad, attributes, config, startup.sh, shutdown.sh
-
-文件目录结构如下:
-
-    |___ attributes
+目录结构如下:
+ 
+    yh-radius
+        |___ attributes
   
-    |___ config
+        |___ config
   
-    |__ go-rad
+        |__ yh-radius
     
-    |__ startup.sh
+        |__ startup.sh
     
-    |__ shutdown.sh
+        |__ shutdown.sh
 
 #### 在Linux系统中运行系统: 
 
@@ -64,23 +57,23 @@ radius-web-dist.zip
 | acct.port | 1813 | int |  radius计费端口  |
 | encrypt.key | 支持16,24,32长度的十六进制字符串 | string |  用于加密用户密码  |
 | radius.session.timeout | 604800 | int | 默认一周的秒数  |
-| limiter.limit | 100 | int | 用于限制每次添加到令牌桶中的token数量，间接控制go协程并发数量 |
-| limiter.burst | 1000 | int | 用于限制最多的可用token数量,间接控制go协程并发数量  |
+| limiter.limit | 100 | int | 用于限制每次添加到令牌桶中的token数量，间接控制go协程并发数量, 服务器环境可根据实际情况调整 |
+| limiter.burst | 1000 | int | 用于限制最多的可用token数量,间接控制go协程并发数量,服务器环境可根据实际情况调整  |
 | product.stage | debug | string | 控制gin日志，sql显示；可选值：test,debug,release 发布生产环境时请修改此配置为：release  |
 
 ## 数据库表结构
-数据库表定义在radius-tables.sql中
+数据库表定义在radius-v2.sql中
 
 ## 使用radius-web管理平台
-这里有一个可用的radius管理平台，实现了用户管理，套餐管理，nas管理，在线用户管理，管理员管理，角色管理等[RADIUD-WEB](https://github.com/cometowell/radius-web.git)
+这里有一个可用的radius管理平台，实现了用户管理，套餐管理，nas管理，在线用户管理，管理员管理，角色管理等[yh-radius-web](https://github.com/cometowell/radius-web.git)
 web平台默认的登陆用户: admin/123456
 
-![首页](https://github.com/cometowell/go-rad/raw/master/document/index.png)
-![用户管理](https://github.com/cometowell/go-rad/raw/master/document/user.png)
-![用户续费](https://github.com/cometowell/go-rad/raw/master/document/continue.png)
-![套餐管理](https://github.com/cometowell/go-rad/raw/master/document/product.png)
-![在线用户管理](https://github.com/cometowell/go-rad/raw/master/document/online.png)
-![NAS管理](https://github.com/cometowell/go-rad/raw/master/document/nas.png)
+![首页](https://github.com/cometowell/yh-radius/raw/master/document/index.png)
+![用户管理](https://github.com/cometowell/yh-radius/raw/master/document/user.png)
+![用户续费](https://github.com/cometowell/yh-radius/raw/master/document/continue.png)
+![套餐管理](https://github.com/cometowell/yh-radius/raw/master/document/product.png)
+![在线用户管理](https://github.com/cometowell/yh-radius/raw/master/document/online.png)
+![NAS管理](https://github.com/cometowell/yh-radius/raw/master/document/nas.png)
 
 
 ## 许可协议

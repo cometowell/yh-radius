@@ -1,2 +1,2 @@
 # !/bin/bash
-nohup ./go-rad & 
+nohup ./yh-radius &
