@@ -79,6 +79,8 @@ func loadControllers(router *gin.Engine) {
 
 	router.POST("/statistic/new/user", statisticNewUser)
 	router.POST("/statistic/online/user", statisticOnlineAndFlowTrend)
+	router.POST("/statistic/area/user", statisticAreaUser)
+	router.POST("/statistic/product/order", statisticProductOrderTrend)
 }
 
 func login(c *gin.Context) {

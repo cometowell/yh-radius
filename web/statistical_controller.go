@@ -2,17 +2,15 @@ package web
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-rad/common"
 	"go-rad/database"
 	"net/http"
 	"time"
 )
 
-func statistic(c *gin.Context) {
-	result := make(map[string]interface{}, 4)
-	result["productOrderStatistic"] = statisticProductOrderTrend()
-	result["areaUserStatistic"] = statisAreaUser()
-	c.JSON(http.StatusOK, common.DefaultSuccessJsonResult(result))
+type PieStruct struct {
+	Value    interface{} `json:"value"`
+	Name     string      `json:"name"`
+	Selected bool        `json:"selected"`
 }
 
 // 新用户发展统计
@@ -87,8 +85,8 @@ func statisticNewUser(c *gin.Context) {
 func statisticOnlineAndFlowTrend(c *gin.Context) {
 	sql := `SELECT
 			ANY_VALUE(start_hour) as start_hour,
-			sum(total_down_stream) / 1024 as total_down_stream,
-			sum(total_up_stream) / 1024 as total_up_stream,
+			sum(total_down_stream) / 1024 / 1024 as total_down_stream,
+			sum(total_up_stream) / 1024 / 1024 as total_up_stream,
 			count(*) AS total
 			FROM
 				(
@@ -154,7 +152,7 @@ func statisticOnlineAndFlowTrend(c *gin.Context) {
 
 // 区域用户统计
 // 饼图
-func statisAreaUser() []AreaUserStatistic {
+func statisticAreaUser(c *gin.Context) {
 	sql := `SELECT
 			ANY_VALUE(area_name) as area_name,
 			count(*) AS total
@@ -170,12 +168,23 @@ func statisAreaUser() []AreaUserStatistic {
 			c.area_id`
 	var areaUserStatistics []AreaUserStatistic
 	database.DataBaseEngine.SQL(sql).Find(&areaUserStatistics)
-	return areaUserStatistics
+	areaNames := make([]string, len(areaUserStatistics))
+	total := make([]PieStruct, len(areaUserStatistics))
+
+	for index, item := range areaUserStatistics {
+		areaNames[index] = item.AreaName
+		total[index] = PieStruct{item.Total, item.AreaName, index == 0}
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"areaNames": areaNames,
+		"total":     total,
+	})
 
 }
 
-// 近七日套餐订购统计，饼图
-func statisticProductOrderTrend() []ProductOrderStatistic {
+// 套餐订购统计，饼图
+func statisticProductOrderTrend(c *gin.Context) {
 	sql := `SELECT
 			any_value(product_name) as product_name,
 			count(*) AS total
@@ -191,5 +200,16 @@ func statisticProductOrderTrend() []ProductOrderStatistic {
 			c.product_id`
 	var productOrderStatistics []ProductOrderStatistic
 	database.DataBaseEngine.SQL(sql).Find(&productOrderStatistics)
-	return productOrderStatistics
+	productNames := make([]string, len(productOrderStatistics))
+	total := make([]PieStruct, len(productOrderStatistics))
+
+	for index, item := range productOrderStatistics {
+		productNames[index] = item.ProductName
+		total[index] = PieStruct{item.Total, item.ProductName, index == 0}
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"productNames": productNames,
+		"total":        total,
+	})
 }

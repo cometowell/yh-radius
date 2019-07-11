@@ -1,18 +1,3 @@
-/*
-Navicat MySQL Data Transfer
-
-Source Server         : localhost
-Source Server Version : 50721
-Source Host           : localhost:3306
-Source Database       : radius-v2
-
-Target Server Type    : MYSQL
-Target Server Version : 50721
-File Encoding         : 65001
-
-Date: 2019-07-10 18:09:01
-*/
-
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
@@ -28,12 +13,13 @@ CREATE TABLE `rad_area` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `description` varchar(1000) COLLATE utf8mb4_bin DEFAULT '' COMMENT '描述',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户片区划分表';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户片区划分表';
 
 -- ----------------------------
 -- Records of rad_area
 -- ----------------------------
 INSERT INTO `rad_area` VALUES ('1', 'test', '测试片区', '1', '2019-07-04 15:44:06', '2019-07-05 10:52:56', '测试片区');
+INSERT INTO `rad_area` VALUES ('4', 'test2', '测试2', '1', '2019-07-11 11:29:26', null, '测试2');
 
 -- ----------------------------
 -- Table structure for rad_nas
@@ -79,7 +65,7 @@ CREATE TABLE `rad_online_user` (
 -- ----------------------------
 -- Records of rad_online_user
 -- ----------------------------
-INSERT INTO `rad_online_user` VALUES ('39', 'test1', '10.18.10.68', '0001', '2019-07-10 15:30:37', '0', '192.168.10.235', '5C:FF:35:0E:58:A5', 'sdafsadfasdfasfasfdas', '0', '0');
+INSERT INTO `rad_online_user` VALUES ('39', 'test1', '10.18.10.68', '0001', '2019-07-11 10:30:37', '0', '192.168.10.235', '5C:FF:35:0E:58:A5', 'sdafsadfasdfasfasfdas', '1888888', '8990000');
 
 -- ----------------------------
 -- Table structure for rad_product
@@ -127,12 +113,13 @@ CREATE TABLE `rad_town` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `description` varchar(1000) COLLATE utf8mb4_bin DEFAULT '' COMMENT '描述',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='村镇/街道，片区下级单位表';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='村镇/街道，片区下级单位表';
 
 -- ----------------------------
 -- Records of rad_town
 -- ----------------------------
 INSERT INTO `rad_town` VALUES ('1', '1', 'test', '测试街道', '1', '2019-07-04 15:43:21', '2019-07-05 15:02:57', '测试街道');
+INSERT INTO `rad_town` VALUES ('5', '4', 'test2', '测试街道2', '1', '2019-07-11 11:32:55', null, '测试街道2');
 
 -- ----------------------------
 -- Table structure for rad_user
@@ -165,7 +152,7 @@ CREATE TABLE `rad_user` (
   `description` varchar(512) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_name` (`username`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- ----------------------------
 -- Records of rad_user
@@ -173,6 +160,7 @@ CREATE TABLE `rad_user` (
 INSERT INTO `rad_user` VALUES ('20', 'test1', '测试', '1', 'kjjSLcA0XhsYbz6ztm6xaA==', '10', '1', '0', '0', '2022-07-08', '1', '1', '1', '', '0', '0', '', 'test', '', '', null, '2019-07-05 17:28:56', null, '');
 INSERT INTO `rad_user` VALUES ('21', 'test2', '测试2', '1', 'kjjSLcA0XhsYbz6ztm6xaA==', '10', '1', '0', '0', '2020-07-08', '1', '1', '1', '', '0', '0', '', 'ceshi2', '', '', null, '2019-07-08 17:45:47', null, '');
 INSERT INTO `rad_user` VALUES ('22', 'test3', 'ceshi3', '1', 'kjjSLcA0XhsYbz6ztm6xaA==', '11', '1', '0', '102400000', '2099-12-31', '0', '1', '1', '', '0', '0', '', 'sdffsf', '', '', null, '2019-07-10 17:49:04', null, '');
+INSERT INTO `rad_user` VALUES ('23', 'test33', '测试3', '5', 'kjjSLcA0XhsYbz6ztm6xaA==', '10', '1', '0', '0', '2020-07-11', '1', '1', '1', '', '0', '0', '', 'ceshi', '', '', null, '2019-07-11 11:33:21', null, '');
 
 -- ----------------------------
 -- Table structure for rad_user_balance
@@ -230,7 +218,7 @@ CREATE TABLE `rad_user_order_record` (
   `end_date` date NOT NULL COMMENT '订单截止日期',
   `count` int(11) NOT NULL DEFAULT '1' COMMENT '套餐倍数',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8 COMMENT='用户订单表';
+) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8 COMMENT='用户订单表';
 
 -- ----------------------------
 -- Records of rad_user_order_record
@@ -240,6 +228,7 @@ INSERT INTO `rad_user_order_record` VALUES ('54', '20', '10', '9000', '1', '2019
 INSERT INTO `rad_user_order_record` VALUES ('55', '20', '11', '1800', '1', '2019-07-08 17:43:52', '1', '2099-12-31', '1');
 INSERT INTO `rad_user_order_record` VALUES ('56', '21', '10', '9000', '1', '2019-07-08 17:45:47', '2', '2020-07-08', '0');
 INSERT INTO `rad_user_order_record` VALUES ('57', '22', '11', '1800', '1', '2019-07-08 17:49:04', '2', '2099-12-31', '1');
+INSERT INTO `rad_user_order_record` VALUES ('58', '23', '10', '9000', '1', '2019-07-11 11:33:21', '2', '2020-07-11', '1');
 
 -- ----------------------------
 -- Table structure for rad_user_special_balance
@@ -319,7 +308,7 @@ CREATE TABLE `sys_resource` (
   `front_key` varchar(255) DEFAULT NULL COMMENT '前端路由key',
   `show` int(11) NOT NULL DEFAULT '1' COMMENT '是否展示菜单，1：是， 2：否',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=503 DEFAULT CHARSET=utf8 COMMENT='菜单表';
+) ENGINE=InnoDB AUTO_INCREMENT=505 DEFAULT CHARSET=utf8 COMMENT='菜单表';
 
 -- ----------------------------
 -- Records of sys_resource
@@ -383,6 +372,8 @@ INSERT INTO `sys_resource` VALUES ('475', '470', '村镇街道信息', null, '/t
 INSERT INTO `sys_resource` VALUES ('500', '0', '首页', null, '/index', '1', '1', 'index', '500', '首页', '0', '1', '/index', 'index', '0');
 INSERT INTO `sys_resource` VALUES ('501', '500', '统计新用户数据', null, '/statistic/new/user', '3', '1', 'statistic::new::user', '501', '统计新用户数据', '0', '3', null, null, '0');
 INSERT INTO `sys_resource` VALUES ('502', '500', '统计在线用户数据', '', '/statistic/online/user', '3', '1', 'statistic::online::user', '502', '统计在线用户数据', '0', '3', '', '', '0');
+INSERT INTO `sys_resource` VALUES ('503', '500', '统计片区用户数据', '', '/statistic/area/user', '3', '1', 'statistic::area::user', '503', '统计片区用户数据', '0', '3', '', '', '0');
+INSERT INTO `sys_resource` VALUES ('504', '500', '统计套餐订购数据', '', '/statistic/product/order', '3', '1', 'statistic::product::order', '504', '统计套餐订购数据', '0', '3', '', '', '0');
 
 -- ----------------------------
 -- Table structure for sys_role

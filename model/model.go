@@ -19,7 +19,7 @@ type RadArea struct {
 
 type RadTown struct {
 	Id          int64  `xorm:"pk autoincr" json:"id"`
-	AreaId      int64  `xorm:"<-" json:"areaId"`
+	AreaId      int64  `json:"areaId"`
 	AreaName    string `xorm:"<-" json:"areaName"`
 	Code        string `json:"code"`
 	Name        string `json:"name"`
