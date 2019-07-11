@@ -70,10 +70,10 @@ web平台默认的登陆用户: admin/123456
 
 ![首页](https://github.com/cometowell/yh-radius/raw/master/document/index.png)
 ![用户管理](https://github.com/cometowell/yh-radius/raw/master/document/user.png)
-![用户续费](https://github.com/cometowell/yh-radius/raw/master/document/continue.png)
 ![套餐管理](https://github.com/cometowell/yh-radius/raw/master/document/product.png)
 ![在线用户管理](https://github.com/cometowell/yh-radius/raw/master/document/online.png)
-![NAS管理](https://github.com/cometowell/yh-radius/raw/master/document/nas.png)
+![系统设置](https://github.com/cometowell/yh-radius/raw/master/document/system.png)
+![角色管理](https://github.com/cometowell/yh-radius/raw/master/document/role.png)
 
 
 ## 许可协议
