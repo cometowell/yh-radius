@@ -1,5 +1,5 @@
 # yh-RADIUS系统
-yh-radius 是一个使用golang语言开发的radius协议实现，目前已适配华为，思科，中兴，RouterOS(MikroTik)以及标准协议
+yh-radius 是一个使用golang语言开发的radius协议实现，目前已适配华为，思科，中兴，RouterOS(MikroTik)以及标准协议，其他厂商协议后续陆续补充。
 
 ## 加群交流
 qq群: 681367304
