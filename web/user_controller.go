@@ -1,7 +1,6 @@
 package web
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-rad/common"
 	"go-rad/database"
@@ -13,7 +12,7 @@ import (
 
 // -------------------------- user start -----------------------------
 func listUser(c *gin.Context) {
-	var params model.RadUser
+	var params model.RadUserWeb
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
@@ -48,12 +47,13 @@ func listUser(c *gin.Context) {
 	}
 
 	var users []model.RadUserProduct
-	totalCount, _ := database.DataBaseEngine.Table(&model.RadUser{}).
+	totalCount, _ := database.DataBaseEngine.Table("rad_user").
 		Alias("ru").Select(`ru.id,ru.username,ru.real_name,ru.product_id,
 			ru.status,ru.available_time,ru.available_flow,ru.expire_time,
 			ru.concurrent_count,ru.should_bind_mac_addr,ru.should_bind_vlan,ru.mac_addr,ru.vlan_id,
 			ru.vlan_id2,ru.framed_ip_addr,ru.installed_addr,ru.mobile,ru.email,
-			ru.pause_time,ru.create_time,ru.update_time,ru.description, sp.*, rt.id as town_id, rt.name as town_name, ra.id as area_id, ra.name as area_name`).
+			ru.pause_time,ru.create_time,ru.update_time,ru.description, sp.*, rt.id as town_id, 
+			rt.name as town_name, ra.id as area_id, ra.name as area_name`).
 		Where(whereSql, whereArgs...).
 		Limit(params.PageSize, (params.Page-1)*params.PageSize).
 		Join("INNER", []interface{}{&model.RadProduct{}, "sp"}, "ru.product_id = sp.id").
@@ -73,7 +73,9 @@ func fetchUserOrderRecord(c *gin.Context) {
 		return
 	}
 	var records []model.RadUserOrderRecordProduct
-	database.DataBaseEngine.Table(&model.RadUserOrderRecordProduct{}).Alias("rop").Join("INNER", []interface{}{&model.RadProduct{}, "rp"}, "rp.id = rop.product_id").Where("rop.user_id = ?", user.Id).Asc("rop.status").Find(&records)
+	database.DataBaseEngine.Table(&model.RadUserOrderRecordProduct{}).Alias("rop").
+		Join("INNER", []interface{}{&model.RadProduct{}, "rp"}, "rp.id = rop.product_id").
+		Where("rop.user_id = ?", user.Id).Asc("rop.status").Find(&records)
 	c.JSON(http.StatusOK, common.JsonResult{Code: 0, Message: "success", Data: records})
 }
 
@@ -104,13 +106,18 @@ func updateUser(c *gin.Context) {
 		hours := time.Now().Sub(time.Time(oldUser.PauseTime)).Hours()
 		user.ExpireTime = model.Time(time.Time(user.ExpireTime).AddDate(0, 0, int(hours)/24))
 	}
+
+	if user.Password != "" {
+		user.Password = common.Encrypt(user.Password)
+	}
+
 	session.ID(user.Id).Update(&user)
 	session.Commit()
 	c.JSON(http.StatusOK, common.NewSuccessJsonResult("success", nil))
 }
 
 func addUser(c *gin.Context) {
-	var user model.RadUser
+	var user model.RadUserWeb
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
@@ -118,7 +125,6 @@ func addUser(c *gin.Context) {
 	}
 	user.Status = radius.UserAvailableStatus
 	user.CreateTime = model.NowTime()
-	fmt.Printf("%#v", user)
 	session := database.DataBaseEngine.NewSession()
 	defer session.Close()
 	session.Begin()
@@ -143,7 +149,7 @@ func addUser(c *gin.Context) {
 		return
 	}
 	user.Password = common.Encrypt(user.Password)
-	PurchaseProduct(&user, &product, &model.RadUser{})
+	PurchaseProduct(&user, &product, &model.RadUserWeb{})
 	session.InsertOne(&user)
 	// 订购信息
 	webSession := GlobalSessionManager.GetSessionByGinContext(c)
@@ -192,7 +198,7 @@ func fetchUser(c *gin.Context) {
 }
 
 func continueProduct(c *gin.Context) {
-	var user model.RadUser
+	var user model.RadUserWeb
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
 		c.JSON(http.StatusOK, common.JsonResult{Code: 1, Message: err.Error()})
@@ -205,7 +211,7 @@ func continueProduct(c *gin.Context) {
 
 	if e != nil {
 		session.Rollback()
-		c.JSON(http.StatusOK, common.NewErrorJsonResult("用户预定了套餐失败"+e.Error()))
+		c.JSON(http.StatusOK, common.NewErrorJsonResult("用户预定套餐失败"+e.Error()))
 		return
 	}
 
@@ -215,7 +221,7 @@ func continueProduct(c *gin.Context) {
 		return
 	}
 
-	var oldUser model.RadUser
+	var oldUser model.RadUserWeb
 	session.Table(&model.RadUser{}).Select("*").Get(&oldUser)
 	user.BeContinue = true
 	var newProduct model.RadProduct
@@ -273,7 +279,7 @@ func continueProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, common.NewSuccessJsonResult("续订成功!", nil))
 }
 
-func PurchaseProduct(user *model.RadUser, product *model.RadProduct, continueUser *model.RadUser) {
+func PurchaseProduct(user *model.RadUserWeb, product *model.RadProduct, continueUser *model.RadUserWeb) {
 	user.ShouldBindMacAddr = product.ShouldBindMacAddr
 	user.ProductId = product.Id
 	user.ShouldBindVlan = product.ShouldBindVlan

@@ -59,7 +59,7 @@ func buildUrlParams(params ...interface{}) string {
 	return result
 }
 
-func IsExpire(user *model.RadUser, product *model.RadProduct) bool {
+func IsExpire(user *model.RadUserWeb, product *model.RadProduct) bool {
 	duration := time.Time(user.ExpireTime).Sub(time.Now())
 	if duration <= 0 {
 		return true

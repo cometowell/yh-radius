@@ -32,11 +32,26 @@ type RadTown struct {
 }
 
 type RadUserProduct struct {
-	RadUser    `xorm:"extends" json:"radUser"`
+	RadUserWeb `xorm:"extends" json:"radUser"`
 	RadProduct `xorm:"extends" json:"radProduct"`
 }
 
 func (RadUserProduct) TableName() string {
+	return "rad_user"
+}
+
+type RadUserWeb struct {
+	RadUser    `xorm:"extends"`
+	TownName   string `xorm:"<-" json:"townName"`
+	AreaId     int64  `xorm:"<-" json:"areaId"`
+	AreaName   string `xorm:"<-" json:"areaName"`
+	Pager      `xorm:"-" json:"page"`
+	Count      int  `xorm:"-" json:"count"`
+	Price      int  `xorm:"-" json:"price"`
+	BeContinue bool `xorm:"-"` // 标记为续费
+}
+
+func (RadUserWeb) TableName() string {
 	return "rad_user"
 }
 
@@ -45,9 +60,6 @@ type RadUser struct {
 	UserName          string `xorm:"unique 'username'" json:"username"`
 	RealName          string `json:"realName"`
 	TownId            int64  `json:"townId"`
-	TownName          string `xorm:"<-" json:"townName"`
-	AreaId            int64  `xorm:"<-" json:"areaId"`
-	AreaName          string `xorm:"<-" json:"areaName"`
 	Password          string `json:"password"`
 	ProductId         int64  `json:"productId"`
 	Status            int    `json:"status"`
@@ -71,10 +83,6 @@ type RadUser struct {
 
 	Product        RadProduct `xorm:"-" json:"product"`
 	SessionTimeout int        `xorm:"-"`
-	Pager          `xorm:"-" json:"page"`
-	Count          int  `xorm:"-" json:"count"`
-	Price          int  `xorm:"-" json:"price"`
-	BeContinue     bool `xorm:"-"` // 标记为续费
 }
 
 type RadUserWallet struct {
@@ -295,6 +303,15 @@ type Pagination struct {
 }
 
 func NewPagination(data interface{}, totalCount int64, current, pageSize int) *Pagination {
+
+	if current == 0 {
+		current = common.DefaultCurrent
+	}
+
+	if pageSize == 0 {
+		pageSize = common.DefaultPageSize
+	}
+
 	p := &Pagination{
 		Size:       pageSize,
 		Current:    current,

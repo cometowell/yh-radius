@@ -18,7 +18,7 @@ func UserExpireTask() {
 	session.Begin()
 	defer session.Close()
 	today := time.Now().Format(common.DateFormat)
-	var users []model.RadUser
+	var users []model.RadUserWeb
 	err := session.Table(&model.RadUser{}).Alias("ru").
 		Join("INNER", []interface{}{model.RadProduct{}, "rp"}, "ru.product_id = rp.id").
 		Where("(ru.expire_time < ?) or (ru.available_time <= 0 and rp.type = 2) or (ru.available_flow <= 0 and rp.type = 3)", today).Find(&users)
@@ -47,7 +47,7 @@ func UserExpireTask() {
 			logger.Logger.Warnf("user :%s find product, %s%s", user.UserName, "user expire task occur error: ", err.Error())
 			continue
 		}
-		web.PurchaseProduct(&user, &product, &model.RadUser{Count: record.Count, BeContinue: true})
+		web.PurchaseProduct(&user, &product, &model.RadUserWeb{Count: record.Count, BeContinue: true})
 		user.ProductId = product.Id
 		_, err := session.AllCols().ID(user.Id).Update(&user)
 		if err != nil {

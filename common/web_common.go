@@ -15,6 +15,11 @@ const (
 )
 
 const (
+	DefaultPageSize = 10
+	DefaultCurrent  = 1
+)
+
+const (
 	MonthlyProduct = 1
 	TimeProduct    = 2
 	FlowProduct    = 3

@@ -23,7 +23,11 @@ func UserVerify(cxt *Context) {
 
 	userName := attr.AttrStringValue
 	user := model.RadUser{UserName: userName}
-	cxt.Session.Get(&user)
+	_, e := cxt.Session.Get(&user)
+
+	if e != nil {
+		panic(e)
+	}
 
 	if user.Id == 0 {
 		panic("user's account number or password is incorrect")
